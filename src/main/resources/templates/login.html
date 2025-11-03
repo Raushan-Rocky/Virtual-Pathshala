@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login | Virtual Pathshala</title>
+  <link rel="stylesheet" th:href="@{/css/login.css}">
+  <link rel="icon" type="image/x-icon" th:href="@{/image/favicon.ico}">
+</head>
+<body>
+
+<!-- Background Video -->
+<video autoplay muted loop playsinline id="bg-video">
+  <source th:src="@{/video/videoplayback (1).mp4}" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+<!-- Header -->
+<header>
+  <div class="logo">
+    <img th:src="@{/image/logo5.png}" alt="Logo">
+    <h2>Virtual Pathshala</h2>
+  </div>
+
+  <a th:href="@{/signup}" class="signup-header-btn">Sign Up</a>
+</header>
+
+<!-- Login Section -->
+<div class="login-container">
+  <div class="login-box">
+
+    <!-- Left Side - Form -->
+    <div class="login-left">
+      <h2>Login</h2>
+      <p>If you have an account, please login</p>
+
+      <form th:action="@{/api/login}" method="post">
+        <label>Email Address</label>
+        <input type="email" name="email" placeholder="Enter Email Address" required>
+
+        <label>Password</label>
+        <input type="password" name="password" placeholder="Enter Password" required>
+
+        <a href="#" class="forgot">Forgot Password?</a>
+
+        <button type="submit" class="login-btn">Log In</button>
+
+        <div class="divider">
+          <span>OR</span>
+        </div>
+
+        <button type="button" class="google-btn">
+          <img src="https://www.svgrepo.com/show/355037/google.svg" alt="Google">
+          Login with Google
+        </button>
+
+        <p class="register-text">
+          If you don't have an account... <a th:href="@{/signup}">Sign up</a>
+        </p>
+      </form>
+    </div>
+
+  </div>
+
+  <!-- Forgot Password Modal -->
+  <div id="forgotModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn">&times;</span>
+      <h2>Forgot Password</h2>
+      <p>Enter your registered email to reset your password</p>
+
+      <form>
+        <label>Email Address</label>
+        <input type="email" id="forgotEmail" placeholder="Enter your email" required>
+        <button type="submit" class="enter-btn">Enter</button>
+      </form>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // Get elements
+  const modal = document.getElementById('forgotModal');
+  const forgotLink = document.querySelector('.forgot');
+  const closeBtn = document.querySelector('.close-btn');
+
+  // Open modal when "Forgot Password?" is clicked
+  forgotLink.addEventListener('click', (e) => {
+    e.preventDefault();
+    modal.style.display = 'flex';
+  });
+
+  // Close modal when clicking the close button
+  closeBtn.addEventListener('click', () => {
+    modal.style.display = 'none';
+  });
+
+  // Close modal when clicking outside the box
+  window.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      modal.style.display = 'none';
+    }
+  });
+</script>
+
+<script th:src="@{/js/api.js}"></script>
+<script th:src="@{/js/auth.js}"></script>
+<script>
+  // Update login form handler for AJAX submission
+  document.querySelector('form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const email = document.querySelector('input[name="email"]').value;
+      const password = document.querySelector('input[name="password"]').value;
+
+      try {
+          const response = await fetch('/api/login', {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ email, password })
+          });
+
+          const data = await response.json();
+          
+          if (response.ok) {
+              // Store user in session/localStorage
+              if (data.token) {
+                  localStorage.setItem('authToken', data.token);
+              }
+              if (data.user) {
+                  localStorage.setItem('user', JSON.stringify(data.user));
+              }
+
+              // Redirect based on role
+              const user = data.user || data;
+              if (user.role === 'STUDENT') {
+                  window.location.href = '/student';
+              } else if (user.role === 'TEACHER') {
+                  window.location.href = '/teacher';
+              } else if (user.role === 'ADMIN') {
+                  window.location.href = '/admin';
+              } else {
+                  window.location.href = '/student'; // Default redirect
+              }
+          } else {
+              alert(data.message || 'Login failed');
+          }
+      } catch (error) {
+          console.error('Login error:', error);
+          alert('Login failed. Please try again.');
+      }
+  });
+</script>
+
+<!-- Footer -->
+<footer>
+  Virtual Pathshala &copy; 2025
+</footer>
+
+</body>
+</html>

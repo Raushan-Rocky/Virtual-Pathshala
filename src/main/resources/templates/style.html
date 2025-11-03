@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virtual Pathshala</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="icon" type="image/x-icon" th:href="@{/image/favicon.ico}">
+</head>
+<body>
+<!-- Navbar -->
+<header class="navbar">
+    <div class="logo">
+        <img th:src="@{/image/logo5.png}" href="#home" alt="Logo">
+    </div>
+
+    <!-- Navigation Links -->
+    <nav id="nav-links">
+        <a href="#home">Home</a>
+        <a href="#courses">Courses</a>
+        <a href="#">About</a>
+        <a href="#contact">Contact</a>
+        <a href="#">Feedback</a>
+    </nav>
+
+    <!-- Buttons -->
+    <div class="nav-buttons">
+        <a href="#" class="icon-btn">
+            <a th:href="@{/login}" class="btn btn-primary">Login</a>
+        </a>
+        <a th:href="@{/signup}" class="btn btn-primary">Sign Up</a>
+    </div>
+
+    <!-- Hamburger Icon -->
+    <div class="hamburger" onclick="toggleMenu()">☰</div>
+</header>
+
+<!-- Background Video -->
+<video autoplay muted loop playsinline class="bg-video">
+    <source th:src="@{/video/classvideo.mp4}" type="video/mp4">
+    Your browser does not support the video tag.
+</video>
+
+<div class="global-blur-overlay"></div>
+
+<!-- Hero Section -->
+<section class="hero" id="home">
+    <div class="video-overlay"></div>
+    <div class="hero-content">
+        <div class="hero-text">
+            <h2>Learn Smarter with <span>Expert Mentors</span> from Kerala</h2>
+            <p>Unlock your true potential with guided learning, interactive sessions, and personalized study plans designed to help you succeed anywhere, anytime.</p>
+            <a href="#courses" class="btn btn-primary">Start Learning</a>
+        </div>
+        <img th:src="@{/image/groupPic.png}" alt="Book Reading" class="hero-img">
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="features" id="courses">
+    <h3>🚀 Select Your Course</h3>
+    <p class="sub-text">Learn with the best teachers of Kerala. Join live classes and get certified.</p>
+
+    <div class="feature-cards">
+
+        <div class="card">
+            <img th:src="@{/image/divyaG.jpg}" alt="Java Development">
+            <h4>15th Nov - Java Development</h4>
+            <p><b>Live Batch:</b> Zero to Hero (8:00 AM - 9:00 AM)</p>
+            <p><b>Prof Miss Divya G</b></p>
+            <button class="btn-card">Enroll Now</button>
+        </div>
+
+        <div class="card">
+            <img th:src="@{/image/deepaNair.jpg}" alt="AI Recommendations">
+            <h4>15 December - DSA with C</h4>
+            <p><b>Live Batch:</b> Zero to Hero (9:15 AM - 10:15 AM)</p>
+            <p><b>Prof Miss Deepa Nair</b></p>
+            <button class="btn-card">Enroll Now</button>
+        </div>
+
+        <div class="card">
+            <img th:src="@{/image/radhikaB.jpg}" alt="Secure Access">
+            <h4>15th Nov - Computer Network</h4>
+            <p><b>Live Batch:</b> Zero to Hero (8:00 AM - 9:00 AM)</p>
+            <p><b>Prof Miss Radhika B</b></p>
+            <button class="btn-card">Enroll Now</button>
+        </div>
+
+        <div class="card">
+            <img th:src="@{/image/riya.jpg}" alt="Expert Teachers">
+            <h4>15 Dec - Android Application Programming</h4>
+            <p><b>Live Batch:</b> Zero to Hero (9:15 AM - 10:15 AM)</p>
+            <p><b>Prof Miss Riya Rashid</b></p>
+            <button class="btn-card">Enroll Now</button>
+        </div>
+
+        <div class="card">
+            <img th:src="@{/image/neethuG.jpg}" alt="Certified Courses">
+            <h4>15 Dec - Web Technology & Programming</h4>
+            <p><b>Live Batch:</b> Zero to Hero (9:15 AM - 10:15 AM)</p>
+            <p><b>Prof Miss Neethu Ganesh</b></p>
+            <button class="btn-card">Enroll Now</button>
+        </div>
+
+        <div class="card">
+            <img th:src="@{/image/anup.jpg}" alt="Community Support">
+            <h4>15 Dec - Python Programming</h4>
+            <p><b>Live Batch:</b> Zero to Hero (9:15 AM - 10:15 AM)</p>
+            <p><b>Prof Miss Anup Suleman</b></p>
+            <button class="btn-card">Enroll Now</button>
+        </div>
+
+        <div class="card">
+            <img th:src="@{/image/softwareRiya.jpg}" alt="Certified Courses">
+            <h4>15 Dec - Software Engineering</h4>
+            <p><b>Live Batch:</b> Zero to Hero (9:15 AM - 10:15 AM)</p>
+            <p><b>Prof Miss Riya Rashid</b></p>
+            <button class="btn-card">Enroll Now</button>
+        </div>
+
+        <div class="card">
+            <img th:src="@{/image/pythonNeethu.jpg}" alt="Community Support">
+            <h4>15 Dec - Python Programming</h4>
+            <p><b>Live Batch:</b> Zero to Hero (9:15 AM - 10:15 AM)</p>
+            <p><b>Prof Miss Neethu Ganesh</b></p>
+            <button class="btn-card">Enroll Now</button>
+        </div>
+
+        <div class="card">
+            <img th:src="@{/image/osDeepa.jpg}" alt="AI Recommendations">
+            <h4>15 December - Operating System</h4>
+            <p><b>Live Batch:</b> Zero to Hero (9:15 AM - 10:15 AM)</p>
+            <p><b>Prof Miss Deepa Nair</b></p>
+            <button class="btn-card">Enroll Now</button>
+        </div>
+
+        <div class="card">
+            <img th:src="@{/image/DFCA.jpg}" alt="Secure Access">
+            <h4>15th Nov - DFCA</h4>
+            <p><b>Live Batch:</b> Zero to Hero (8:00 AM - 9:00 AM)</p>
+            <p><b>Prof Miss Radhika B</b></p>
+            <button class="btn-card">Enroll Now</button>
+        </div>
+
+        <div class="card">
+            <img th:src="@{/image/DBMSanup.jpg}" alt="Expert Teachers">
+            <h4>15 Dec - Data Base MAnagement System</h4>
+            <p><b>Live Batch:</b> Zero to Hero (9:15 AM - 10:15 AM)</p>
+            <p><b>Prof Miss Anup Suleman</b></p>
+            <button class="btn-card">Enroll Now</button>
+        </div>
+
+        <div class="card">
+            <img th:src="@{/image/mathDiv.jpg}" alt="Certified Courses">
+            <h4>15 Dec - MAthematical Foundation for Computing</h4>
+            <p><b>Live Batch:</b> Zero to Hero (9:15 AM - 10:15 AM)</p>
+            <p><b>Prof Miss Divya G</b></p>
+            <button class="btn-card">Enroll Now</button>
+        </div>
+    </div>
+</section>
+
+<!-- Contact Section -->
+<section class="contact" id="contact">
+    <h3>📩 Get in Touch</h3>
+    <p class="sub-text">Stay connected with us on social platforms</p>
+
+    <div class="contact-grid">
+        <a href="whatsapp.com" class="contact-card">
+            <img th:src="@{/image/whatsapp.jpeg}" alt="Email">
+            <h4>What's app</h4>
+        </a>
+
+        <a href="https://mail.google.com/mail/u/0/#inbox" class="contact-card">
+            <img th:src="@{/image/mail.webp}" alt="Email">
+            <h4>Email</h4>
+        </a>
+
+        <a href="https://www.instagram.com/rocky_raushan/" target="_blank" class="contact-card">
+            <img th:src="@{/image/instagram.png}" alt="Instagram">
+            <h4>Instagram</h4>
+        </a>
+
+        <a href="https://facebook.com" target="_blank" class="contact-card">
+            <img th:src="@{/image/facebook.jpeg}" alt="Facebook">
+            <h4>Facebook</h4>
+        </a>
+
+        <a href="https://github.com/Raushan-Rocky" target="_blank" class="contact-card">
+            <img th:src="@{/image/git1.jpeg}" alt="GitHub">
+            <h4>GitHub</h4>
+        </a>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer>
+    <p>© <span id="year"></span> Stay with Virtual Pathshala.</p>
+</footer>
+
+<script th:src="@{/js/api.js}"></script>
+<script th:src="@{/js/auth.js}"></script>
+<script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+
+    function toggleMenu() {
+        document.getElementById("nav-links").classList.toggle("show");
+        document.querySelector(".nav-buttons").classList.toggle("show");
+    }
+
+    function updateNavigation() {
+        const navButtons = document.querySelector('.nav-buttons');
+
+        if (typeof authService !== 'undefined' && authService.isLoggedIn()) {
+            const user = authService.getCurrentUser();
+            navButtons.innerHTML = `
+                <a href="#" class="icon-btn">
+                    <span>Welcome, ${user.name}</span>
+                </a>
+                <a href="/student" class="btn btn-primary">Dashboard</a>
+                <button onclick="authService.logout()" class="btn btn-primary">Logout</button>
+            `;
+        }
+    }
+
+    function setupEnrollmentButtons() {
+        const enrollButtons = document.querySelectorAll('.btn-card');
+
+        enrollButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                if (typeof authService === 'undefined' || !authService.isLoggedIn()) {
+                    alert('Please login to enroll in courses');
+                    window.location.href = '/login';
+                    return;
+                }
+                alert('Please go to dashboard for enrollment!');
+            });
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        updateNavigation();
+        setupEnrollmentButtons();
+    });
+</script>
+</body>
+</html>

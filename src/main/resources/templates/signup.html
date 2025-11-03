@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign Up | Virtual Pathshala</title>
+  <link rel="icon" type="image/x-icon" th:href="@{/image/favicon.ico}">
+  <link rel="stylesheet" th:href="@{/css/signup.css}">
+</head>
+<body>
+
+<!-- Background Video -->
+<video autoplay muted loop playsinline id="bg-video">
+  <source th:src="@{/video/videoplayback (1).mp4}" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+<!-- Header -->
+<header>
+  <div class="header-left">
+    <div class="logo">
+      <img th:src="@{/image/logo5.png}" alt="Virtual Pathshala Logo">
+      <h2>Virtual Pathshala</h2>
+    </div>
+  </div>
+  <div class="header-right">
+    <a th:href="@{/login}" class="login-btn">Login</a>
+  </div>
+</header>
+
+<!-- Signup Section -->
+<div class="signup-container">
+  <div class="signup-box">
+    <h2>✨ Sign Up ✨</h2>
+    <p>Create your Virtual Pathshala account</p>
+
+    <form th:action="@{/api/signup}" method="post">
+      <label for="name">Full Name</label>
+      <input type="text" id="name" name="name" placeholder="Enter your full name" required>
+
+      <label for="mobile">Mobile Number</label>
+      <input type="tel" id="mobile" name="mobile" placeholder="Enter your mobile number" required>
+
+      <label for="email">Email Address</label>
+      <input type="email" id="email" name="email" placeholder="Enter your email address" required>
+
+      <label for="password">Password</label>
+      <input type="password" id="password" name="password" placeholder="Enter password" required>
+
+      <label for="confirm-password">Confirm Password</label>
+      <input type="password" id="confirm-password" name="confirmPassword" placeholder="Confirm password" required>
+
+      <button type="submit" class="signup-btn">Create Account</button>
+
+      <div class="divider"><span>OR</span></div>
+
+      <button type="button" class="google-btn">
+        <img src="https://www.svgrepo.com/show/355037/google.svg" alt="Google Logo">
+        Sign up with Google
+      </button>
+
+      <p class="login-text">
+        Already have an account? <a th:href="@{/login}">Log in</a>
+      </p>
+    </form>
+  </div>
+</div>
+
+<script th:src="@{/js/api.js}"></script>
+<script th:src="@{/js/auth.js}"></script>
+<script>
+  document.querySelector('form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const userData = {
+          name: document.getElementById('name').value,
+          mobile: document.getElementById('mobile').value,
+          email: document.getElementById('email').value,
+          password: document.getElementById('password').value,
+          confirmPassword: document.getElementById('confirm-password').value,
+          role: 'STUDENT' // Default role
+      };
+
+      // Password confirmation check
+      if (userData.password !== userData.confirmPassword) {
+          alert('Passwords do not match!');
+          return;
+      }
+
+      try {
+          const response = await fetch('/api/signup', {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(userData)
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+              alert('Registration successful! Please login.');
+              window.location.href = '/login';
+          } else {
+              alert(data.message || 'Registration failed');
+          }
+      } catch (error) {
+          console.error('Signup error:', error);
+          alert('Registration failed. Please try again.');
+      }
+  });
+</script>
+
+<!-- Footer -->
+<footer>
+  Virtual Pathshala &copy; <span id="year"></span>
+</footer>
+
+<script>
+  document.getElementById("year").textContent = new Date().getFullYear();
+</script>
+
+</body>
+</html>
