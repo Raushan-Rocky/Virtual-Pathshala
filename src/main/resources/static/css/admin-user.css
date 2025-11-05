@@ -1,0 +1,117 @@
+:root {
+  --bg: rgba(10,10,10,0.6);
+  --card: rgba(255,255,255,0.05);
+  --accent: #4f46e5;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: 'Poppins', sans-serif;
+  margin: 0;
+  background: linear-gradient(180deg, rgba(10,10,10,0.9), rgba(20,20,20,0.95));
+  color: #fff;
+  min-height: 100vh;
+}
+
+/* header */
+.admin-header {
+  display:flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  padding: 12px 28px;
+  background: rgba(0,0,0,0.45);
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  backdrop-filter: blur(6px);
+}
+.admin-header .logo { display:flex; align-items:center; gap:12px; }
+.admin-header .logo .logo { height:56px; }
+.admin-header h1 { margin:0; font-size:18px; font-weight:600; }
+
+.container {
+  padding: 28px;
+  max-width: 1100px;
+  margin: 24px auto;
+}
+
+.controls { display:flex; justify-content:flex-end; margin-bottom:12px; }
+.controls input {
+  width: 320px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: none;
+  outline: none;
+  background: rgba(255,255,255,0.06);
+  color: #fff;
+}
+
+/* table */
+.table-wrap { overflow-x:auto; background:transparent; border-radius:8px; padding:8px; }
+table {
+  width:100%;
+  border-collapse: collapse;
+  min-width: 720px;
+  background: rgba(255,255,255,0.03);
+}
+thead th {
+  text-align:left;
+  padding: 12px 14px;
+  font-size: 13px;
+  color: #dfe6ff;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+tbody td {
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.02);
+  font-size: 14px;
+}
+
+/* role select */
+.role-select {
+  padding: 8px;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.92);
+  color: #111;
+  border: 1px solid rgba(0,0,0,0.06);
+  font-weight: 600;
+}
+
+/* buttons */
+.btn {
+  display:inline-block;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+  margin-left: 8px;
+}
+.btn.small { padding:6px 8px; font-size:13px; }
+.btn.danger { background: #ef4444; }
+
+button.btn.small {
+  border: none;
+  cursor: pointer;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.06);
+  color: #fff;
+  transition: all .18s ease;
+}
+button.btn.small.update-role {
+  background: linear-gradient(90deg, #06b6d4, #4f46e5);
+  color: #fff;
+}
+button.btn.small.delete-user {
+  background: linear-gradient(90deg, #ff6b6b, #ef4444);
+}
+
+/* responsive */
+@media (max-width: 720px) {
+  .controls input { width: 100%; }
+  table { min-width: 600px; }
+}

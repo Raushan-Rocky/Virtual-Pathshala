@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virtual Pathshala - Student Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/StudentLogin.css}">
+</head>
+<body>
+<!-- Navbar -->
+<!-- Navbar -->
+<header class="navbar">
+    <div class="logo">
+        <img th:src="@{/image/logo5.png}" href="#home" alt="Logo">
+    </div>
+
+    <!-- Navigation Links -->
+    <nav id="nav-links">
+        <a href="#home">Home</a>
+        <a href="#courses">Courses</a>
+        <a href="#">About</a>
+        <a href="#contact">Contact</a>
+    </nav>
+
+    <!-- Dynamic User Menu -->
+    <div class="nav-buttons" id="nav-buttons">
+        <!-- Guest buttons (when not logged in) - UNCOMMENTED -->
+        <div id="guest-buttons">
+            <a th:href="@{/login}" class="btn btn-primary">Login</a>
+            <a th:href="@{/signup}" class="btn btn-primary">Sign Up</a>
+        </div>
+
+        <!-- User menu (when logged in) - REMOVED style="display: none;" -->
+        <div id="user-menu" class="user-menu">
+            <button id="user-btn">
+                <img th:src="@{/image/profile.png}" alt="User" class="user-logo" onerror="this.src='https://via.placeholder.com/35'">
+                <span class="welcome-text" id="welcome-text">Welcome</span>
+            </button>
+            <div class="user-popup" id="user-popup">
+                <a th:href="@{/student}">Dashboard</a>
+                <a href="#profile">Profile</a>
+                <a href="#settings">Settings</a>
+                <hr>
+                <button onclick="logout()">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hamburger Icon -->
+    <div class="hamburger" onclick="toggleMenu()">☰</div>
+</header>
+
+<!-- Background Video -->
+<video autoplay muted loop playsinline class="bg-video">
+    <source th:src="@{/video/classvideo.mp4}" type="video/mp4">
+    Your browser does not support the video tag.
+</video>
+
+<div class="global-blur-overlay"></div>
+
+<!-- Hero Section -->
+<section class="hero" id="home">
+    <div class="video-overlay"></div>
+    <div class="hero-content">
+        <div class="hero-text">
+            <h2>Learn Smarter with <span>Expert Mentors</span> from Kerala</h2>
+            <p>Unlock your true potential with guided learning, interactive sessions, and personalized study plans designed to help you succeed anywhere, anytime.</p>
+            <a href="#courses" class="btn btn-primary">Start Learning</a>
+        </div>
+        <img th:src="@{/image/groupPic.png}" alt="Book Reading" class="hero-img">
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="features" id="courses">
+    <h3>🚀 Select Your Course</h3>
+    <p class="sub-text">Learn with the best teachers of Kerala. Join live classes and get certified.</p>
+
+    <div class="feature-cards">
+        <!-- Course Cards -->
+        <div class="card">
+            <img th:src="@{/image/divyaG.jpg}" alt="Java Development">
+            <h4>15th Nov - Java Development</h4>
+            <p><b>Live Batch:</b> Zero to Hero (8:00 AM - 9:00 AM)</p>
+            <p><b>Prof Miss Divya G</b></p>
+            <button class="btn-card" onclick="enrollCourse('Java Development')">Enroll Now</button>
+        </div>
+
+        <div class="card">
+            <img th:src="@{/image/deepaNair.jpg}" alt="AI Recommendations">
+            <h4>15 December - DSA with C</h4>
+            <p><b>Live Batch:</b> Zero to Hero (9:15 AM - 10:15 AM)</p>
+            <p><b>Prof Miss Deepa Nair</b></p>
+            <button class="btn-card" onclick="enrollCourse('DSA with C')">Enroll Now</button>
+        </div>
+
+        <div class="card">
+            <img th:src="@{/image/radhikaB.jpg}" alt="Secure Access">
+            <h4>15th Nov - Computer Network</h4>
+            <p><b>Live Batch:</b> Zero to Hero (8:00 AM - 9:00 AM)</p>
+            <p><b>Prof Miss Radhika B</b></p>
+            <button class="btn-card" onclick="enrollCourse('Computer Network')">Enroll Now</button>
+        </div>
+
+        <div class="card">
+            <img th:src="@{/image/riya.jpg}" alt="Expert Teachers">
+            <h4>15 Dec - Android Application Programming</h4>
+            <p><b>Live Batch:</b> Zero to Hero (9:15 AM - 10:15 AM)</p>
+            <p><b>Prof Miss Riya Rashid</b></p>
+            <button class="btn-card" onclick="enrollCourse('Android Application Programming')">Enroll Now</button>
+        </div>
+
+        <div class="card">
+            <img th:src="@{/image/neethuG.jpg}" alt="Certified Courses">
+            <h4>15 Dec - Web Technology & Programming</h4>
+            <p><b>Live Batch:</b> Zero to Hero (9:15 AM - 10:15 AM)</p>
+            <p><b>Prof Miss Neethu Ganesh</b></p>
+            <button class="btn-card" onclick="enrollCourse('Web Technology & Programming')">Enroll Now</button>
+        </div>
+
+        <div class="card">
+            <img th:src="@{/image/anup.jpg}" alt="Community Support">
+            <h4>15 Dec - Python Programming</h4>
+            <p><b>Live Batch:</b> Zero to Hero (9:15 AM - 10:15 AM)</p>
+            <p><b>Prof Miss Anup Suleman</b></p>
+            <button class="btn-card" onclick="enrollCourse('Python Programming')">Enroll Now</button>
+        </div>
+
+        <div class="card">
+            <img th:src="@{/image/softwareRiya.jpg}" alt="Certified Courses">
+            <h4>15 Dec - Software Engineering</h4>
+            <p><b>Live Batch:</b> Zero to Hero (9:15 AM - 10:15 AM)</p>
+            <p><b>Prof Miss Riya Rashid</b></p>
+            <button class="btn-card" onclick="enrollCourse('Software Engineering')">Enroll Now</button>
+        </div>
+
+        <div class="card">
+            <img th:src="@{/image/pythonNeethu.jpg}" alt="Community Support">
+            <h4>15 Dec - Python Programming</h4>
+            <p><b>Live Batch:</b> Zero to Hero (9:15 AM - 10:15 AM)</p>
+            <p><b>Prof Miss Neethu Ganesh</b></p>
+            <button class="btn-card" onclick="enrollCourse('Python Programming')">Enroll Now</button>
+        </div>
+
+        <div class="card">
+            <img th:src="@{/image/osDeepa.jpg}" alt="AI Recommendations">
+            <h4>15 December - Operating System</h4>
+            <p><b>Live Batch:</b> Zero to Hero (9:15 AM - 10:15 AM)</p>
+            <p><b>Prof Miss Deepa Nair</b></p>
+            <button class="btn-card" onclick="enrollCourse('Operating System')">Enroll Now</button>
+        </div>
+
+        <div class="card">
+            <img th:src="@{/image/DFCA.jpg}" alt="Secure Access">
+            <h4>15th Nov - DFCA</h4>
+            <p><b>Live Batch:</b> Zero to Hero (8:00 AM - 9:00 AM)</p>
+            <p><b>Prof Miss Radhika B</b></p>
+            <button class="btn-card" onclick="enrollCourse('DFCA')">Enroll Now</button>
+        </div>
+
+        <div class="card">
+            <img th:src="@{/image/DBMSanup.jpg}" alt="Expert Teachers">
+            <h4>15 Dec - Data Base Management System</h4>
+            <p><b>Live Batch:</b> Zero to Hero (9:15 AM - 10:15 AM)</p>
+            <p><b>Prof Miss Anup Suleman</b></p>
+            <button class="btn-card" onclick="enrollCourse('Database Management System')">Enroll Now</button>
+        </div>
+
+        <div class="card">
+            <img th:src="@{/image/mathDiv.jpg}" alt="Certified Courses">
+            <h4>15 Dec - Mathematical Foundation for Computing</h4>
+            <p><b>Live Batch:</b> Zero to Hero (9:15 AM - 10:15 AM)</p>
+            <p><b>Prof Miss Divya G</b></p>
+            <button class="btn-card" onclick="enrollCourse('Mathematical Foundation for Computing')">Enroll Now</button>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer>
+    <div class="footer-content">
+        <div class="footer-section footer-about">
+            <h3>About Virtual Pathshala</h3>
+            <p>Virtual Pathshala is an innovative online learning platform connecting students with expert mentors from Kerala. We provide quality education through interactive live classes and personalized learning paths.</p>
+        </div>
+
+        <div class="footer-section footer-social" id="contact">
+            <h3>Follow Us</h3>
+            <div class="social-icons">
+                <a href="https://facebook.com" class="social-icon facebook" target="_blank" title="Facebook">
+                    <i class="fab fa-facebook-f"></i>
+                </a>
+                <a href="https://www.instagram.com/rocky_raushan/" class="social-icon instagram" target="_blank" title="Instagram">
+                    <i class="fab fa-instagram"></i>
+                </a>
+                <a href="https://twitter.com" class="social-icon twitter" target="_blank" title="Twitter">
+                    <i class="fab fa-twitter"></i>
+                </a>
+                <a href="https://mail.google.com/mail/u/0/#inbox" class="social-icon gmail" title="Gmail">
+                    <i class="fas fa-envelope"></i>
+                </a>
+                <a href="https://whatsapp.com" class="social-icon whatsapp" title="WhatsApp">
+                    <i class="fab fa-whatsapp"></i>
+                </a>
+                <a href="https://github.com/Raushan-Rocky" class="social-icon github" target="_blank" title="GitHub">
+                    <i class="fab fa-github"></i>
+                </a>
+            </div>
+        </div>
+
+        <div class="footer-section footer-contact">
+            <h3>Contact Us</h3>
+            <p><i class="fas fa-map-marker-alt"></i> Kerala, India</p>
+            <p><i class="fas fa-envelope"></i> info@virtualpathshala.com</p>
+            <p><i class="fas fa-phone"></i> +91 98765 43210</p>
+        </div>
+    </div>
+
+    <div class="footer-bottom">
+        <p>&copy; <span id="year"></span> Virtual Pathshala. All rights reserved.</p>
+        <p class="team-credits">Designed and Developed by Team Virtual Pathshala</p>
+    </div>
+</footer>
+
+<script th:src="@{/js/auth.js}"></script>
+<script th:src="@{/js/auth.js}"></script>
+<script>
+    // Auto update year in footer
+    document.getElementById("year").textContent = new Date().getFullYear();
+
+    // Toggle mobile menu
+    function toggleMenu() {
+        document.getElementById("nav-links").classList.toggle("show");
+        document.querySelector(".nav-buttons").classList.toggle("show");
+    }
+
+    // User menu functionality
+    document.getElementById('user-btn')?.addEventListener('click', function(e) {
+        e.stopPropagation();
+        document.getElementById('user-popup').classList.toggle('show');
+    });
+
+    // Close user menu when clicking outside
+    document.addEventListener('click', function() {
+        const popup = document.getElementById('user-popup');
+        if (popup) popup.classList.remove('show');
+    });
+
+    // ✅ IMPROVED LOGIN STATUS CHECK
+    function checkLoginStatus() {
+        const userMenu = document.getElementById('user-menu');
+        const guestButtons = document.getElementById('guest-buttons');
+        const welcomeText = document.getElementById('welcome-text');
+
+        // Check if user is logged in
+        const userData = localStorage.getItem('user');
+
+        if (userData) {
+            try {
+                const user = JSON.parse(userData);
+
+                // ✅ SHOW USER MENU, HIDE GUEST BUTTONS
+                if (userMenu) userMenu.style.display = 'block';
+                if (guestButtons) guestButtons.style.display = 'none';
+                if (welcomeText) {
+                    welcomeText.textContent = `Welcome, ${user.name || user.email}`;
+                }
+
+                console.log('✅ User is logged in:', user.name || user.email);
+
+            } catch (error) {
+                console.error('Error parsing user data:', error);
+                showGuestMenu();
+            }
+        } else {
+            showGuestMenu();
+        }
+    }
+
+    // Show guest menu (when not logged in)
+    function showGuestMenu() {
+        const userMenu = document.getElementById('user-menu');
+        const guestButtons = document.getElementById('guest-buttons');
+
+        if (userMenu) userMenu.style.display = 'none';
+        if (guestButtons) guestButtons.style.display = 'block';
+
+        console.log('❌ User is not logged in');
+    }
+
+    // Logout function
+    function logout() {
+        // Clear localStorage
+        localStorage.removeItem('user');
+        localStorage.removeItem('authToken');
+
+        console.log('🚪 User logged out');
+
+        // Redirect to home page
+        window.location.href = '/';
+    }
+
+    // Course enrollment function
+    async function enrollCourse(courseName) {
+        console.log("🎯 Enrollment clicked for: " + courseName);
+
+        // Get current user
+        const userData = localStorage.getItem('user');
+        if (!userData) {
+            alert('Please login first');
+            window.location.href = '/login';
+            return;
+        }
+
+        try {
+            const user = JSON.parse(userData);
+            if (!user.id) {
+                alert('User data not found. Please login again.');
+                return;
+            }
+
+            // Show loading
+            const button = event.target;
+            const originalText = button.textContent;
+            button.textContent = 'Enrolling...';
+            button.disabled = true;
+
+            // Call enrollment API
+            const response = await fetch(`/api/enroll?userId=${user.id}&courseName=${encodeURIComponent(courseName)}`, {
+                method: 'POST'
+            });
+
+            const result = await response.text();
+
+            if (response.ok) {
+                alert('✅ ' + result);
+                button.textContent = 'Enrolled ✓';
+                button.style.background = 'green';
+                button.disabled = true;
+            } else {
+                alert('❌ ' + result);
+                button.textContent = originalText;
+                button.disabled = false;
+            }
+
+        } catch (error) {
+            console.error('Enrollment error:', error);
+            alert('❌ Network error. Please try again.');
+            event.target.textContent = 'Enroll Now';
+            event.target.disabled = false;
+        }
+    }
+
+    // ✅ BETTER INITIALIZATION
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('🎓 StudentLogin page loaded');
+
+        // Check login status immediately
+        checkLoginStatus();
+
+        // Also check when page becomes visible (in case of multiple tabs)
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                checkLoginStatus();
+            }
+        });
+
+        // Optional: Check every 5 seconds for login status changes
+        setInterval(checkLoginStatus, 5000);
+    });
+</script>
+</script>
+</body>
+</html>

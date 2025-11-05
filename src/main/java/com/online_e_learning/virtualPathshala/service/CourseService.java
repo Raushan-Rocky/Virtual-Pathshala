@@ -46,7 +46,7 @@ public class CourseService {
                 .orElseThrow(() -> new CourseNotFoundException("Course not found with id: " + id));
     }
 
-    // READ BY USER ID (Instructor's courses)
+    // READ BY USER ID
     public List<Course> getCoursesByUserId(int userId) {
         if (!userRepository.existsById(userId)) {
             throw new UserNotFoundException("User not found with id: " + userId);
@@ -69,7 +69,6 @@ public class CourseService {
         Course course = courseRepository.findById(id)
                 .orElseThrow(() -> new CourseNotFoundException("Course not found with id: " + id));
 
-        // If instructor is being updated, validate new user exists
         if (requestDto.getUserId() != null) {
             User user = userRepository.findById(requestDto.getUserId())
                     .orElseThrow(() -> new UserNotFoundException("User not found with id: " + requestDto.getUserId()));
@@ -88,6 +87,7 @@ public class CourseService {
         courseRepository.deleteById(id);
     }
 
+    // SEARCH
     public List<Course> searchCourses(String query, String category, String status) {
         if (query != null && !query.trim().isEmpty()) {
             return courseRepository.findByTitleContainingIgnoreCaseOrCategoryContainingIgnoreCase(query, query);
@@ -102,7 +102,7 @@ public class CourseService {
 
     public List<Course> getFeaturedCourses() {
         return courseRepository.findAll().stream()
-                .limit(6) // Get top 6 courses
+                .limit(6)
                 .collect(Collectors.toList());
     }
 }

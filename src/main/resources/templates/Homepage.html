@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Virtual Pathshala</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="icon" type="image/x-icon" th:href="@{/image/favicon.ico}">
 </head>
 <body>
@@ -161,42 +162,53 @@
     </div>
 </section>
 
-<!-- Contact Section -->
-<section class="contact" id="contact">
-    <h3>📩 Get in Touch</h3>
-    <p class="sub-text">Stay connected with us on social platforms</p>
 
-    <div class="contact-grid">
-        <a href="whatsapp.com" class="contact-card">
-            <img th:src="@{/image/whatsapp.jpeg}" alt="Email">
-            <h4>What's app</h4>
-        </a>
 
-        <a href="https://mail.google.com/mail/u/0/#inbox" class="contact-card">
-            <img th:src="@{/image/mail.webp}" alt="Email">
-            <h4>Email</h4>
-        </a>
-
-        <a href="https://www.instagram.com/rocky_raushan/" target="_blank" class="contact-card">
-            <img th:src="@{/image/instagram.png}" alt="Instagram">
-            <h4>Instagram</h4>
-        </a>
-
-        <a href="https://facebook.com" target="_blank" class="contact-card">
-            <img th:src="@{/image/facebook.jpeg}" alt="Facebook">
-            <h4>Facebook</h4>
-        </a>
-
-        <a href="https://github.com/Raushan-Rocky" target="_blank" class="contact-card">
-            <img th:src="@{/image/git1.jpeg}" alt="GitHub">
-            <h4>GitHub</h4>
-        </a>
-    </div>
-</section>
 
 <!-- Footer -->
 <footer>
-    <p>© <span id="year"></span> Stay with Virtual Pathshala.</p>
+    <div class="footer-content" id="contact">
+        <div class="footer-section footer-about">
+            <h3>About Virtual Pathshala</h3>
+            <p>Virtual Pathshala is an innovative online learning platform connecting students with expert mentors from Kerala. We provide quality education through interactive live classes and personalized learning paths.</p>
+        </div>
+
+        <div class="footer-section footer-social">
+            <h3>Follow Us</h3>
+            <div class="social-icons">
+                <a href="https://facebook.com" class="social-icon facebook" target="_blank" title="Facebook">
+                    <i class="fab fa-facebook-f"></i>
+                </a>
+                <a href="https://www.instagram.com/rocky_raushan/" class="social-icon instagram" target="_blank" title="Instagram">
+                    <i class="fab fa-instagram"></i>
+                </a>
+                <a href="https://twitter.com" class="social-icon twitter" target="_blank" title="Twitter">
+                    <i class="fab fa-twitter"></i>
+                </a>
+                <a href="https://mail.google.com/mail/u/0/#inbox" class="social-icon gmail" title="Gmail">
+                    <i class="fas fa-envelope"></i>
+                </a>
+<!--                <a href="whatsapp.com" class="social-icon whatsapp" title="WhatsApp">-->
+<!--                    <i class="fab fa-whatsapp"></i>-->
+<!--                </a>-->
+                <a href="https://github.com/Raushan-Rocky" class="social-icon github" target="_blank" title="GitHub">
+                    <i class="fab fa-github"></i>
+                </a>
+            </div>
+        </div>
+
+        <div class="footer-section footer-contact">
+            <h3>Contact Us</h3>
+            <p><i class="fas fa-map-marker-alt"></i> Kerala, India</p>
+            <p><i class="fas fa-envelope"></i> info@virtualpathshala.com</p>
+            <p><i class="fas fa-phone"></i> +91 98765 43210</p>
+        </div>
+    </div>
+
+    <div class="footer-bottom">
+        <p>&copy; <span id="year"></span> Virtual Pathshala. All rights reserved.</p>
+        <p class="team-credits">Designed and Developed by Team Virtual Pathshala</p>
+    </div>
 </footer>
 
 <script th:src="@{/js/api.js}"></script>

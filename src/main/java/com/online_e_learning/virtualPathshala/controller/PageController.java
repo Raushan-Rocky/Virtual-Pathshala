@@ -8,21 +8,26 @@ public class PageController {
 
     @GetMapping("/")
     public String home() {
-        return "style"; // Home page
+        return "Homepage";
     }
 
     @GetMapping("/login")
     public String login() {
-        return "login"; // Login page
+        return "login";
     }
 
     @GetMapping("/signup")
     public String signup() {
-        return "signup"; // Signup page
+        return "signup";
     }
+
+//    @GetMapping("/style")
+//    public String style() {
+//        return "style";
+//    }
 
     @GetMapping("/student")
     public String student() {
-        return "student"; // Student dashboard
+        return "StudentLogin";  // ✅ StudentLogin.html after login
     }
 }

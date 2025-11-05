@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Admin - Manage Users</title>
+    <link rel="stylesheet" th:href="@{/css/admin-user.css}" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+    <meta name="_csrf_parameter" th:content="${_csrf.parameterName}"/>
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+</head>
+<body>
+
+<header class="admin-header">
+    <div class="left">
+        <img th:src="@{/image/logo5.png}" alt="logo" class="logo"/>
+        <h1>Admin — Manage Users</h1>
+    </div>
+    <div class="right">
+        <a th:href="@{/admin}" class="btn">Dashboard</a>
+        <a th:href="@{/logout}" class="btn danger">Logout</a>
+    </div>
+</header>
+
+<main class="container">
+    <section class="controls">
+        <input id="searchInput" type="text" placeholder="Search by name or email..." />
+    </section>
+
+    <section class="table-wrap">
+        <table>
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody id="usersTable">
+            <!-- Thymeleaf loop -->
+            <tr th:each="user : ${users}" th:attr="data-id=${user.id}">
+                <td th:text="${user.id}">1</td>
+                <td th:text="${user.name}">User Name</td>
+                <td th:text="${user.email}">email@example.com</td>
+                <td>
+                    <select class="role-select">
+                        <option th:each="r : ${roles}"
+                                th:value="${r}"
+                                th:text="${r}"
+                                th:selected="${r} == ${user.role}"></option>
+                    </select>
+                </td>
+                <td>
+                    <button class="btn small update-role">Update</button>
+                    <button class="btn small danger delete-user">Delete</button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+</main>
+
+<script>
+    // CSRF setup
+    const csrfToken = document.querySelector('meta[name="_csrf"]').content;
+    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+
+    // Event delegation for update & delete
+    document.getElementById('usersTable').addEventListener('click', async (e) => {
+      const target = e.target;
+      const row = target.closest('tr');
+      if (!row) return;
+      const id = row.getAttribute('data-id');
+
+      // Update role
+      if (target.classList.contains('update-role')) {
+        const select = row.querySelector('.role-select');
+        const role = select.value;
+
+        try {
+          const res = await fetch('/admin/users/role', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+              [csrfHeader]: csrfToken
+            },
+            body: new URLSearchParams({ userId: id, role })
+          });
+          const text = await res.text();
+          if (res.ok) {
+            alert('Role updated');
+          } else {
+            alert('Update failed: ' + text);
+          }
+        } catch (err) {
+          console.error(err);
+          alert('Request error');
+        }
+      }
+
+      // Delete user
+      if (target.classList.contains('delete-user')) {
+        if (!confirm('Are you sure you want to permanently delete this user?')) return;
+
+        try {
+          const res = await fetch('/admin/users/' + id, {
+            method: 'DELETE',
+            headers: { [csrfHeader]: csrfToken }
+          });
+          const text = await res.text();
+          if (res.ok) {
+            // remove row
+            row.remove();
+            alert('User deleted');
+          } else {
+            alert('Delete failed: ' + text);
+          }
+        } catch (err) {
+          console.error(err);
+          alert('Request error');
+        }
+      }
+    });
+
+    // Simple client-side search
+    document.getElementById('searchInput').addEventListener('input', function() {
+      const q = this.value.toLowerCase();
+      document.querySelectorAll('#usersTable tr').forEach(row => {
+        const name = row.children[1].innerText.toLowerCase();
+        const email = row.children[2].innerText.toLowerCase();
+        row.style.display = (name.includes(q) || email.includes(q)) ? '' : 'none';
+      });
+    });
+</script>
+
+</body>
+</html>

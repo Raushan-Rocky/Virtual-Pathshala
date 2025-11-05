@@ -45,6 +45,15 @@ public class UserService {
                 .orElseThrow(() -> new UserNotFoundException("User not found with email: " + email));
     }
 
+    public void updateUserRole(int userId, Role newRole) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
+
+        user.setRole(newRole);
+        userRepository.save(user);
+    }
+
+
     public List<User> getUsersByRole(String role) {
         Role userRole = Role.valueOf(role.toUpperCase());
         return userRepository.findByRole(userRole);

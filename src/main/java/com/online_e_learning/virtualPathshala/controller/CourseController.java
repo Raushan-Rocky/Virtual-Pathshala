@@ -60,7 +60,7 @@ public class CourseController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         try {
-            Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+            Pageable pageable = PageRequest.of(page, size);
             Page<Course> coursePage = courseRepository.findAll(pageable);
 
             List<CourseRequestDto> courseDtos = coursePage.getContent().stream()
@@ -74,7 +74,9 @@ public class CourseController {
             response.put("totalItems", coursePage.getTotalElements());
             response.put("totalPages", coursePage.getTotalPages());
             response.put("pageSize", coursePage.getSize());
+
             return new ResponseEntity<>(response, HttpStatus.OK);
+
         } catch (Exception e) {
             Map<String, String> errorResponse = new HashMap<>();
             errorResponse.put("success", "false");
@@ -82,6 +84,7 @@ public class CourseController {
             return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
 
     // READ BY ID - GET /api/courses/{id}
     @GetMapping("/{id}")

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard | Virtual Pathshala</title>
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+    <link rel="icon" type="image/x-icon" th:href="@{/image/favicon.ico}">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+<!-- Background Video -->
+<video autoplay muted loop playsinline id="bg-video">
+    <source th:src="@{/video/videoplayback (1).mp4}" type="video/mp4">
+</video>
+
+<header>
+    <div class="logo">
+        <img th:src="@{/image/logo5.png}" alt="Logo">
+        <h2>Admin Panel</h2>
+    </div>
+</header>
+
+<div class="admin-container">
+    <h2>Welcome Admin 👑</h2>
+    <p>Manage the entire Virtual Pathshala from here</p>
+
+    <div class="cards">
+        <a href="/users" class="card">
+            <i class="fas fa-users"></i>
+            <h3>Users</h3>
+        </a>
+
+        <a href="/courses" class="card">
+            <i class="fas fa-book"></i>
+            <h3>Courses</h3>
+        </a>
+
+        <a href="/assignments" class="card">
+            <i class="fas fa-file-alt"></i>
+            <h3>Assignments</h3>
+        </a>
+
+        <a href="/submissions" class="card">
+            <i class="fas fa-paper-plane"></i>
+            <h3>Submissions</h3>
+        </a>
+    </div>
+</div>
+
+<footer>
+    © 2025 Virtual Pathshala | Admin Dashboard
+</footer>
+
+</body>
+</html>

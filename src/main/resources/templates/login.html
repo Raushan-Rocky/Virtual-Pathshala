@@ -6,6 +6,7 @@
   <title>Login | Virtual Pathshala</title>
   <link rel="stylesheet" th:href="@{/css/login.css}">
   <link rel="icon" type="image/x-icon" th:href="@{/image/favicon.ico}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
 
@@ -34,12 +35,13 @@
       <h2>Login</h2>
       <p>If you have an account, please login</p>
 
-      <form th:action="@{/api/login}" method="post">
+      <!-- ✅ FORM ACTION REMOVE KAR DIYA -->
+      <form id="loginForm">
         <label>Email Address</label>
-        <input type="email" name="email" placeholder="Enter Email Address" required>
+        <input type="email" id="email" name="email" placeholder="Enter Email Address" required>
 
         <label>Password</label>
-        <input type="password" name="password" placeholder="Enter Password" required>
+        <input type="password" id="password" name="password" placeholder="Enter Password" required>
 
         <a href="#" class="forgot">Forgot Password?</a>
 
@@ -49,9 +51,8 @@
           <span>OR</span>
         </div>
 
-        <button type="button" class="google-btn">
-          <img src="https://www.svgrepo.com/show/355037/google.svg" alt="Google">
-          Login with Google
+        <button type="button" class="admin-login">
+          <i class="fas fa-user-shield"></i> Login as Admin
         </button>
 
         <p class="register-text">
@@ -80,41 +81,42 @@
 </div>
 
 <script>
-  // Get elements
+  // Forgot Password Modal
   const modal = document.getElementById('forgotModal');
   const forgotLink = document.querySelector('.forgot');
   const closeBtn = document.querySelector('.close-btn');
 
-  // Open modal when "Forgot Password?" is clicked
   forgotLink.addEventListener('click', (e) => {
     e.preventDefault();
     modal.style.display = 'flex';
   });
 
-  // Close modal when clicking the close button
   closeBtn.addEventListener('click', () => {
     modal.style.display = 'none';
   });
 
-  // Close modal when clicking outside the box
   window.addEventListener('click', (e) => {
     if (e.target === modal) {
       modal.style.display = 'none';
     }
   });
-</script>
 
-<script th:src="@{/js/api.js}"></script>
-<script th:src="@{/js/auth.js}"></script>
-<script>
-  // Update login form handler for AJAX submission
-  document.querySelector('form').addEventListener('submit', async function(e) {
+  // ✅ UPDATED LOGIN FORM HANDLER
+  document.getElementById('loginForm').addEventListener('submit', async function(e) {
       e.preventDefault();
 
-      const email = document.querySelector('input[name="email"]').value;
-      const password = document.querySelector('input[name="password"]').value;
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      console.log('Login attempt for:', email);
 
       try {
+          // Show loading
+          const loginBtn = document.querySelector('.login-btn');
+          const originalText = loginBtn.textContent;
+          loginBtn.textContent = 'Logging in...';
+          loginBtn.disabled = true;
+
           const response = await fetch('/api/login', {
               method: 'POST',
               headers: {
@@ -123,35 +125,45 @@
               body: JSON.stringify({ email, password })
           });
 
+          console.log('Response status:', response.status);
+
+          if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
           const data = await response.json();
-          
-          if (response.ok) {
-              // Store user in session/localStorage
-              if (data.token) {
-                  localStorage.setItem('authToken', data.token);
-              }
-              if (data.user) {
-                  localStorage.setItem('user', JSON.stringify(data.user));
+          console.log('Login response:', data);
+
+          if (data.success) {
+              // Store user in localStorage
+              if (data.data) {
+                  localStorage.setItem('user', JSON.stringify(data.data));
+                  console.log('User data stored successfully');
               }
 
-              // Redirect based on role
-              const user = data.user || data;
-              if (user.role === 'STUDENT') {
-                  window.location.href = '/student';
-              } else if (user.role === 'TEACHER') {
-                  window.location.href = '/teacher';
-              } else if (user.role === 'ADMIN') {
-                  window.location.href = '/admin';
-              } else {
-                  window.location.href = '/student'; // Default redirect
-              }
+              // ✅ ALWAYS REDIRECT TO STUDENT PAGE (Simple approach)
+              console.log('✅ Login successful! Redirecting to student page...');
+              window.location.href = '/student';
+
           } else {
               alert(data.message || 'Login failed');
           }
       } catch (error) {
           console.error('Login error:', error);
-          alert('Login failed. Please try again.');
+          alert('Login failed. Please try again. Error: ' + error.message);
+      } finally {
+          // Reset button
+          const loginBtn = document.querySelector('.login-btn');
+          if (loginBtn) {
+              loginBtn.textContent = 'Log In';
+              loginBtn.disabled = false;
+          }
       }
+  });
+
+  // Admin login button handler
+  document.querySelector('.admin-login').addEventListener('click', function() {
+      alert('Admin login feature coming soon!');
   });
 </script>
 

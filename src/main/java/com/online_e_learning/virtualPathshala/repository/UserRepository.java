@@ -12,14 +12,15 @@ import java.util.Optional;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Integer> {
+
     Optional<User> findByEmail(String email);
+
     List<User> findByRole(Role role);
+
     boolean existsByEmail(String email);
 
-    // ✅ Correct method to find users enrolled in a course
     @Query("SELECT u FROM User u JOIN u.enrollmentList e WHERE e.course.id = :courseId")
     List<User> findUsersEnrolledInCourse(@Param("courseId") int courseId);
 
-    // Alternative method name (if you prefer)
     List<User> findByEnrollmentList_CourseId(int courseId);
 }
