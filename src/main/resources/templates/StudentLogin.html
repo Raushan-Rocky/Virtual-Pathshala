@@ -10,7 +10,6 @@
 </head>
 <body>
 <!-- Navbar -->
-<!-- Navbar -->
 <header class="navbar">
     <div class="logo">
         <img th:src="@{/image/logo5.png}" href="#home" alt="Logo">
@@ -26,20 +25,20 @@
 
     <!-- Dynamic User Menu -->
     <div class="nav-buttons" id="nav-buttons">
-        <!-- Guest buttons (when not logged in) - UNCOMMENTED -->
+        <!-- Guest buttons (when not logged in) -->
         <div id="guest-buttons">
             <a th:href="@{/login}" class="btn btn-primary">Login</a>
             <a th:href="@{/signup}" class="btn btn-primary">Sign Up</a>
         </div>
 
-        <!-- User menu (when logged in) - REMOVED style="display: none;" -->
+        <!-- User menu (when logged in) -->
         <div id="user-menu" class="user-menu">
             <button id="user-btn">
                 <img th:src="@{/image/profile.png}" alt="User" class="user-logo" onerror="this.src='https://via.placeholder.com/35'">
                 <span class="welcome-text" id="welcome-text">Welcome</span>
             </button>
             <div class="user-popup" id="user-popup">
-                <a th:href="@{/student}">Dashboard</a>
+                <a th:href="@{/student-dashboard}">Dashboard</a>
                 <a href="#profile">Profile</a>
                 <a href="#settings">Settings</a>
                 <hr>
@@ -225,7 +224,6 @@
 </footer>
 
 <script th:src="@{/js/auth.js}"></script>
-<script th:src="@{/js/auth.js}"></script>
 <script>
     // Auto update year in footer
     document.getElementById("year").textContent = new Date().getFullYear();
@@ -370,7 +368,6 @@
         // Optional: Check every 5 seconds for login status changes
         setInterval(checkLoginStatus, 5000);
     });
-</script>
 </script>
 </body>
 </html>

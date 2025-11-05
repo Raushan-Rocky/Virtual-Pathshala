@@ -78,10 +78,25 @@
           email: document.getElementById('email').value,
           password: document.getElementById('password').value,
           confirmPassword: document.getElementById('confirm-password').value,
-          role: 'STUDENT' // Default role
+          role: 'STUDENT'
       };
 
-      // Password confirmation check
+      // ✅ Mobile number validation: must be exactly 10 digits
+      const mobilePattern = /^[0-9]{10}$/;
+      if (!mobilePattern.test(userData.mobile)) {
+          alert("Enter 10 digit valid mobile number");
+          return;
+      }
+
+      // ✅ Password strength validation:
+      // At least 1 capital letter, 1 special char, and length > 6
+      const strongPasswordPattern = /^(?=.*[A-Z])(?=.*[!@#$%^&*])(?=.{7,}).*$/;
+      if (!strongPasswordPattern.test(userData.password)) {
+          alert("Make strong password it contain a Capital letter and special character and more than 6 digit");
+          return;
+      }
+
+      // ✅ Confirm password validation
       if (userData.password !== userData.confirmPassword) {
           alert('Passwords do not match!');
           return;
@@ -110,6 +125,7 @@
       }
   });
 </script>
+
 
 <!-- Footer -->
 <footer>

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Dashboard</title>
+    <title>Student Dashboard - Virtual Pathshala</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -407,61 +407,6 @@
         .note-actions {
             display: flex;
             justify-content: space-between;
-        }
-
-        /* Calendar Section */
-        .calendar {
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-        }
-
-        .calendar-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 10px;
-        }
-
-        .calendar-day {
-            text-align: center;
-            font-weight: 600;
-            color: var(--gray);
-            padding: 10px 0;
-        }
-
-        .calendar-date {
-            text-align: center;
-            padding: 10px 0;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .calendar-date:hover {
-            background-color: var(--light-gray);
-        }
-
-        .calendar-date.active {
-            background-color: var(--primary);
-            color: white;
-        }
-
-        .calendar-date.has-event::after {
-            content: '';
-            display: block;
-            width: 6px;
-            height: 6px;
-            background-color: var(--accent);
-            border-radius: 50%;
-            margin: 5px auto 0;
         }
 
         /* Profile Section */
