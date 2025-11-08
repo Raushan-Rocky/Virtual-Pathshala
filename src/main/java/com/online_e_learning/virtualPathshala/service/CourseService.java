@@ -1,17 +1,18 @@
 package com.online_e_learning.virtualPathshala.service;
 
-import com.online_e_learning.virtualPathshala.converter.CourseConverter;
-import com.online_e_learning.virtualPathshala.exception.CourseNotFoundException;
-import com.online_e_learning.virtualPathshala.exception.UserNotFoundException;
 import com.online_e_learning.virtualPathshala.model.Course;
 import com.online_e_learning.virtualPathshala.model.User;
 import com.online_e_learning.virtualPathshala.repository.CourseRepository;
 import com.online_e_learning.virtualPathshala.repository.UserRepository;
 import com.online_e_learning.virtualPathshala.requestDto.CourseRequestDto;
+import com.online_e_learning.virtualPathshala.responseDto.ApiResponse;
+import com.online_e_learning.virtualPathshala.responseDto.CourseResponseDto;
+import com.online_e_learning.virtualPathshala.converter.CourseConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,83 +27,43 @@ public class CourseService {
     @Autowired
     private CourseConverter courseConverter;
 
-    // CREATE
-    public Course createCourse(CourseRequestDto requestDto) {
-        User user = userRepository.findById(requestDto.getUserId())
-                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + requestDto.getUserId()));
+    public ApiResponse<CourseResponseDto> createCourse(CourseRequestDto courseRequestDto) {
+        try {
+            // Check if teacher exists
+            Optional<User> teacherOptional = userRepository.findById(courseRequestDto.getTeacherId());
+            if (teacherOptional.isEmpty()) {
+                return ApiResponse.error("Teacher not found with ID: " + courseRequestDto.getTeacherId());
+            }
 
-        Course course = courseConverter.convertToEntity(requestDto, user);
-        return courseRepository.save(course);
-    }
+            // Check if course code already exists
+            if (courseRepository.existsByCode(courseRequestDto.getCode())) {
+                return ApiResponse.error("Course with code " + courseRequestDto.getCode() + " already exists");
+            }
 
-    // READ ALL
-    public List<Course> getAllCourses() {
-        return courseRepository.findAll();
-    }
+            User teacher = teacherOptional.get();
+            Course course = courseConverter.courseRequestDtoToCourse(courseRequestDto, teacher);
+            Course savedCourse = courseRepository.save(course);
+            CourseResponseDto responseDto = courseConverter.courseToCourseResponseDto(savedCourse);
 
-    // READ BY ID
-    public Course getCourseById(int id) {
-        return courseRepository.findById(id)
-                .orElseThrow(() -> new CourseNotFoundException("Course not found with id: " + id));
-    }
+            return ApiResponse.success("Course created successfully", responseDto);
 
-    // READ BY USER ID
-    public List<Course> getCoursesByUserId(int userId) {
-        if (!userRepository.existsById(userId)) {
-            throw new UserNotFoundException("User not found with id: " + userId);
-        }
-        return courseRepository.findByUserId(userId);
-    }
-
-    // READ BY CATEGORY
-    public List<Course> getCoursesByCategory(String category) {
-        return courseRepository.findByCategory(category);
-    }
-
-    // READ BY STATUS
-    public List<Course> getCoursesByStatus(String status) {
-        return courseRepository.findByStatus(status);
-    }
-
-    // UPDATE
-    public Course updateCourse(int id, CourseRequestDto requestDto) {
-        Course course = courseRepository.findById(id)
-                .orElseThrow(() -> new CourseNotFoundException("Course not found with id: " + id));
-
-        if (requestDto.getUserId() != null) {
-            User user = userRepository.findById(requestDto.getUserId())
-                    .orElseThrow(() -> new UserNotFoundException("User not found with id: " + requestDto.getUserId()));
-            course.setUser(user);
-        }
-
-        courseConverter.updateEntityFromDto(requestDto, course);
-        return courseRepository.save(course);
-    }
-
-    // DELETE
-    public void deleteCourse(int id) {
-        if (!courseRepository.existsById(id)) {
-            throw new CourseNotFoundException("Course not found with id: " + id);
-        }
-        courseRepository.deleteById(id);
-    }
-
-    // SEARCH
-    public List<Course> searchCourses(String query, String category, String status) {
-        if (query != null && !query.trim().isEmpty()) {
-            return courseRepository.findByTitleContainingIgnoreCaseOrCategoryContainingIgnoreCase(query, query);
-        } else if (category != null) {
-            return courseRepository.findByCategory(category);
-        } else if (status != null) {
-            return courseRepository.findByStatus(status);
-        } else {
-            return getAllCourses();
+        } catch (Exception e) {
+            return ApiResponse.error("Error creating course: " + e.getMessage());
         }
     }
 
-    public List<Course> getFeaturedCourses() {
-        return courseRepository.findAll().stream()
-                .limit(6)
-                .collect(Collectors.toList());
+    public ApiResponse<List<CourseResponseDto>> getCoursesByTeacher(int teacherId) {
+        try {
+            List<Course> courses = courseRepository.findByUserId(teacherId);
+            List<CourseResponseDto> responseDtos = courses.stream()
+                    .map(courseConverter::courseToCourseResponseDto)
+                    .collect(Collectors.toList());
+
+            return ApiResponse.success("Courses retrieved successfully", responseDtos);
+        } catch (Exception e) {
+            return ApiResponse.error("Error retrieving courses: " + e.getMessage());
+        }
     }
+
+    // Add other methods as needed...
 }

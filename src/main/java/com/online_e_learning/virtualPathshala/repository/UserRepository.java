@@ -23,4 +23,6 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     List<User> findUsersEnrolledInCourse(@Param("courseId") int courseId);
 
     List<User> findByEnrollmentList_CourseId(int courseId);
+    Optional<User> findByEmailAndRole(String email, String role);
+    List<User> findByRole(String role);
 }

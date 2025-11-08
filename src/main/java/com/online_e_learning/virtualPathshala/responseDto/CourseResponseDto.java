@@ -1,9 +1,10 @@
-package com.online_e_learning.virtualPathshala.requestDto;
+package com.online_e_learning.virtualPathshala.responseDto;
 
-public class CourseRequestDto {
+public class CourseResponseDto {
+    private int id;
     private String title;
     private String code;
-    private String category; // Existing field
+    private String category;
     private String description;
     private String department;
     private Integer credits;
@@ -12,16 +13,19 @@ public class CourseRequestDto {
     private String schedule;
     private String location;
     private String prerequisites;
-    private int teacherId; // Changed from Long to int to match your User entity
+    private String status;
+    private String teacherName;
+    private int teacherId;
 
-    // Default constructor
-    public CourseRequestDto() {}
+    // Constructors
+    public CourseResponseDto() {}
 
-    // Parameterized constructor
-    public CourseRequestDto(String title, String code, String category, String description,
-                            String department, Integer credits, String semester,
-                            Integer capacity, String schedule, String location,
-                            String prerequisites, int teacherId) {
+    public CourseResponseDto(int id, String title, String code, String category,
+                             String description, String department, Integer credits,
+                             String semester, Integer capacity, String schedule,
+                             String location, String prerequisites, String status,
+                             String teacherName, int teacherId) {
+        this.id = id;
         this.title = title;
         this.code = code;
         this.category = category;
@@ -33,10 +37,15 @@ public class CourseRequestDto {
         this.schedule = schedule;
         this.location = location;
         this.prerequisites = prerequisites;
+        this.status = status;
+        this.teacherName = teacherName;
         this.teacherId = teacherId;
     }
 
     // Getters and Setters
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
+
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
 
@@ -69,6 +78,12 @@ public class CourseRequestDto {
 
     public String getPrerequisites() { return prerequisites; }
     public void setPrerequisites(String prerequisites) { this.prerequisites = prerequisites; }
+
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
+
+    public String getTeacherName() { return teacherName; }
+    public void setTeacherName(String teacherName) { this.teacherName = teacherName; }
 
     public int getTeacherId() { return teacherId; }
     public void setTeacherId(int teacherId) { this.teacherId = teacherId; }

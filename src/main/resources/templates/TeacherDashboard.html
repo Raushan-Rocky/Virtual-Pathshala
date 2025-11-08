@@ -1218,7 +1218,11 @@
 </div>
 
 <script>
-    // Simulated user data - in a real app, this would come from your backend
+    // API Configuration
+    const API_BASE_URL = 'http://localhost:8040/api';
+    let TEACHER_ID = null; // Dynamic teacher ID
+
+    // Simulated user data
     const loggedInUser = {
         id: 1,
         name: "Dr. Sarah Williams",
@@ -1331,6 +1335,9 @@
 
     // Simple JavaScript for interactive elements
     document.addEventListener('DOMContentLoaded', function() {
+        // Initialize teacher ID from logged in user
+        TEACHER_ID = loggedInUser.id;
+
         // Populate user data
         populateUserData();
 
@@ -1393,7 +1400,6 @@
         // Dropdown menu actions...
         document.getElementById('logoutBtn').addEventListener('click', function() {
             if (confirm('Are you sure you want to logout?')) {
-                // In a real app, this would redirect to login page
                 window.location.href = '/login';
                 dropdownMenu.classList.remove('active');
             }
@@ -1454,10 +1460,10 @@
             this.reset();
         });
 
-        // Add Course Form Submission
+        // Add Course Form Submission - BACKEND INTEGRATION
         document.getElementById('addCourseForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            addNewCourse();
+            addNewCourseToBackend();
         });
 
         // Upload History Button
@@ -1466,7 +1472,109 @@
         });
     });
 
-    // Populate user data throughout the interface
+    // API Functions
+    async function addNewCourseToBackend() {
+        const submitBtn = document.querySelector('#addCourseForm button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+
+        try {
+            // Show loading state
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = 'Creating Course...';
+
+            // Complete course data for backend
+            const courseData = {
+                title: document.getElementById('courseTitle').value,
+                code: document.getElementById('courseCode').value,
+                category: document.getElementById('courseDepartment').value,
+                description: document.getElementById('courseDescription').value,
+                department: document.getElementById('courseDepartment').value,
+                credits: parseInt(document.getElementById('courseCredits').value),
+                semester: document.getElementById('courseSemester').value,
+                capacity: parseInt(document.getElementById('courseCapacity').value),
+                schedule: document.getElementById('courseSchedule').value,
+                location: document.getElementById('courseLocation').value,
+                prerequisites: document.getElementById('coursePrerequisites').value,
+                teacherId: TEACHER_ID
+            };
+
+            const response = await fetch(`${API_BASE_URL}/courses`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(courseData)
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+                alert(`Course "${courseData.title}" created successfully!`);
+
+                // Reset form
+                document.getElementById('addCourseForm').reset();
+
+                // Reload courses from backend
+                await loadCoursesFromBackend();
+
+                // Navigate to courses section
+                document.querySelector('[data-section="courses"]').click();
+            } else {
+                throw new Error(result.error || 'Failed to create course');
+            }
+        } catch (error) {
+            console.error('Error creating course:', error);
+            alert(`Error: ${error.message}`);
+        } finally {
+            // Reset button state
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        }
+    }
+
+    async function loadCoursesFromBackend() {
+        try {
+            const response = await fetch(`${API_BASE_URL}/courses/user/${TEACHER_ID}`);
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+                // Update courses array with backend data
+                courses = result.data.map(course => ({
+                    id: course.id,
+                    title: course.title,
+                    code: course.code,
+                    semester: course.semester || "Current",
+                    students: 0, // You can update these from backend if available
+                    assignments: 0,
+                    materials: 0,
+                    color: getRandomColor()
+                }));
+
+                // Refresh UI
+                loadCourses();
+                updateDashboardCounts();
+            } else {
+                throw new Error(result.error || 'Failed to load courses');
+            }
+        } catch (error) {
+            console.error('Error loading courses:', error);
+            // Continue with existing courses data
+        }
+    }
+
+    // Helper Functions
+    function getRandomColor() {
+        const colors = ['#4361ee', '#3a0ca3', '#4cc9f0', '#7209b7', '#f72585', '#560bad'];
+        return colors[Math.floor(Math.random() * colors.length)];
+    }
+
+    function updateDashboardCounts() {
+        document.getElementById('coursesCount').textContent = courses.length;
+        document.getElementById('infoCoursesCount').textContent = courses.length;
+        loggedInUser.coursesTeaching = courses.length;
+    }
+
+    // Your existing UI functions (NO CHANGES)
     function populateUserData() {
         document.getElementById('userName').textContent = loggedInUser.name;
         document.getElementById('userRole').textContent = formatRole(loggedInUser.role);
@@ -1494,16 +1602,13 @@
         document.getElementById('materialsCount').textContent = loggedInUser.materialsUploaded;
     }
 
-    // Load courses into the interface
     function loadCourses() {
         const coursesGrid = document.getElementById('coursesGrid');
         const coursesList = document.getElementById('coursesList');
 
-        // Clear existing content
         coursesGrid.innerHTML = '';
         coursesList.innerHTML = '';
 
-        // Add courses to both sections
         courses.forEach(course => {
             const courseCard = createCourseCard(course);
             coursesGrid.appendChild(courseCard.cloneNode(true));
@@ -1511,7 +1616,6 @@
         });
     }
 
-    // Create a course card element
     function createCourseCard(course) {
         const courseCard = document.createElement('div');
         courseCard.className = 'course-card';
@@ -1541,7 +1645,6 @@
             </div>
         `;
 
-        // Add event listeners to buttons
         const manageButton = courseCard.querySelector('.btn-primary');
         manageButton.addEventListener('click', function() {
             alert(`Managing course: ${course.title}`);
@@ -1550,16 +1653,13 @@
         return courseCard;
     }
 
-    // Load assignments into the interface
     function loadAssignments() {
         const assignmentsList = document.getElementById('assignmentsList');
         const assignmentsSectionList = document.getElementById('assignmentsSectionList');
 
-        // Clear existing content
         assignmentsList.innerHTML = '';
         assignmentsSectionList.innerHTML = '';
 
-        // Add assignments to both sections
         assignments.forEach(assignment => {
             const assignmentItem = createAssignmentItem(assignment);
             assignmentsList.appendChild(assignmentItem.cloneNode(true));
@@ -1567,7 +1667,6 @@
         });
     }
 
-    // Create an assignment item element
     function createAssignmentItem(assignment) {
         const assignmentItem = document.createElement('div');
         assignmentItem.className = 'assignment-item';
@@ -1582,7 +1681,6 @@
             </div>
         `;
 
-        // Add event listener to grade button
         const gradeButton = assignmentItem.querySelector('.btn-success');
         gradeButton.addEventListener('click', function() {
             alert(`Opening grading interface for: ${assignment.title}`);
@@ -1591,16 +1689,13 @@
         return assignmentItem;
     }
 
-    // Load students into the interface
     function loadStudents() {
         const studentsGrid = document.getElementById('studentsGrid');
         const studentsSectionGrid = document.getElementById('studentsSectionGrid');
 
-        // Clear existing content
         studentsGrid.innerHTML = '';
         studentsSectionGrid.innerHTML = '';
 
-        // Add students to both sections
         students.forEach(student => {
             const studentCard = createStudentCard(student);
             studentsGrid.appendChild(studentCard.cloneNode(true));
@@ -1608,7 +1703,6 @@
         });
     }
 
-    // Create a student card element
     function createStudentCard(student) {
         const studentCard = document.createElement('div');
         studentCard.className = 'student-card';
@@ -1622,7 +1716,6 @@
         return studentCard;
     }
 
-    // Load analytics data
     function loadAnalytics() {
         document.getElementById('avgGrade').textContent = loggedInUser.avgGrade;
         document.getElementById('completionRate').textContent = loggedInUser.completionRate;
@@ -1630,7 +1723,6 @@
         document.getElementById('materialViews').textContent = loggedInUser.materialViews.toLocaleString();
     }
 
-    // Load schedule data
     function loadSchedule() {
         const scheduleContent = document.getElementById('scheduleContent');
         scheduleContent.innerHTML = `
@@ -1642,16 +1734,13 @@
         `;
     }
 
-    // Populate course dropdowns in modals
     function populateCourseDropdowns() {
         const materialCourse = document.getElementById('materialCourse');
         const assignmentCourse = document.getElementById('assignmentCourse');
 
-        // Clear existing options
         materialCourse.innerHTML = '<option value="">Select a course</option>';
         assignmentCourse.innerHTML = '<option value="">Select a course</option>';
 
-        // Add courses to dropdowns
         courses.forEach(course => {
             const option1 = document.createElement('option');
             option1.value = course.id;
@@ -1665,54 +1754,6 @@
         });
     }
 
-    // Add a new course
-    function addNewCourse() {
-        const title = document.getElementById('courseTitle').value;
-        const code = document.getElementById('courseCode').value;
-        const description = document.getElementById('courseDescription').value;
-        const department = document.getElementById('courseDepartment').value;
-        const credits = document.getElementById('courseCredits').value;
-        const semester = document.getElementById('courseSemester').value;
-        const capacity = document.getElementById('courseCapacity').value;
-        const schedule = document.getElementById('courseSchedule').value;
-        const location = document.getElementById('courseLocation').value;
-        const prerequisites = document.getElementById('coursePrerequisites').value;
-
-        // Generate a random color for the course
-        const colors = ['#4361ee', '#3a0ca3', '#4cc9f0', '#7209b7', '#f72585', '#560bad'];
-        const randomColor = colors[Math.floor(Math.random() * colors.length)];
-
-        // Create new course object
-        const newCourse = {
-            id: courses.length + 1,
-            title: title,
-            code: code,
-            semester: semester,
-            students: 0,
-            assignments: 0,
-            materials: 0,
-            color: randomColor
-        };
-
-        // Add to courses array
-        courses.push(newCourse);
-
-        // Update the UI
-        loadCourses();
-
-        // Update user data
-        loggedInUser.coursesTeaching = courses.length;
-        document.getElementById('coursesCount').textContent = loggedInUser.coursesTeaching;
-        document.getElementById('infoCoursesCount').textContent = loggedInUser.coursesTeaching;
-
-        // Reset form
-        document.getElementById('addCourseForm').reset();
-
-        // Show success message
-        alert(`Course "${title}" has been created successfully!`);
-    }
-
-    // Helper function to format role for display
     function formatRole(role) {
         if (role === 'TEACHER') return 'Professor';
         if (role === 'STUDENT') return 'Student';

@@ -2,13 +2,16 @@ package com.online_e_learning.virtualPathshala.controller;
 
 import com.online_e_learning.virtualPathshala.requestDto.SignupRequest;
 import com.online_e_learning.virtualPathshala.requestDto.LoginRequest;
+import com.online_e_learning.virtualPathshala.model.User;
+import com.online_e_learning.virtualPathshala.repository.UserRepository;
 import com.online_e_learning.virtualPathshala.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api")
@@ -16,6 +19,9 @@ public class AuthController {
 
     @Autowired
     private AuthService authService;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @PostMapping("/signup")
     public ResponseEntity<?> signup(@RequestBody SignupRequest signupRequest) {
@@ -50,6 +56,34 @@ public class AuthController {
             return authService.login(loginRequest);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Login failed: " + e.getMessage());
+        }
+    }
+
+    // ✅ SIRF YEH EK METHOD ADD KARO - Teacher dashboard ke liye
+    @GetMapping("/teacher/profile")
+    public ResponseEntity<?> getTeacherProfile(@RequestParam String email) {
+        try {
+            Optional<User> teacher = userRepository.findByEmail(email);
+
+            if (teacher.isPresent() && "TEACHER".equals(teacher.get().getRole())) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", true);
+
+                // Simple response - sirf necessary fields
+                Map<String, Object> teacherData = new HashMap<>();
+                teacherData.put("id", teacher.get().getId());
+                teacherData.put("name", teacher.get().getName());
+                teacherData.put("email", teacher.get().getEmail());
+                teacherData.put("role", teacher.get().getRole());
+
+                response.put("data", teacherData);
+                return ResponseEntity.ok(response);
+            }
+
+            return ResponseEntity.status(404).body("Teacher not found");
+
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Error: " + e.getMessage());
         }
     }
 }

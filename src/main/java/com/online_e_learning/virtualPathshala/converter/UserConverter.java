@@ -63,7 +63,7 @@ public class UserConverter {
         responseDto.setEmail(user.getEmail());
         responseDto.setMobile(user.getMobile());  // ADD THIS
         responseDto.setRole(user.getRole());
-        responseDto.setStatus(user.getStatus());
+        //responseDto.setStatus(user.getStatus());
         // Password is not returned in response for security
         return responseDto;
     }
