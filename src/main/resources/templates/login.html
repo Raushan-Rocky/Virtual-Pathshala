@@ -6,7 +6,7 @@
   <title>Login | Virtual Pathshala</title>
   <link rel="stylesheet" th:href="@{/css/login.css}">
   <link rel="icon" type="image/x-icon" th:href="@{/image/favicon.ico}">
-
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;700&display=swap" rel="stylesheet">
   <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -317,130 +317,75 @@
 </footer>
 
 <script>
-  document.getElementById("year").textContent = new Date().getFullYear();
+  // ===== Login Form Submission =====
+const loginForm = document.getElementById('loginForm');
 
-  document.addEventListener('DOMContentLoaded', () => {
-    // ===== Role Selection =====
-    const roleOptions = document.querySelectorAll('.role-option');
+loginForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
 
-    roleOptions.forEach(option => {
-      option.addEventListener('click', () => {
-        roleOptions.forEach(opt => opt.classList.remove('selected'));
-        option.classList.add('selected');
-        const radioInput = option.querySelector('input[type="radio"]');
-        radioInput.checked = true;
-      });
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+
+  if (!email || !password) {
+    alert('Please fill in all fields');
+    return;
+  }
+
+  const loginBtn = loginForm.querySelector('.login-btn');
+  const originalText = loginBtn.textContent;
+  loginBtn.textContent = 'Signing In...';
+  loginBtn.disabled = true;
+
+  try {
+    const response = await fetch('/api/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email, password })
     });
 
-    // Set default selection
-    document.querySelector('.role-option[data-role="student"]').classList.add('selected');
+    console.log('Response status:', response.status);
 
-    // ===== Password Toggle Visibility =====
-    const togglePassword = document.getElementById('togglePassword');
-    const passwordInput = document.getElementById('password');
+    const data = await response.json();
+    console.log('Login response:', data);
 
-    togglePassword.addEventListener('click', () => {
-      const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-      passwordInput.setAttribute('type', type);
-      togglePassword.classList.toggle('bx-hide');
-      togglePassword.classList.toggle('bx-show');
-    });
+    if (data.success) {
+      // Store user in localStorage
+      if (data.data) {
+        localStorage.setItem('user', JSON.stringify(data.data));
+        console.log('User data stored successfully');
 
-    // ===== Forgot Password Modal =====
-    const modal = document.getElementById('forgotModal');
-    const forgotLink = document.getElementById('forgotPasswordLink');
-    const closeBtn = document.querySelector('.close-btn');
+        // Redirect based on ACTUAL user role from backend
+        const userRole = data.data.role.toLowerCase();
+        let redirectPath = '/student'; // Default
 
-    forgotLink.addEventListener('click', (e) => {
-      e.preventDefault();
-      modal.style.display = 'flex';
-    });
-
-    closeBtn.addEventListener('click', () => {
-      modal.style.display = 'none';
-    });
-
-    window.addEventListener('click', (e) => {
-      if (e.target === modal) {
-        modal.style.display = 'none';
-      }
-    });
-
-    // ===== Login Form Submission =====
-    const loginForm = document.getElementById('loginForm');
-
-    loginForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-
-      const email = document.getElementById('email').value.trim();
-      const password = document.getElementById('password').value;
-      const selectedRole = document.querySelector('input[name="role"]:checked').value;
-
-      if (!email || !password) {
-        alert('Please fill in all fields');
-        return;
-      }
-
-      const loginBtn = loginForm.querySelector('.login-btn');
-      const originalText = loginBtn.textContent;
-      loginBtn.textContent = 'Signing In...';
-      loginBtn.disabled = true;
-
-      try {
-        const response = await fetch('/api/login', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ email, password })
-        });
-
-        console.log('Response status:', response.status);
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+        switch(userRole) {
+          case 'admin':
+            redirectPath = '/admin';
+            break;
+          case 'teacher':
+            redirectPath = '/teacher';
+            break;
+          case 'student':
+          default:
+            redirectPath = '/student';
         }
 
-        const data = await response.json();
-        console.log('Login response:', data);
-
-        if (data.success) {
-          // Store user in localStorage (using data.data as in first code)
-          if (data.data) {
-            localStorage.setItem('user', JSON.stringify(data.data));
-            console.log('User data stored successfully');
-          }
-
-          // Redirect based on selected role (not backend role)
-          let redirectPath = '/student'; // Default
-
-          switch(selectedRole) {
-            case 'admin':
-              redirectPath = '/admin';
-              break;
-            case 'teacher':
-              redirectPath = '/teacher';
-              break;
-            case 'student':
-            default:
-              redirectPath = '/student';
-          }
-
-          console.log(`✅ Login successful! Redirecting to ${selectedRole} page...`);
-          window.location.href = redirectPath;
-
-        } else {
-          alert(data.message || 'Login failed');
-        }
-      } catch (error) {
-        console.error('Login error:', error);
-        alert('Login failed. Please try again. Error: ' + error.message);
-      } finally {
-        loginBtn.textContent = originalText;
-        loginBtn.disabled = false;
+        console.log(`✅ Login successful! Redirecting to ${userRole} dashboard...`);
+        window.location.href = redirectPath;
       }
-    });
-  });
+    } else {
+      alert(data.error || 'Login failed');
+    }
+  } catch (error) {
+    console.error('Login error:', error);
+    alert('Login failed. Please try again. Error: ' + error.message);
+  } finally {
+    loginBtn.textContent = originalText;
+    loginBtn.disabled = false;
+  }
+});
 </script>
 
 </body>

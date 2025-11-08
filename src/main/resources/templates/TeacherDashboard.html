@@ -45,6 +45,10 @@
             color: white;
             padding: 20px 0;
             transition: all 0.3s;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 100;
         }
 
         .logo {
@@ -101,6 +105,8 @@
             flex: 1;
             padding: 20px;
             overflow-y: auto;
+            margin-left: 260px;
+            transition: margin-left 0.3s;
         }
 
         .header {
@@ -122,6 +128,7 @@
             display: flex;
             align-items: center;
             gap: 15px;
+            position: relative;
         }
 
         .user-info img {
@@ -130,6 +137,7 @@
             border-radius: 50%;
             object-fit: cover;
             border: 2px solid var(--primary);
+            cursor: pointer;
         }
 
         .user-details h4 {
@@ -139,6 +147,41 @@
         .user-details p {
             font-size: 14px;
             color: var(--gray);
+        }
+
+        /* Dropdown menu */
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            width: 200px;
+            padding: 10px 0;
+            z-index: 1000;
+            display: none;
+        }
+
+        .dropdown-menu.active {
+            display: block;
+        }
+
+        .dropdown-item {
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .dropdown-item:hover {
+            background: var(--light-gray);
+        }
+
+        .dropdown-item i {
+            margin-right: 10px;
+            color: var(--primary);
         }
 
         /* Dashboard Cards */
@@ -609,20 +652,46 @@
             margin-bottom: 10px;
         }
 
+        /* Section Styles */
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        /* Mobile Menu Toggle */
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--dark);
+            cursor: pointer;
+            margin-right: 15px;
+        }
+
         /* Responsive Design */
         @media (max-width: 992px) {
-            .container {
-                flex-direction: column;
-            }
-
             .sidebar {
                 width: 100%;
-                padding: 15px;
+                height: auto;
+                position: relative;
+                transform: translateX(-100%);
+                transition: transform 0.3s;
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
             }
 
             .nav-links {
-                display: flex;
-                overflow-x: auto;
+                display: block;
                 margin-top: 20px;
             }
 
@@ -635,6 +704,10 @@
             .nav-links li.active {
                 border-left: none;
                 border-bottom: 4px solid var(--accent);
+            }
+
+            .menu-toggle {
+                display: block;
             }
         }
 
@@ -672,20 +745,21 @@
 <body>
 <div class="container">
     <!-- Sidebar -->
-    <div class="sidebar">
+    <div class="sidebar" id="sidebar">
         <div class="logo">
             <i class="fas fa-chalkboard-teacher"></i>
             <h1>EduPortal Teacher</h1>
         </div>
         <ul class="nav-links">
-            <li class="active"><i class="fas fa-home"></i> <span>Dashboard</span></li>
-            <li><i class="fas fa-book"></i> <span>My Courses</span></li>
-            <li><i class="fas fa-tasks"></i> <span>Assignments</span></li>
-            <li><i class="fas fa-upload"></i> <span>Upload Materials</span></li>
-            <li><i class="fas fa-users"></i> <span>Students</span></li>
-            <li><i class="fas fa-chart-line"></i> <span>Analytics</span></li>
-            <li><i class="fas fa-calendar-alt"></i> <span>Schedule</span></li>
-            <li><i class="fas fa-cog"></i> <span>Settings</span></li>
+            <li class="active" data-section="dashboard"><i class="fas fa-home"></i> <span>Dashboard</span></li>
+            <li data-section="courses"><i class="fas fa-book"></i> <span>My Courses</span></li>
+            <li data-section="add-course"><i class="fas fa-plus-circle"></i> <span>Add Course</span></li>
+            <li data-section="assignments"><i class="fas fa-tasks"></i> <span>Assignments</span></li>
+            <li data-section="upload"><i class="fas fa-upload"></i> <span>Upload Materials</span></li>
+            <li data-section="students"><i class="fas fa-users"></i> <span>Students</span></li>
+            <li data-section="analytics"><i class="fas fa-chart-line"></i> <span>Analytics</span></li>
+            <li data-section="schedule"><i class="fas fa-calendar-alt"></i> <span>Schedule</span></li>
+            <li data-section="settings"><i class="fas fa-cog"></i> <span>Settings</span></li>
         </ul>
     </div>
 
@@ -693,274 +767,369 @@
     <div class="main-content">
         <!-- Header -->
         <div class="header">
+            <button class="menu-toggle" id="menuToggle">
+                <i class="fas fa-bars"></i>
+            </button>
             <h2>Teacher Dashboard</h2>
             <div class="user-info">
                 <div class="user-details">
-                    <h4 id="userName">Dr. Sarah Williams</h4>
-                    <p id="userRole">Professor</p>
+                    <h4 id="userName">Loading...</h4>
+                    <p id="userRole">Loading...</p>
                 </div>
-                <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="User Profile">
-            </div>
-        </div>
+                <img id="userProfile" src="" alt="User Profile">
 
-        <!-- Profile Section -->
-        <div class="profile-section">
-            <div class="profile-header">
-                <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Profile" class="profile-avatar">
-                <div class="profile-details">
-                    <h3 id="profileName">Dr. Sarah Williams</h3>
-                    <p id="profileEmail">sarah.williams@university.edu</p>
-                    <p id="profileRole">Professor - Computer Science</p>
-                    <span class="status-badge status-active" id="profileStatus">ACTIVE</span>
-                </div>
-            </div>
-            <div class="profile-info-grid">
-                <div class="info-item">
-                    <div class="info-label">Full Name</div>
-                    <div class="info-value" id="infoName">Dr. Sarah Williams</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Email Address</div>
-                    <div class="info-value" id="infoEmail">sarah.williams@university.edu</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">User Role</div>
-                    <div class="info-value" id="infoRole">TEACHER</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Account Status</div>
-                    <div class="info-value" id="infoStatus">ACTIVE</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Department</div>
-                    <div class="info-value">Computer Science</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Courses Teaching</div>
-                    <div class="info-value">4</div>
+                <!-- Dropdown Menu -->
+                <div class="dropdown-menu" id="dropdownMenu">
+                    <div class="dropdown-item" id="logoutBtn">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Logout</span>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Dashboard Cards -->
-        <div class="dashboard-cards">
-            <div class="card">
-                <div class="card-header">
-                    <h3>My Courses</h3>
-                    <i class="fas fa-book"></i>
+        <!-- Dashboard Section -->
+        <div id="dashboard" class="section active">
+            <!-- Profile Section -->
+            <div class="profile-section">
+                <div class="profile-header">
+                    <img id="profileAvatar" src="" alt="Profile" class="profile-avatar">
+                    <div class="profile-details">
+                        <h3 id="profileName">Loading...</h3>
+                        <p id="profileEmail">Loading...</p>
+                        <p id="profileRole">Loading...</p>
+                        <span class="status-badge status-active" id="profileStatus">ACTIVE</span>
+                    </div>
                 </div>
-                <div class="card-content">
-                    <h2>4</h2>
-                    <p>This semester</p>
+                <div class="profile-info-grid">
+                    <div class="info-item">
+                        <div class="info-label">Full Name</div>
+                        <div class="info-value" id="infoName">Loading...</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Email Address</div>
+                        <div class="info-value" id="infoEmail">Loading...</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">User Role</div>
+                        <div class="info-value" id="infoRole">Loading...</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Account Status</div>
+                        <div class="info-value" id="infoStatus">Loading...</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Department</div>
+                        <div class="info-value" id="infoDepartment">Loading...</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Courses Teaching</div>
+                        <div class="info-value" id="infoCoursesCount">Loading...</div>
+                    </div>
                 </div>
             </div>
-            <div class="card">
-                <div class="card-header">
-                    <h3>Students</h3>
-                    <i class="fas fa-users"></i>
+
+            <!-- Dashboard Cards -->
+            <div class="dashboard-cards">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>My Courses</h3>
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <div class="card-content">
+                        <h2 id="coursesCount">0</h2>
+                        <p>This semester</p>
+                    </div>
                 </div>
-                <div class="card-content">
-                    <h2>142</h2>
-                    <p>Total enrolled</p>
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Students</h3>
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="card-content">
+                        <h2 id="studentsCount">0</h2>
+                        <p>Total enrolled</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Assignments</h3>
+                        <i class="fas fa-tasks"></i>
+                    </div>
+                    <div class="card-content">
+                        <h2 id="assignmentsCount">0</h2>
+                        <p>To be graded</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Materials</h3>
+                        <i class="fas fa-file-upload"></i>
+                    </div>
+                    <div class="card-content">
+                        <h2 id="materialsCount">0</h2>
+                        <p>Uploaded this month</p>
+                    </div>
                 </div>
             </div>
-            <div class="card">
-                <div class="card-header">
-                    <h3>Assignments</h3>
-                    <i class="fas fa-tasks"></i>
-                </div>
-                <div class="card-content">
-                    <h2>12</h2>
-                    <p>To be graded</p>
+
+            <!-- Upload Section -->
+            <div class="section-title">
+                <h3>Upload Materials</h3>
+                <button class="btn btn-primary" id="uploadHistoryBtn">View Upload History</button>
+            </div>
+            <div class="upload-section">
+                <div class="upload-options">
+                    <div class="upload-card" id="uploadStudyMaterial">
+                        <div class="upload-icon">
+                            <i class="fas fa-book"></i>
+                        </div>
+                        <h4>Study Materials</h4>
+                        <p>Upload lecture notes, presentations, reading materials</p>
+                        <button class="btn btn-primary">Upload Now</button>
+                    </div>
+                    <div class="upload-card" id="uploadAssignment">
+                        <div class="upload-icon">
+                            <i class="fas fa-tasks"></i>
+                        </div>
+                        <h4>Assignments</h4>
+                        <p>Create and upload new assignments for your students</p>
+                        <button class="btn btn-primary">Create Assignment</button>
+                    </div>
+                    <div class="upload-card" id="uploadVideo">
+                        <div class="upload-icon">
+                            <i class="fas fa-video"></i>
+                        </div>
+                        <h4>Video Lectures</h4>
+                        <p>Upload recorded lectures or tutorial videos</p>
+                        <button class="btn btn-primary">Upload Video</button>
+                    </div>
                 </div>
             </div>
+
+            <!-- My Courses -->
+            <h3 class="section-title">My Courses</h3>
+            <div id="coursesGrid" class="courses-grid">
+                <!-- Courses will be dynamically added here -->
+            </div>
+
+            <!-- Recent Assignments -->
+            <h3 class="section-title">Recent Assignments</h3>
+            <div id="assignmentsList" class="assignments-list">
+                <!-- Assignments will be dynamically added here -->
+            </div>
+
+            <!-- Top Students -->
+            <h3 class="section-title">Top Students</h3>
+            <div id="studentsGrid" class="students-grid">
+                <!-- Students will be dynamically added here -->
+            </div>
+        </div>
+
+        <!-- My Courses Section -->
+        <div id="courses" class="section">
+            <h3 class="section-title">My Courses</h3>
+            <div id="coursesList" class="courses-grid">
+                <!-- Courses will be dynamically added here -->
+            </div>
+        </div>
+
+        <!-- Add Course Section -->
+        <div id="add-course" class="section">
+            <h3 class="section-title">Add New Course</h3>
             <div class="card">
-                <div class="card-header">
-                    <h3>Materials</h3>
-                    <i class="fas fa-file-upload"></i>
-                </div>
                 <div class="card-content">
-                    <h2>28</h2>
-                    <p>Uploaded this month</p>
+                    <form id="addCourseForm">
+                        <div class="form-group">
+                            <label for="courseTitle">Course Title</label>
+                            <input type="text" id="courseTitle" class="form-control" placeholder="Enter course title" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="courseCode">Course Code</label>
+                            <input type="text" id="courseCode" class="form-control" placeholder="e.g., CS-301" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="courseDescription">Course Description</label>
+                            <textarea id="courseDescription" class="form-control" rows="4" placeholder="Enter course description" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="courseDepartment">Department</label>
+                            <input type="text" id="courseDepartment" class="form-control" placeholder="e.g., Computer Science" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="courseCredits">Credits</label>
+                            <input type="number" id="courseCredits" class="form-control" placeholder="e.g., 3" min="1" max="6" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="courseSemester">Semester</label>
+                            <select id="courseSemester" class="form-control" required>
+                                <option value="">Select Semester</option>
+                                <option value="Fall 2023">Fall 2023</option>
+                                <option value="Spring 2024">Spring 2024</option>
+                                <option value="Summer 2024">Summer 2024</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="courseCapacity">Student Capacity</label>
+                            <input type="number" id="courseCapacity" class="form-control" placeholder="e.g., 40" min="1" max="200" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="courseSchedule">Schedule</label>
+                            <input type="text" id="courseSchedule" class="form-control" placeholder="e.g., Mon/Wed 9:00-10:30 AM" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="courseLocation">Location</label>
+                            <input type="text" id="courseLocation" class="form-control" placeholder="e.g., Room 301, Science Building" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="coursePrerequisites">Prerequisites</label>
+                            <input type="text" id="coursePrerequisites" class="form-control" placeholder="e.g., CS-201, MATH-101">
+                        </div>
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary" style="width: 100%;">Create Course</button>
+                        </div>
+                    </form>
                 </div>
+            </div>
+        </div>
+
+        <!-- Assignments Section -->
+        <div id="assignments" class="section">
+            <h3 class="section-title">Assignments</h3>
+            <div id="assignmentsSectionList" class="assignments-list">
+                <!-- Assignments will be dynamically added here -->
             </div>
         </div>
 
         <!-- Upload Section -->
-        <div class="section-title">
-            <h3>Upload Materials</h3>
-            <button class="btn btn-primary" id="uploadHistoryBtn">View Upload History</button>
-        </div>
-        <div class="upload-section">
-            <div class="upload-options">
-                <div class="upload-card" id="uploadStudyMaterial">
-                    <div class="upload-icon">
-                        <i class="fas fa-book"></i>
+        <div id="upload" class="section">
+            <h3 class="section-title">Upload Materials</h3>
+            <div class="upload-section">
+                <div class="upload-options">
+                    <div class="upload-card" id="uploadStudyMaterial2">
+                        <div class="upload-icon">
+                            <i class="fas fa-book"></i>
+                        </div>
+                        <h4>Study Materials</h4>
+                        <p>Upload lecture notes, presentations, reading materials</p>
+                        <button class="btn btn-primary">Upload Now</button>
                     </div>
-                    <h4>Study Materials</h4>
-                    <p>Upload lecture notes, presentations, reading materials</p>
-                    <button class="btn btn-primary">Upload Now</button>
+                    <div class="upload-card" id="uploadAssignment2">
+                        <div class="upload-icon">
+                            <i class="fas fa-tasks"></i>
+                        </div>
+                        <h4>Assignments</h4>
+                        <p>Create and upload new assignments for your students</p>
+                        <button class="btn btn-primary">Create Assignment</button>
+                    </div>
+                    <div class="upload-card" id="uploadVideo2">
+                        <div class="upload-icon">
+                            <i class="fas fa-video"></i>
+                        </div>
+                        <h4>Video Lectures</h4>
+                        <p>Upload recorded lectures or tutorial videos</p>
+                        <button class="btn btn-primary">Upload Video</button>
+                    </div>
                 </div>
-                <div class="upload-card" id="uploadAssignment">
-                    <div class="upload-icon">
+            </div>
+        </div>
+
+        <!-- Students Section -->
+        <div id="students" class="section">
+            <h3 class="section-title">Students</h3>
+            <div id="studentsSectionGrid" class="students-grid">
+                <!-- Students will be dynamically added here -->
+            </div>
+        </div>
+
+        <!-- Analytics Section -->
+        <div id="analytics" class="section">
+            <h3 class="section-title">Analytics</h3>
+            <div class="dashboard-cards">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Student Performance</h3>
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="card-content">
+                        <h2 id="avgGrade">0%</h2>
+                        <p>Average grade</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Assignment Completion</h3>
                         <i class="fas fa-tasks"></i>
                     </div>
-                    <h4>Assignments</h4>
-                    <p>Create and upload new assignments for your students</p>
-                    <button class="btn btn-primary">Create Assignment</button>
-                </div>
-                <div class="upload-card" id="uploadVideo">
-                    <div class="upload-icon">
-                        <i class="fas fa-video"></i>
-                    </div>
-                    <h4>Video Lectures</h4>
-                    <p>Upload recorded lectures or tutorial videos</p>
-                    <button class="btn btn-primary">Upload Video</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- My Courses -->
-        <h3 class="section-title">My Courses</h3>
-        <div class="courses-grid">
-            <div class="course-card">
-                <div class="course-image" style="background-color: #4361ee;"></div>
-                <div class="course-content">
-                    <h3 class="course-title">Database Management Systems</h3>
-                    <p class="course-info">CS-301 | Fall 2023</p>
-                    <div class="course-stats">
-                        <div class="stat">
-                            <div class="stat-value">42</div>
-                            <div class="stat-label">Students</div>
-                        </div>
-                        <div class="stat">
-                            <div class="stat-value">5</div>
-                            <div class="stat-label">Assignments</div>
-                        </div>
-                        <div class="stat">
-                            <div class="stat-value">12</div>
-                            <div class="stat-label">Materials</div>
-                        </div>
-                    </div>
-                    <div class="course-actions">
-                        <button class="btn btn-outline">View Details</button>
-                        <button class="btn btn-primary">Manage</button>
+                    <div class="card-content">
+                        <h2 id="completionRate">0%</h2>
+                        <p>On-time submissions</p>
                     </div>
                 </div>
-            </div>
-            <div class="course-card">
-                <div class="course-image" style="background-color: #3a0ca3;"></div>
-                <div class="course-content">
-                    <h3 class="course-title">Advanced Algorithms</h3>
-                    <p class="course-info">CS-405 | Fall 2023</p>
-                    <div class="course-stats">
-                        <div class="stat">
-                            <div class="stat-value">36</div>
-                            <div class="stat-label">Students</div>
-                        </div>
-                        <div class="stat">
-                            <div class="stat-value">3</div>
-                            <div class="stat-label">Assignments</div>
-                        </div>
-                        <div class="stat">
-                            <div class="stat-value">8</div>
-                            <div class="stat-label">Materials</div>
-                        </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Course Engagement</h3>
+                        <i class="fas fa-users"></i>
                     </div>
-                    <div class="course-actions">
-                        <button class="btn btn-outline">View Details</button>
-                        <button class="btn btn-primary">Manage</button>
+                    <div class="card-content">
+                        <h2 id="engagementRate">0%</h2>
+                        <p>Active participation</p>
                     </div>
                 </div>
-            </div>
-            <div class="course-card">
-                <div class="course-image" style="background-color: #4cc9f0;"></div>
-                <div class="course-content">
-                    <h3 class="course-title">Web Technologies</h3>
-                    <p class="course-info">CS-350 | Fall 2023</p>
-                    <div class="course-stats">
-                        <div class="stat">
-                            <div class="stat-value">48</div>
-                            <div class="stat-label">Students</div>
-                        </div>
-                        <div class="stat">
-                            <div class="stat-value">4</div>
-                            <div class="stat-label">Assignments</div>
-                        </div>
-                        <div class="stat">
-                            <div class="stat-value">15</div>
-                            <div class="stat-label">Materials</div>
-                        </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Material Views</h3>
+                        <i class="fas fa-eye"></i>
                     </div>
-                    <div class="course-actions">
-                        <button class="btn btn-outline">View Details</button>
-                        <button class="btn btn-primary">Manage</button>
+                    <div class="card-content">
+                        <h2 id="materialViews">0</h2>
+                        <p>This month</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Recent Assignments -->
-        <h3 class="section-title">Recent Assignments</h3>
-        <div class="assignments-list">
-            <div class="assignment-item">
-                <div class="assignment-info">
-                    <h4>SQL Query Optimization</h4>
-                    <p>Database Management Systems | Due: Oct 15, 2023</p>
+        <!-- Schedule Section -->
+        <div id="schedule" class="section">
+            <h3 class="section-title">Schedule</h3>
+            <div class="card">
+                <div class="card-header">
+                    <h3>Upcoming Classes</h3>
+                    <i class="fas fa-calendar-alt"></i>
                 </div>
-                <div class="assignment-due">
-                    <span class="due-date">12/42 Submitted</span>
-                    <button class="btn btn-success">Grade</button>
-                </div>
-            </div>
-            <div class="assignment-item">
-                <div class="assignment-info">
-                    <h4>Graph Algorithm Implementation</h4>
-                    <p>Advanced Algorithms | Due: Oct 18, 2023</p>
-                </div>
-                <div class="assignment-due">
-                    <span class="due-date">8/36 Submitted</span>
-                    <button class="btn btn-success">Grade</button>
-                </div>
-            </div>
-            <div class="assignment-item">
-                <div class="assignment-info">
-                    <h4>Responsive Web Design Project</h4>
-                    <p>Web Technologies | Due: Oct 20, 2023</p>
-                </div>
-                <div class="assignment-due">
-                    <span class="due-date">15/48 Submitted</span>
-                    <button class="btn btn-success">Grade</button>
+                <div id="scheduleContent" class="card-content">
+                    <!-- Schedule will be dynamically added here -->
                 </div>
             </div>
         </div>
 
-        <!-- Top Students -->
-        <h3 class="section-title">Top Students</h3>
-        <div class="students-grid">
-            <div class="student-card">
-                <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Student" class="student-avatar">
-                <h4 class="student-name">Alex Johnson</h4>
-                <p class="student-course">Database Management</p>
-                <div class="student-grade">Grade: 96%</div>
-            </div>
-            <div class="student-card">
-                <img src="https://randomuser.me/api/portraits/women/33.jpg" alt="Student" class="student-avatar">
-                <h4 class="student-name">Maria Garcia</h4>
-                <p class="student-course">Advanced Algorithms</p>
-                <div class="student-grade">Grade: 94%</div>
-            </div>
-            <div class="student-card">
-                <img src="https://randomuser.me/api/portraits/men/22.jpg" alt="Student" class="student-avatar">
-                <h4 class="student-name">James Wilson</h4>
-                <p class="student-course">Web Technologies</p>
-                <div class="student-grade">Grade: 92%</div>
-            </div>
-            <div class="student-card">
-                <img src="https://randomuser.me/api/portraits/women/45.jpg" alt="Student" class="student-avatar">
-                <h4 class="student-name">Sophie Brown</h4>
-                <p class="student-course">Database Management</p>
-                <div class="student-grade">Grade: 91%</div>
+        <!-- Settings Section -->
+        <div id="settings" class="section">
+            <h3 class="section-title">Settings</h3>
+            <div class="card">
+                <div class="card-header">
+                    <h3>Account Settings</h3>
+                    <i class="fas fa-user-cog"></i>
+                </div>
+                <div class="card-content">
+                    <div class="form-group">
+                        <label for="notificationSettings">Email Notifications</label>
+                        <select id="notificationSettings" class="form-control">
+                            <option>All notifications</option>
+                            <option>Important only</option>
+                            <option>None</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="themeSettings">Theme</label>
+                        <select id="themeSettings" class="form-control">
+                            <option>Light</option>
+                            <option>Dark</option>
+                            <option>Auto</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary">Save Settings</button>
+                </div>
             </div>
         </div>
     </div>
@@ -982,9 +1151,6 @@
                 <label for="materialCourse">Select Course</label>
                 <select id="materialCourse" class="form-control" required>
                     <option value="">Select a course</option>
-                    <option value="CS-301">Database Management Systems</option>
-                    <option value="CS-405">Advanced Algorithms</option>
-                    <option value="CS-350">Web Technologies</option>
                 </select>
             </div>
             <div class="form-group">
@@ -1022,9 +1188,6 @@
                 <label for="assignmentCourse">Select Course</label>
                 <select id="assignmentCourse" class="form-control" required>
                     <option value="">Select a course</option>
-                    <option value="CS-301">Database Management Systems</option>
-                    <option value="CS-405">Advanced Algorithms</option>
-                    <option value="CS-350">Web Technologies</option>
                 </select>
             </div>
             <div class="form-group">
@@ -1055,48 +1218,206 @@
 </div>
 
 <script>
-    // Teacher data based on UserRequestDto
-    const teacherData = {
+    // Simulated user data - in a real app, this would come from your backend
+    const loggedInUser = {
+        id: 1,
         name: "Dr. Sarah Williams",
         email: "sarah.williams@university.edu",
-        password: "********", // In a real app, password would be hidden
         role: "TEACHER",
-        status: "ACTIVE"
+        status: "ACTIVE",
+        department: "Computer Science",
+        avatar: "https://randomuser.me/api/portraits/women/44.jpg",
+        coursesTeaching: 4,
+        totalStudents: 142,
+        assignmentsToGrade: 12,
+        materialsUploaded: 28,
+        avgGrade: "87%",
+        completionRate: "92%",
+        engagementRate: "78%",
+        materialViews: 1245
     };
+
+    // Simulated data for courses, assignments, and students
+    let courses = [
+        {
+            id: 1,
+            title: "Database Management Systems",
+            code: "CS-301",
+            semester: "Fall 2023",
+            students: 42,
+            assignments: 5,
+            materials: 12,
+            color: "#4361ee"
+        },
+        {
+            id: 2,
+            title: "Advanced Algorithms",
+            code: "CS-405",
+            semester: "Fall 2023",
+            students: 36,
+            assignments: 3,
+            materials: 8,
+            color: "#3a0ca3"
+        },
+        {
+            id: 3,
+            title: "Web Technologies",
+            code: "CS-350",
+            semester: "Fall 2023",
+            students: 48,
+            assignments: 4,
+            materials: 15,
+            color: "#4cc9f0"
+        }
+    ];
+
+    let assignments = [
+        {
+            id: 1,
+            title: "SQL Query Optimization",
+            course: "Database Management Systems",
+            dueDate: "Oct 15, 2023",
+            submitted: 12,
+            total: 42
+        },
+        {
+            id: 2,
+            title: "Graph Algorithm Implementation",
+            course: "Advanced Algorithms",
+            dueDate: "Oct 18, 2023",
+            submitted: 8,
+            total: 36
+        },
+        {
+            id: 3,
+            title: "Responsive Web Design Project",
+            course: "Web Technologies",
+            dueDate: "Oct 20, 2023",
+            submitted: 15,
+            total: 48
+        }
+    ];
+
+    let students = [
+        {
+            id: 1,
+            name: "Alex Johnson",
+            course: "Database Management",
+            grade: "96%",
+            avatar: "https://randomuser.me/api/portraits/men/32.jpg"
+        },
+        {
+            id: 2,
+            name: "Maria Garcia",
+            course: "Advanced Algorithms",
+            grade: "94%",
+            avatar: "https://randomuser.me/api/portraits/women/33.jpg"
+        },
+        {
+            id: 3,
+            name: "James Wilson",
+            course: "Web Technologies",
+            grade: "92%",
+            avatar: "https://randomuser.me/api/portraits/men/22.jpg"
+        },
+        {
+            id: 4,
+            name: "Sophie Brown",
+            course: "Database Management",
+            grade: "91%",
+            avatar: "https://randomuser.me/api/portraits/women/45.jpg"
+        }
+    ];
 
     // Simple JavaScript for interactive elements
     document.addEventListener('DOMContentLoaded', function() {
-        // Populate teacher data
-        document.getElementById('userName').textContent = teacherData.name;
-        document.getElementById('userRole').textContent = formatRole(teacherData.role);
-        document.getElementById('profileName').textContent = teacherData.name;
-        document.getElementById('profileEmail').textContent = teacherData.email;
-        document.getElementById('profileRole').textContent = formatRole(teacherData.role);
-        document.getElementById('profileStatus').textContent = teacherData.status;
-        document.getElementById('profileStatus').className = teacherData.status === 'ACTIVE' ?
-            'status-badge status-active' : 'status-badge status-inactive';
+        // Populate user data
+        populateUserData();
 
-        document.getElementById('infoName').textContent = teacherData.name;
-        document.getElementById('infoEmail').textContent = teacherData.email;
-        document.getElementById('infoRole').textContent = teacherData.role;
-        document.getElementById('infoStatus').textContent = teacherData.status;
+        // Load dynamic content
+        loadCourses();
+        loadAssignments();
+        loadStudents();
+        loadAnalytics();
+        loadSchedule();
 
-        // Navigation active state
+        // Navigation active state and section switching
         const navLinks = document.querySelectorAll('.nav-links li');
+        const sections = document.querySelectorAll('.section');
+
         navLinks.forEach(link => {
             link.addEventListener('click', function() {
+                const targetSection = this.getAttribute('data-section');
+
+                // Update active nav link
                 navLinks.forEach(l => l.classList.remove('active'));
                 this.classList.add('active');
+
+                // Show target section, hide others
+                sections.forEach(section => {
+                    section.classList.remove('active');
+                    if (section.id === targetSection) {
+                        section.classList.add('active');
+                    }
+                });
+
+                // Update page title
+                document.querySelector('.header h2').textContent = this.querySelector('span').textContent;
+
+                // Close sidebar on mobile after selection
+                if (window.innerWidth <= 992) {
+                    document.getElementById('sidebar').classList.remove('active');
+                }
             });
+        });
+
+        // Mobile menu toggle
+        document.getElementById('menuToggle').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('active');
+        });
+
+        // User profile dropdown
+        const userProfile = document.getElementById('userProfile');
+        const dropdownMenu = document.getElementById('dropdownMenu');
+
+        userProfile.addEventListener('click', function(e) {
+            e.stopPropagation();
+            dropdownMenu.classList.toggle('active');
+        });
+
+        // Close dropdown when clicking elsewhere
+        document.addEventListener('click', function() {
+            dropdownMenu.classList.remove('active');
+        });
+
+        // Dropdown menu actions...
+        document.getElementById('logoutBtn').addEventListener('click', function() {
+            if (confirm('Are you sure you want to logout?')) {
+                // In a real app, this would redirect to login page
+                window.location.href = '/login';
+                dropdownMenu.classList.remove('active');
+            }
         });
 
         // Upload Study Material
         document.getElementById('uploadStudyMaterial').addEventListener('click', function() {
+            populateCourseDropdowns();
+            document.getElementById('studyMaterialModal').style.display = 'flex';
+        });
+
+        document.getElementById('uploadStudyMaterial2').addEventListener('click', function() {
+            populateCourseDropdowns();
             document.getElementById('studyMaterialModal').style.display = 'flex';
         });
 
         // Upload Assignment
         document.getElementById('uploadAssignment').addEventListener('click', function() {
+            populateCourseDropdowns();
+            document.getElementById('assignmentModal').style.display = 'flex';
+        });
+
+        document.getElementById('uploadAssignment2').addEventListener('click', function() {
+            populateCourseDropdowns();
             document.getElementById('assignmentModal').style.display = 'flex';
         });
 
@@ -1133,29 +1454,263 @@
             this.reset();
         });
 
+        // Add Course Form Submission
+        document.getElementById('addCourseForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            addNewCourse();
+        });
+
         // Upload History Button
         document.getElementById('uploadHistoryBtn').addEventListener('click', function() {
             alert('Opening upload history...');
         });
-
-        // Grade buttons
-        const gradeButtons = document.querySelectorAll('.btn-success');
-        gradeButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                const assignmentName = this.closest('.assignment-item').querySelector('h4').textContent;
-                alert(`Opening grading interface for: ${assignmentName}`);
-            });
-        });
-
-        // Course management buttons
-        const manageButtons = document.querySelectorAll('.course-actions .btn-primary');
-        manageButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                const courseName = this.closest('.course-card').querySelector('.course-title').textContent;
-                alert(`Managing course: ${courseName}`);
-            });
-        });
     });
+
+    // Populate user data throughout the interface
+    function populateUserData() {
+        document.getElementById('userName').textContent = loggedInUser.name;
+        document.getElementById('userRole').textContent = formatRole(loggedInUser.role);
+        document.getElementById('userProfile').src = loggedInUser.avatar;
+
+        document.getElementById('profileName').textContent = loggedInUser.name;
+        document.getElementById('profileEmail').textContent = loggedInUser.email;
+        document.getElementById('profileRole').textContent = `${formatRole(loggedInUser.role)} - ${loggedInUser.department}`;
+        document.getElementById('profileAvatar').src = loggedInUser.avatar;
+        document.getElementById('profileStatus').textContent = loggedInUser.status;
+        document.getElementById('profileStatus').className = loggedInUser.status === 'ACTIVE' ?
+            'status-badge status-active' : 'status-badge status-inactive';
+
+        document.getElementById('infoName').textContent = loggedInUser.name;
+        document.getElementById('infoEmail').textContent = loggedInUser.email;
+        document.getElementById('infoRole').textContent = loggedInUser.role;
+        document.getElementById('infoStatus').textContent = loggedInUser.status;
+        document.getElementById('infoDepartment').textContent = loggedInUser.department;
+        document.getElementById('infoCoursesCount').textContent = loggedInUser.coursesTeaching;
+
+        // Dashboard cards
+        document.getElementById('coursesCount').textContent = loggedInUser.coursesTeaching;
+        document.getElementById('studentsCount').textContent = loggedInUser.totalStudents;
+        document.getElementById('assignmentsCount').textContent = loggedInUser.assignmentsToGrade;
+        document.getElementById('materialsCount').textContent = loggedInUser.materialsUploaded;
+    }
+
+    // Load courses into the interface
+    function loadCourses() {
+        const coursesGrid = document.getElementById('coursesGrid');
+        const coursesList = document.getElementById('coursesList');
+
+        // Clear existing content
+        coursesGrid.innerHTML = '';
+        coursesList.innerHTML = '';
+
+        // Add courses to both sections
+        courses.forEach(course => {
+            const courseCard = createCourseCard(course);
+            coursesGrid.appendChild(courseCard.cloneNode(true));
+            coursesList.appendChild(courseCard);
+        });
+    }
+
+    // Create a course card element
+    function createCourseCard(course) {
+        const courseCard = document.createElement('div');
+        courseCard.className = 'course-card';
+        courseCard.innerHTML = `
+            <div class="course-image" style="background-color: ${course.color};"></div>
+            <div class="course-content">
+                <h3 class="course-title">${course.title}</h3>
+                <p class="course-info">${course.code} | ${course.semester}</p>
+                <div class="course-stats">
+                    <div class="stat">
+                        <div class="stat-value">${course.students}</div>
+                        <div class="stat-label">Students</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value">${course.assignments}</div>
+                        <div class="stat-label">Assignments</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value">${course.materials}</div>
+                        <div class="stat-label">Materials</div>
+                    </div>
+                </div>
+                <div class="course-actions">
+                    <button class="btn btn-outline">View Details</button>
+                    <button class="btn btn-primary">Manage</button>
+                </div>
+            </div>
+        `;
+
+        // Add event listeners to buttons
+        const manageButton = courseCard.querySelector('.btn-primary');
+        manageButton.addEventListener('click', function() {
+            alert(`Managing course: ${course.title}`);
+        });
+
+        return courseCard;
+    }
+
+    // Load assignments into the interface
+    function loadAssignments() {
+        const assignmentsList = document.getElementById('assignmentsList');
+        const assignmentsSectionList = document.getElementById('assignmentsSectionList');
+
+        // Clear existing content
+        assignmentsList.innerHTML = '';
+        assignmentsSectionList.innerHTML = '';
+
+        // Add assignments to both sections
+        assignments.forEach(assignment => {
+            const assignmentItem = createAssignmentItem(assignment);
+            assignmentsList.appendChild(assignmentItem.cloneNode(true));
+            assignmentsSectionList.appendChild(assignmentItem);
+        });
+    }
+
+    // Create an assignment item element
+    function createAssignmentItem(assignment) {
+        const assignmentItem = document.createElement('div');
+        assignmentItem.className = 'assignment-item';
+        assignmentItem.innerHTML = `
+            <div class="assignment-info">
+                <h4>${assignment.title}</h4>
+                <p>${assignment.course} | Due: ${assignment.dueDate}</p>
+            </div>
+            <div class="assignment-due">
+                <span class="due-date">${assignment.submitted}/${assignment.total} Submitted</span>
+                <button class="btn btn-success">Grade</button>
+            </div>
+        `;
+
+        // Add event listener to grade button
+        const gradeButton = assignmentItem.querySelector('.btn-success');
+        gradeButton.addEventListener('click', function() {
+            alert(`Opening grading interface for: ${assignment.title}`);
+        });
+
+        return assignmentItem;
+    }
+
+    // Load students into the interface
+    function loadStudents() {
+        const studentsGrid = document.getElementById('studentsGrid');
+        const studentsSectionGrid = document.getElementById('studentsSectionGrid');
+
+        // Clear existing content
+        studentsGrid.innerHTML = '';
+        studentsSectionGrid.innerHTML = '';
+
+        // Add students to both sections
+        students.forEach(student => {
+            const studentCard = createStudentCard(student);
+            studentsGrid.appendChild(studentCard.cloneNode(true));
+            studentsSectionGrid.appendChild(studentCard);
+        });
+    }
+
+    // Create a student card element
+    function createStudentCard(student) {
+        const studentCard = document.createElement('div');
+        studentCard.className = 'student-card';
+        studentCard.innerHTML = `
+            <img src="${student.avatar}" alt="Student" class="student-avatar">
+            <h4 class="student-name">${student.name}</h4>
+            <p class="student-course">${student.course}</p>
+            <div class="student-grade">Grade: ${student.grade}</div>
+        `;
+
+        return studentCard;
+    }
+
+    // Load analytics data
+    function loadAnalytics() {
+        document.getElementById('avgGrade').textContent = loggedInUser.avgGrade;
+        document.getElementById('completionRate').textContent = loggedInUser.completionRate;
+        document.getElementById('engagementRate').textContent = loggedInUser.engagementRate;
+        document.getElementById('materialViews').textContent = loggedInUser.materialViews.toLocaleString();
+    }
+
+    // Load schedule data
+    function loadSchedule() {
+        const scheduleContent = document.getElementById('scheduleContent');
+        scheduleContent.innerHTML = `
+            <p><strong>Monday:</strong> Database Management (9:00 AM - 10:30 AM)</p>
+            <p><strong>Tuesday:</strong> Advanced Algorithms (11:00 AM - 12:30 PM)</p>
+            <p><strong>Wednesday:</strong> Web Technologies (2:00 PM - 3:30 PM)</p>
+            <p><strong>Thursday:</strong> Office Hours (10:00 AM - 12:00 PM)</p>
+            <p><strong>Friday:</strong> Database Management (9:00 AM - 10:30 AM)</p>
+        `;
+    }
+
+    // Populate course dropdowns in modals
+    function populateCourseDropdowns() {
+        const materialCourse = document.getElementById('materialCourse');
+        const assignmentCourse = document.getElementById('assignmentCourse');
+
+        // Clear existing options
+        materialCourse.innerHTML = '<option value="">Select a course</option>';
+        assignmentCourse.innerHTML = '<option value="">Select a course</option>';
+
+        // Add courses to dropdowns
+        courses.forEach(course => {
+            const option1 = document.createElement('option');
+            option1.value = course.id;
+            option1.textContent = `${course.code} - ${course.title}`;
+            materialCourse.appendChild(option1);
+
+            const option2 = document.createElement('option');
+            option2.value = course.id;
+            option2.textContent = `${course.code} - ${course.title}`;
+            assignmentCourse.appendChild(option2);
+        });
+    }
+
+    // Add a new course
+    function addNewCourse() {
+        const title = document.getElementById('courseTitle').value;
+        const code = document.getElementById('courseCode').value;
+        const description = document.getElementById('courseDescription').value;
+        const department = document.getElementById('courseDepartment').value;
+        const credits = document.getElementById('courseCredits').value;
+        const semester = document.getElementById('courseSemester').value;
+        const capacity = document.getElementById('courseCapacity').value;
+        const schedule = document.getElementById('courseSchedule').value;
+        const location = document.getElementById('courseLocation').value;
+        const prerequisites = document.getElementById('coursePrerequisites').value;
+
+        // Generate a random color for the course
+        const colors = ['#4361ee', '#3a0ca3', '#4cc9f0', '#7209b7', '#f72585', '#560bad'];
+        const randomColor = colors[Math.floor(Math.random() * colors.length)];
+
+        // Create new course object
+        const newCourse = {
+            id: courses.length + 1,
+            title: title,
+            code: code,
+            semester: semester,
+            students: 0,
+            assignments: 0,
+            materials: 0,
+            color: randomColor
+        };
+
+        // Add to courses array
+        courses.push(newCourse);
+
+        // Update the UI
+        loadCourses();
+
+        // Update user data
+        loggedInUser.coursesTeaching = courses.length;
+        document.getElementById('coursesCount').textContent = loggedInUser.coursesTeaching;
+        document.getElementById('infoCoursesCount').textContent = loggedInUser.coursesTeaching;
+
+        // Reset form
+        document.getElementById('addCourseForm').reset();
+
+        // Show success message
+        alert(`Course "${title}" has been created successfully!`);
+    }
 
     // Helper function to format role for display
     function formatRole(role) {

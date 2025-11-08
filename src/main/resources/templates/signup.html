@@ -4,136 +4,364 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sign Up | Virtual Pathshala</title>
+  <link rel="stylesheet" th:href="@{/css/login.css}">
   <link rel="icon" type="image/x-icon" th:href="@{/image/favicon.ico}">
-  <link rel="stylesheet" th:href="@{/css/signup.css}">
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+  <style>
+    /* Same styles as login page */
+    .login-container {
+      width: 100%;
+      max-width: 450px;
+      padding: 20px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.54);
+      box-shadow: 0 6px 15px rgb(220, 155, 15);
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .login-card {
+      background: rgba(255, 255, 255, 0.7);
+      border-radius: 15px;
+      padding: 25px 30px;
+      box-shadow: 0 8px 25px rgba(46, 4, 255, 0.76);
+    }
+
+    .login-card h2 {
+      color: #000;
+      font-size: 28px;
+      font-weight: 600;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .subtitle {
+      color: #000;
+      margin-bottom: 25px;
+      font-size: 14px;
+      text-align: center;
+    }
+
+    .login-form {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .input-group {
+      position: relative;
+    }
+
+    .input-group input {
+      width: 100%;
+      padding: 15px 45px;
+      border: 2px solid #e1e5e9;
+      border-radius: 10px;
+      font-size: 16px;
+      background: #f8f9fa;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+      outline: none;
+    }
+
+    .input-group input:focus {
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .input-group i {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #667eea;
+      font-size: 20px;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .input-group i.bx-user,
+    .input-group i.bx-envelope,
+    .input-group i.bx-phone,
+    .input-group i.bx-lock-alt {
+      left: 15px;
+    }
+
+    .input-group i.toggle-eye {
+      right: 15px;
+      pointer-events: auto;
+      cursor: pointer;
+    }
+
+    .role-selection {
+      margin-bottom: 10px;
+      color: #000;
+    }
+
+    .role-options {
+      display: flex;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .role-option {
+      flex: 1;
+      padding: 10px 5px;
+      border: 2px solid #191818;
+      border-radius: 8px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background-color: #f9f9f9;
+    }
+
+    .role-option:hover {
+      border-color: #6c63ff;
+      background-color: #f0f0ff;
+    }
+
+    .role-option.selected {
+      border-color: #6c63ff;
+      background-color: #e6e4ff;
+      font-weight: bold;
+    }
+
+    .role-option input {
+      display: none;
+    }
+
+    .role-icon {
+      font-size: 20px;
+      margin-bottom: 5px;
+      display: block;
+      color: black;
+    }
+
+    .login-btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 15px;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      margin-top: 10px;
+    }
+
+    .login-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+    }
+
+    .signup-link {
+      margin-top: 15px;
+      color: #000;
+      font-size: 14px;
+      text-align: center;
+    }
+
+    .signup-link a {
+      color: #e41111;
+      text-decoration: none;
+    }
+
+    .signup-link a:hover {
+      color: #764ba2;
+      text-decoration: underline;
+    }
+  </style>
 </head>
 <body>
 
 <!-- Background Video -->
 <video autoplay muted loop playsinline id="bg-video">
   <source th:src="@{/video/videoplayback (1).mp4}" type="video/mp4">
-  Your browser does not support the video tag.
 </video>
 
 <!-- Header -->
 <header>
-  <div class="header-left">
-    <div class="logo">
-      <img th:src="@{/image/logo5.png}" alt="Virtual Pathshala Logo">
-      <h2>Virtual Pathshala</h2>
-    </div>
+  <div class="logo">
+    <img th:src="@{/image/logo5.png}" alt="Logo">
+    <h2>Virtual Pathshala</h2>
   </div>
-  <div class="header-right">
-    <a th:href="@{/login}" class="login-btn">Login</a>
-  </div>
+  <a th:href="@{/login}" class="signup-header-btn">Login</a>
 </header>
 
-<!-- Signup Section -->
-<div class="signup-container">
-  <div class="signup-box">
-    <h2>✨ Sign Up ✨</h2>
-    <p>Create your Virtual Pathshala account</p>
+<!-- Main Signup Form -->
+<div class="login-container">
+  <div class="login-card">
+    <h2>Create Account</h2>
+    <p class="subtitle">Join Virtual Pathshala today</p>
 
-    <form th:action="@{/api/signup}" method="post">
-      <label for="name">Full Name</label>
-      <input type="text" id="name" name="name" placeholder="Enter your full name" required>
+    <!-- ✅ YEH FORM KA ID CHECK KARO -->
+    <form class="login-form" id="signupForm">
+      <!-- Role Selection -->
+      <div class="role-selection">
+        <label>Select User Type</label>
+        <div class="role-options">
+          <div class="role-option" data-role="student">
+            <input type="radio" id="role-student" name="role" value="student" required checked>
+            <i class='bx bx-book-alt role-icon'></i>
+            <span>STUDENT</span>
+          </div>
+          <div class="role-option" data-role="teacher">
+            <input type="radio" id="role-teacher" name="role" value="teacher" required>
+            <i class='bx bx-user-circle role-icon'></i>
+            <span>TEACHER</span>
+          </div>
 
-      <label for="mobile">Mobile Number</label>
-      <input type="tel" id="mobile" name="mobile" placeholder="Enter your mobile number" required>
+        </div>
+      </div>
 
-      <label for="email">Email Address</label>
-      <input type="email" id="email" name="email" placeholder="Enter your email address" required>
+      <!-- Name -->
+      <div class="input-group">
+        <i class="bx bx-user"></i>
+        <input type="text" id="name" name="name" placeholder="Full Name" required>
+      </div>
 
-      <label for="password">Password</label>
-      <input type="password" id="password" name="password" placeholder="Enter password" required>
+      <!-- Email -->
+      <div class="input-group">
+        <i class="bx bx-envelope"></i>
+        <input type="email" id="email" name="email" placeholder="Email Address" required>
+      </div>
 
-      <label for="confirm-password">Confirm Password</label>
-      <input type="password" id="confirm-password" name="confirmPassword" placeholder="Confirm password" required>
+      <!-- Mobile -->
+      <div class="input-group">
+        <i class="bx bx-phone"></i>
+        <input type="tel" id="mobile" name="mobile" placeholder="Mobile Number" required>
+      </div>
 
-      <button type="submit" class="signup-btn">Create Account</button>
 
-      <div class="divider"><span>OR</span></div>
 
-      <button type="button" class="google-btn">
-        <img src="https://www.svgrepo.com/show/355037/google.svg" alt="Google Logo">
-        Sign up with Google
-      </button>
+      <!-- Password -->
+      <div class="input-group">
+        <i class="bx bx-lock-alt"></i>
+        <input type="password" id="password" name="password" placeholder="Password" required>
+        <i class='bx bx-hide toggle-eye' id="togglePassword"></i>
+      </div>
 
-      <p class="login-text">
-        Already have an account? <a th:href="@{/login}">Log in</a>
-      </p>
+      <!-- Confirm Password -->
+      <div class="input-group">
+        <i class="bx bx-lock-alt"></i>
+        <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm Password" required>
+        <i class='bx bx-hide toggle-eye' id="confirmtogglePassword"></i>
+      </div>
+
+      <button type="submit" class="login-btn">Create Account</button>
+
+      <p class="signup-link">Already have an account? <a th:href="@{/login}">Login here</a></p>
     </form>
   </div>
 </div>
 
-<script th:src="@{/js/api.js}"></script>
-<script th:src="@{/js/auth.js}"></script>
-<script>
-  document.querySelector('form').addEventListener('submit', async function(e) {
-      e.preventDefault();
-
-      const userData = {
-          name: document.getElementById('name').value,
-          mobile: document.getElementById('mobile').value,
-          email: document.getElementById('email').value,
-          password: document.getElementById('password').value,
-          confirmPassword: document.getElementById('confirm-password').value,
-          role: 'STUDENT'
-      };
-
-      // ✅ Mobile number validation: must be exactly 10 digits
-      const mobilePattern = /^[0-9]{10}$/;
-      if (!mobilePattern.test(userData.mobile)) {
-          alert("Enter 10 digit valid mobile number");
-          return;
-      }
-
-      // ✅ Password strength validation:
-      // At least 1 capital letter, 1 special char, and length > 6
-      const strongPasswordPattern = /^(?=.*[A-Z])(?=.*[!@#$%^&*])(?=.{7,}).*$/;
-      if (!strongPasswordPattern.test(userData.password)) {
-          alert("Make strong password it contain a Capital letter and special character and more than 6 digit");
-          return;
-      }
-
-      // ✅ Confirm password validation
-      if (userData.password !== userData.confirmPassword) {
-          alert('Passwords do not match!');
-          return;
-      }
-
-      try {
-          const response = await fetch('/api/signup', {
-              method: 'POST',
-              headers: {
-                  'Content-Type': 'application/json',
-              },
-              body: JSON.stringify(userData)
-          });
-
-          const data = await response.json();
-
-          if (response.ok) {
-              alert('Registration successful! Please login.');
-              window.location.href = '/login';
-          } else {
-              alert(data.message || 'Registration failed');
-          }
-      } catch (error) {
-          console.error('Signup error:', error);
-          alert('Registration failed. Please try again.');
-      }
-  });
-</script>
-
-
 <!-- Footer -->
 <footer>
-  Virtual Pathshala &copy; <span id="year"></span>
+  Virtual Pathshala © <span id="year"></span>
 </footer>
 
 <script>
   document.getElementById("year").textContent = new Date().getFullYear();
+
+  document.addEventListener('DOMContentLoaded', () => {
+    console.log("✅ Signup page loaded");
+
+    // ===== Role Selection =====
+    const roleOptions = document.querySelectorAll('.role-option');
+    roleOptions.forEach(option => {
+      option.addEventListener('click', () => {
+        roleOptions.forEach(opt => opt.classList.remove('selected'));
+        option.classList.add('selected');
+        const radioInput = option.querySelector('input[type="radio"]');
+        radioInput.checked = true;
+      });
+    });
+
+    // Set default selection
+    document.querySelector('.role-option[data-role="student"]').classList.add('selected');
+
+    // ===== Password Toggle Visibility =====
+    const togglePassword = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('password');
+
+    if (togglePassword && passwordInput) {
+      togglePassword.addEventListener('click', () => {
+        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordInput.setAttribute('type', type);
+        togglePassword.classList.toggle('bx-hide');
+        togglePassword.classList.toggle('bx-show');
+      });
+    }
+
+    // ===== Signup Form Submission =====
+    const signupForm = document.getElementById('signupForm');
+
+    if (signupForm) {
+      console.log("✅ Signup form found");
+
+      signupForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        console.log("📤 Form submission started");
+
+        const formData = {
+          name: document.getElementById('name').value.trim(),
+          email: document.getElementById('email').value.trim(),
+          mobile: document.getElementById('mobile').value.trim(),
+          role: document.querySelector('input[name="role"]:checked').value,
+          password: document.getElementById('password').value,
+          confirmPassword: document.getElementById('confirmPassword').value
+        };
+
+        console.log('📤 Sending signup data:', formData);
+
+        // Basic validation
+        if (!formData.name || !formData.email || !formData.mobile || !formData.password || !formData.confirmPassword) {
+          alert('Please fill in all fields');
+          return;
+        }
+
+        if (formData.password !== formData.confirmPassword) {
+          alert('Passwords do not match');
+          return;
+        }
+
+        const signupBtn = signupForm.querySelector('.login-btn');
+        const originalText = signupBtn.textContent;
+        signupBtn.textContent = 'Creating Account...';
+        signupBtn.disabled = true;
+
+        try {
+          const response = await fetch('/api/signup', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData)
+          });
+
+          const data = await response.json();
+          console.log('📥 Signup response:', data);
+
+          if (data.success) {
+            alert('✅ Registration successful! Please login.');
+            window.location.href = '/login';
+          } else {
+            alert('❌ ' + (data.error || data.message || 'Registration failed'));
+          }
+        } catch (error) {
+          console.error('Signup error:', error);
+          alert('❌ Registration failed. Please try again.');
+        } finally {
+          signupBtn.textContent = originalText;
+          signupBtn.disabled = false;
+        }
+      });
+    } else {
+      console.error("❌ Signup form not found!");
+    }
+  });
 </script>
 
 </body>

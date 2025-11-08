@@ -122,6 +122,33 @@ public class UserController {
         }
     }
 
+    @GetMapping("/teacher/{id}/profile")
+    public ResponseEntity<?> getTeacherProfile(@PathVariable int id) {
+        try {
+            User user = userService.getUserById(id);
+
+            // Check if user is actually a teacher
+            if (!user.getRole().name().equals("TEACHER")) {
+                Map<String, String> errorResponse = new HashMap<>();
+                errorResponse.put("success", "false");
+                errorResponse.put("error", "User is not a teacher");
+                return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+            }
+
+            UserRequestDto response = userConverter.convertToResponseDto(user);
+
+            Map<String, Object> responseBody = new HashMap<>();
+            responseBody.put("success", true);
+            responseBody.put("data", response);
+            return new ResponseEntity<>(responseBody, HttpStatus.OK);
+        } catch (Exception e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("success", "false");
+            errorResponse.put("error", e.getMessage());
+            return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+        }
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<?> updateUser(@PathVariable int id, @RequestBody UserRequestDto requestDto) {
         try {

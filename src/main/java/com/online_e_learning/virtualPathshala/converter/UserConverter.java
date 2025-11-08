@@ -15,6 +15,13 @@ public class UserConverter {
         user.setName(requestDto.getName());
         user.setEmail(requestDto.getEmail());
 
+        // Handle mobile number - ADD THIS
+        if (requestDto.getMobile() != null && !requestDto.getMobile().isEmpty()) {
+            user.setMobile(requestDto.getMobile());
+        } else {
+            throw new IllegalArgumentException("Mobile number cannot be null or empty");
+        }
+
         // Handle null password
         if (requestDto.getPassword() != null && !requestDto.getPassword().isEmpty()) {
             user.setPasswordHash(hashPassword(requestDto.getPassword()));
@@ -34,6 +41,10 @@ public class UserConverter {
         if (requestDto.getEmail() != null) {
             user.setEmail(requestDto.getEmail());
         }
+        // Handle mobile number update - ADD THIS
+        if (requestDto.getMobile() != null && !requestDto.getMobile().isEmpty()) {
+            user.setMobile(requestDto.getMobile());
+        }
         if (requestDto.getRole() != null) {
             user.setRole(requestDto.getRole());
         }
@@ -50,6 +61,7 @@ public class UserConverter {
         UserRequestDto responseDto = new UserRequestDto();
         responseDto.setName(user.getName());
         responseDto.setEmail(user.getEmail());
+        responseDto.setMobile(user.getMobile());  // ADD THIS
         responseDto.setRole(user.getRole());
         responseDto.setStatus(user.getStatus());
         // Password is not returned in response for security

@@ -18,6 +18,7 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
+
     @Column(nullable = false)
     private String name;
 
@@ -27,7 +28,6 @@ public class User {
     @Column(nullable = false)
     private String passwordHash;
 
-    @Column(nullable = false)
     private String mobile;
 
     @Column(nullable = false)

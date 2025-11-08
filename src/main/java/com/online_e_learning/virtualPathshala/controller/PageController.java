@@ -8,7 +8,7 @@ public class PageController {
 
     @GetMapping("/")
     public String home() {
-        return "Homepage";  // ✅ Homepage.html
+        return "Homepage";
     }
 
     @GetMapping("/login")
@@ -23,11 +23,21 @@ public class PageController {
 
     @GetMapping("/student")
     public String student() {
-        return "StudentLogin";  // ✅ Student dashboard
+        return "StudentDashboard"; // Changed from StudentLogin to StudentDashboard
+    }
+
+    @GetMapping("/teacher")
+    public String teacher() {
+        return "TeacherDashboard"; // Create this new template
+    }
+
+    @GetMapping("/admin")
+    public String admin() {
+        return "AdminDashboard"; // Create this new template
     }
 
     @GetMapping("/homepage")
     public String homepage() {
-        return "Homepage";  // ✅ Alternative route
+        return "Homepage";
     }
 }

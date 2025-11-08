@@ -53,10 +53,13 @@ public class UserService {
         userRepository.save(user);
     }
 
-
     public List<User> getUsersByRole(String role) {
         Role userRole = Role.valueOf(role.toUpperCase());
         return userRepository.findByRole(userRole);
+    }
+
+    public List<User> getAllTeachers() {
+        return userRepository.findByRole(Role.TEACHER);
     }
 
     public User updateUser(int id, UserRequestDto requestDto) {

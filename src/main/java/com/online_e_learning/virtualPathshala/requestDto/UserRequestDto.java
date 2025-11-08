@@ -9,15 +9,16 @@ public class UserRequestDto {
     private String password;
     private Role role;
     private Status status = Status.INACTIVE;
-
+    private String mobile;
     // Constructors
     public UserRequestDto() {}
 
-    public UserRequestDto(String name, String email, String password, Role role) {
+    public UserRequestDto(String name, String email, String password, Role role, String mobile) {
         this.name = name;
         this.email = email;
         this.password = password;
         this.role = role;
+        this.mobile=mobile;
     }
 
     // Getters and Setters
@@ -35,4 +36,12 @@ public class UserRequestDto {
 
     public Status getStatus() { return status; }
     public void setStatus(Status status) { this.status = status; }
+
+    public String getMobile() {
+        return mobile;
+    }
+
+    public void setMobile(String mobile) {
+        this.mobile = mobile;
+    }
 }

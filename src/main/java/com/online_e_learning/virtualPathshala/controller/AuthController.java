@@ -20,8 +20,17 @@ public class AuthController {
     @PostMapping("/signup")
     public ResponseEntity<?> signup(@RequestBody SignupRequest signupRequest) {
         try {
+            System.out.println("🔍 Received signup request:");
+            System.out.println("Name: " + signupRequest.getName());
+            System.out.println("Email: " + signupRequest.getEmail());
+            System.out.println("Mobile: " + signupRequest.getMobile());
+            System.out.println("Role: " + signupRequest.getRole());
+            System.out.println("Password length: " + (signupRequest.getPassword() != null ? signupRequest.getPassword().length() : "null"));
+            System.out.println("Confirm Password length: " + (signupRequest.getConfirmPassword() != null ? signupRequest.getConfirmPassword().length() : "null"));
+
             // Add validation
             if (!signupRequest.getPassword().equals(signupRequest.getConfirmPassword())) {
+                System.out.println("❌ Passwords do not match");
                 return ResponseEntity.badRequest().body("Passwords do not match");
             }
 
@@ -29,6 +38,8 @@ public class AuthController {
             return authService.signup(signupRequest);
 
         } catch (Exception e) {
+            System.out.println("❌ Signup controller error: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body("Signup failed: " + e.getMessage());
         }
     }
