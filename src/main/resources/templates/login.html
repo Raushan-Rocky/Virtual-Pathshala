@@ -301,40 +301,6 @@
       object-fit: cover;
       z-index: -1;
     }
-
-    /* Modal styles */
-    .modal {
-      display: none;
-      position: fixed;
-      z-index: 1000;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.5);
-    }
-
-    .modal-content {
-      background-color: #fefefe;
-      margin: 15% auto;
-      padding: 20px;
-      border-radius: 10px;
-      width: 80%;
-      max-width: 400px;
-      position: relative;
-    }
-
-    .close-btn {
-      color: #aaa;
-      float: right;
-      font-size: 28px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    .close-btn:hover {
-      color: black;
-    }
   </style>
 </head>
 <body>
@@ -404,7 +370,7 @@
         <label class="checkbox-label">
           <input type="checkbox" name="remember"> Remember me
         </label>
-        <a href="#" class="forgot-link" id="forgotPasswordLink">Forgot Password?</a>
+        <a href="/forgotpass" class="forgot-link" id="forgotPasswordLink">Forgot Password?</a>
       </div>
 
       <button type="submit" class="login-btn" id="loginBtn">Sign In</button>
@@ -414,16 +380,6 @@
       </p>
 
     </form>
-  </div>
-</div>
-
-<!-- Forgot Password Modal -->
-<div id="forgotModal" class="modal">
-  <div class="modal-content">
-    <span class="close-btn">&times;</span>
-    <h2>Forgot Password</h2>
-    <p>Enter your registered email to reset your password</p>
-    <!-- Add forgot password form here if needed -->
   </div>
 </div>
 
@@ -633,24 +589,11 @@
     return emailRegex.test(email);
   }
 
-  // ===== Forgot Password Modal =====
-  const forgotModal = document.getElementById('forgotModal');
-  const forgotPasswordLink = document.getElementById('forgotPasswordLink');
-  const closeBtn = document.querySelector('.close-btn');
-
-  forgotPasswordLink.addEventListener('click', (e) => {
+  // ===== Forgot Password Link =====
+  document.getElementById('forgotPasswordLink').addEventListener('click', (e) => {
     e.preventDefault();
-    forgotModal.style.display = 'block';
-  });
-
-  closeBtn.addEventListener('click', () => {
-    forgotModal.style.display = 'none';
-  });
-
-  window.addEventListener('click', (e) => {
-    if (e.target === forgotModal) {
-      forgotModal.style.display = 'none';
-    }
+    console.log('🔗 Redirecting to Forgot Password page');
+    window.location.href = '/forgotpass';
   });
 
   // ===== Enter Key Support =====

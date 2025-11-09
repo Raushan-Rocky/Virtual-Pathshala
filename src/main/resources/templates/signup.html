@@ -10,168 +10,322 @@
   <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
   <style>
     /* Same styles as login page */
-    .login-container {
-      width: 100%;
-      max-width: 450px;
-      padding: 20px;
-      border-radius: 20px;
-      background: rgba(255, 255, 255, 0.54);
-      box-shadow: 0 6px 15px rgb(220, 155, 15);
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-    }
+.login-container {
+  width: 100%;
+  max-width: 450px;
+  padding: 20px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.54);
+  box-shadow: 0 6px 15px rgb(220, 155, 15);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
 
-    .login-card {
-      background: rgba(255, 255, 255, 0.7);
-      border-radius: 15px;
-      padding: 25px 30px;
-      box-shadow: 0 8px 25px rgba(46, 4, 255, 0.76);
-    }
+.login-card {
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 15px;
+  padding: 25px 30px;
+  box-shadow: 0 8px 25px rgba(46, 4, 255, 0.76);
+}
 
-    .login-card h2 {
-      color: #000;
-      font-size: 28px;
-      font-weight: 600;
-      margin-bottom: 10px;
-      text-align: center;
-    }
+.login-card h2 {
+  color: #000;
+  font-size: 28px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  text-align: center;
+}
 
-    .subtitle {
-      color: #000;
-      margin-bottom: 25px;
-      font-size: 14px;
-      text-align: center;
-    }
+.subtitle {
+  color: #000;
+  margin-bottom: 25px;
+  font-size: 14px;
+  text-align: center;
+}
 
-    .login-form {
-      display: flex;
-      flex-direction: column;
-      gap: 18px;
-    }
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
 
-    .input-group {
-      position: relative;
-    }
+.input-group {
+  position: relative;
+}
 
-    .input-group input {
-      width: 100%;
-      padding: 15px 45px;
-      border: 2px solid #e1e5e9;
-      border-radius: 10px;
-      font-size: 16px;
-      background: #f8f9fa;
-      transition: border-color 0.3s ease, box-shadow 0.3s ease;
-      outline: none;
-    }
+.input-group input {
+  width: 100%;
+  padding: 15px 45px;
+  border: 2px solid #e1e5e9;
+  border-radius: 10px;
+  font-size: 16px;
+  background: #f8f9fa;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  outline: none;
+}
 
-    .input-group input:focus {
-      border-color: #667eea;
-      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-    }
+.input-group input:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
 
-    .input-group i {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #667eea;
-      font-size: 20px;
-      pointer-events: none;
-      z-index: 2;
-    }
+/* ===== FIXED ICON STYLES ===== */
+.input-group i {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #667eea;
+  font-size: 20px;
+  pointer-events: none;
+  z-index: 2;
+  left: 15px;
+}
 
-    .input-group i.bx-user,
-    .input-group i.bx-envelope,
-    .input-group i.bx-phone,
-    .input-group i.bx-lock-alt {
-      left: 15px;
-    }
+.input-group i.toggle-eye {
+  left: auto;
+  right: 15px;
+  pointer-events: auto;
+  cursor: pointer;
+}
 
-    .input-group i.toggle-eye {
-      right: 15px;
-      pointer-events: auto;
-      cursor: pointer;
-    }
+.input-group input:focus ~ i:not(.toggle-eye) {
+  transform: translateY(calc(-50% - 3px)) scale(1.2);
+  color: #667eea;
+}
 
-    .role-selection {
-      margin-bottom: 10px;
-      color: #000;
-    }
 
-    .role-options {
-      display: flex;
-      gap: 10px;
-      margin-top: 8px;
-    }
+.role-selection {
+  margin-bottom: 10px;
+  color: #000;
+}
 
-    .role-option {
-      flex: 1;
-      padding: 10px 5px;
-      border: 2px solid #191818;
-      border-radius: 8px;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      background-color: #f9f9f9;
-    }
+.role-options {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+}
 
-    .role-option:hover {
-      border-color: #6c63ff;
-      background-color: #f0f0ff;
-    }
+.role-option {
+  flex: 1;
+  padding: 10px 5px;
+  border: 2px solid #191818;
+  border-radius: 8px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background-color: #f9f9f9;
+}
 
-    .role-option.selected {
-      border-color: #6c63ff;
-      background-color: #e6e4ff;
-      font-weight: bold;
-    }
+.role-option:hover {
+  border-color: #6c63ff;
+  background-color: #f0f0ff;
+}
 
-    .role-option input {
-      display: none;
-    }
+.role-option.selected {
+  border-color: #6c63ff;
+  background-color: #e6e4ff;
+  font-weight: bold;
+}
 
-    .role-icon {
-      font-size: 20px;
-      margin-bottom: 5px;
-      display: block;
-      color: black;
-    }
+.role-option input {
+  display: none;
+}
 
-    .login-btn {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      border: none;
-      padding: 15px;
-      border-radius: 10px;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-      margin-top: 10px;
-    }
+.role-icon {
+  font-size: 20px;
+  margin-bottom: 5px;
+  display: block;
+  color: black;
+}
 
-    .login-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
-    }
+.login-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 15px;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  margin-top: 10px;
+}
 
-    .signup-link {
-      margin-top: 15px;
-      color: #000;
-      font-size: 14px;
-      text-align: center;
-    }
+.login-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+}
 
-    .signup-link a {
-      color: #e41111;
-      text-decoration: none;
-    }
+.signup-link {
+  margin-top: 15px;
+  color: #000;
+  font-size: 14px;
+  text-align: center;
+}
 
-    .signup-link a:hover {
-      color: #764ba2;
-      text-decoration: underline;
-    }
+.signup-link a {
+  color: #e41111;
+  text-decoration: none;
+}
+
+.signup-link a:hover {
+  color: #764ba2;
+  text-decoration: underline;
+}
+
+/* ===== FIXED VALIDATION STYLES ===== */
+.validation-message {
+  display: none !important;
+}
+
+/* Visual validation states - REMOVED TICK/CROSS ICONS */
+.input-group.valid input {
+  border-color: #28a745 !important;
+  padding-right: 45px !important;
+}
+
+.input-group.invalid input {
+  border-color: #dc3545 !important;
+  padding-right: 45px !important;
+}
+
+/* Password requirements styling */
+.password-requirements {
+  background: #f8f9fa;
+  padding: 12px;
+  border-radius: 8px;
+  margin: 5px 0 15px 0;
+  border: 1px solid #e1e5e9;
+}
+
+.requirement {
+  font-size: 12px;
+  color: #dc3545;
+  margin: 3px 0;
+  transition: color 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.requirement.valid {
+  color: #28a745;
+}
+
+.requirement i {
+  font-size: 14px;
+  width: 16px;
+  text-align: center;
+}
+
+/* Input hints */
+.input-hint {
+  font-size: 11px;
+  color: #666;
+  margin-top: 5px;
+  display: none;
+  padding: 0 5px;
+}
+
+.input-group:focus-within .input-hint {
+  display: block;
+}
+
+.login-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.login-btn:disabled:hover {
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* Header styles */
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 30px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo img {
+  height: 40px;
+}
+
+.logo h2 {
+  color: white;
+  font-size: 24px;
+}
+
+.signup-header-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: transform 0.3s ease;
+}
+
+.signup-header-btn:hover {
+  transform: translateY(-2px);
+}
+
+/* Mobile prefix styling */
+.phn-prefix {
+  position: absolute;
+  top: 50%;
+  left: 45px;
+  transform: translateY(-50%);
+  font-size: 14px;
+  font-weight: bold;
+  color: #000;
+  pointer-events: none;
+  transition: all 0.3s ease;
+  z-index: 2;
+}
+
+.input-group:focus-within .phn-prefix {
+  color: #000;
+}
+
+#mobile {
+  padding-left: 70px !important;
+}
+
+/* Footer */
+footer {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  text-align: center;
+  padding: 15px;
+  color: white;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+/* Background video */
+#bg-video {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -1;
+}
   </style>
 </head>
 <body>
@@ -196,7 +350,6 @@
     <h2>Create Account</h2>
     <p class="subtitle">Join Virtual Pathshala today</p>
 
-    <!-- ✅ YEH FORM KA ID CHECK KARO -->
     <form class="login-form" id="signupForm">
       <!-- Role Selection -->
       <div class="role-selection">
@@ -212,45 +365,57 @@
             <i class='bx bx-user-circle role-icon'></i>
             <span>TEACHER</span>
           </div>
-
         </div>
       </div>
 
       <!-- Name -->
-      <div class="input-group">
+      <div class="input-group" id="nameGroup">
         <i class="bx bx-user"></i>
-        <input type="text" id="name" name="name" placeholder="Full Name" required>
+        <input type="text" id="name" name="name" placeholder="Full Name" required
+               pattern="[A-Za-z ]{3,50}"
+               title="Name should be 3-50 characters long and contain only letters">
+        <div class="input-hint">3-50 characters, letters and spaces only</div>
       </div>
 
       <!-- Email -->
-      <div class="input-group">
+      <div class="input-group" id="emailGroup">
         <i class="bx bx-envelope"></i>
-        <input type="email" id="email" name="email" placeholder="Email Address" required>
+        <input type="email" id="email" name="email" placeholder="Email Address" required
+               pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{3,}$"
+               title="Enter a valid email address">
+        <div class="input-hint">Enter a valid email address (e.g., user@example.com)</div>
       </div>
 
       <!-- Mobile -->
-      <div class="input-group">
+      <div class="input-group" id="mobileGroup">
         <i class="bx bx-phone"></i>
-        <input type="tel" id="mobile" name="mobile" placeholder="Mobile Number" required>
+        <span class="phn-prefix">+91</span>
+        <input type="tel" id="mobile" name="mobile" placeholder="Mobile Number"
+               pattern="[6-9]\d{9}"
+               title="Enter a valid 10-digit Indian mobile number"
+               required>
+        <div class="input-hint">10-digit Indian mobile number starting with 6-9</div>
       </div>
 
-
-
       <!-- Password -->
-      <div class="input-group">
+      <div class="input-group" id="passwordGroup">
         <i class="bx bx-lock-alt"></i>
-        <input type="password" id="password" name="password" placeholder="Password" required>
+        <input type="password" id="password" name="password" placeholder="Password" required
+               pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"
+               title="Must contain at least 8 characters, one uppercase, one lowercase, one number and one special character">
         <i class='bx bx-hide toggle-eye' id="togglePassword"></i>
+        <div class="input-hint">Create a strong password meeting all requirements</div>
       </div>
 
       <!-- Confirm Password -->
-      <div class="input-group">
+      <div class="input-group" id="confirmPasswordGroup">
         <i class="bx bx-lock-alt"></i>
         <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm Password" required>
         <i class='bx bx-hide toggle-eye' id="confirmtogglePassword"></i>
+        <div class="input-hint">Re-enter your password to confirm</div>
       </div>
 
-      <button type="submit" class="login-btn">Create Account</button>
+      <button type="submit" class="login-btn" id="signupBtn" disabled>Create Account</button>
 
       <p class="signup-link">Already have an account? <a th:href="@{/login}">Login here</a></p>
     </form>
@@ -267,6 +432,140 @@
 
   document.addEventListener('DOMContentLoaded', () => {
     console.log("✅ Signup page loaded");
+
+    // ===== Validation Functions =====
+    function validateName(name) {
+      const nameRegex = /^[A-Za-z ]{3,50}$/;
+      return nameRegex.test(name);
+    }
+
+    function validateEmail(email) {
+      const emailRegex = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/i;
+      return emailRegex.test(email);
+    }
+
+    function validateMobile(mobile) {
+      const mobileRegex = /^[6-9]\d{9}$/;
+      return mobileRegex.test(mobile);
+    }
+
+    function validatePassword(password) {
+      const requirements = {
+        length: password.length >= 8,
+        uppercase: /[A-Z]/.test(password),
+        lowercase: /[a-z]/.test(password),
+        number: /[0-9]/.test(password),
+        special: /[@$!%*?&]/.test(password)
+      };
+
+      const isValid = Object.values(requirements).every(req => req);
+
+      // Update password field visual state
+      if (password.length > 0) {
+        showValidationState('passwordGroup', isValid);
+      } else {
+        document.getElementById('passwordGroup').classList.remove('valid', 'invalid');
+      }
+
+      return isValid;
+    }
+
+    function showValidationState(inputGroupId, isValid) {
+      const inputGroup = document.getElementById(inputGroupId);
+      if (isValid) {
+        inputGroup.classList.add('valid');
+        inputGroup.classList.remove('invalid');
+      } else {
+        inputGroup.classList.add('invalid');
+        inputGroup.classList.remove('valid');
+      }
+    }
+
+    function isFormValid() {
+      const name = document.getElementById('name').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const mobile = document.getElementById('mobile').value.trim();
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+
+      return validateName(name) &&
+             validateEmail(email) &&
+             validateMobile(mobile) &&
+             validatePassword(password) &&
+             password === confirmPassword &&
+             password.length > 0;
+    }
+
+    function updateSubmitButton() {
+      const signupBtn = document.getElementById('signupBtn');
+      signupBtn.disabled = !isFormValid();
+    }
+
+    // ===== Real-time Validation =====
+    document.getElementById('name').addEventListener('input', function(e) {
+      const name = e.target.value.trim();
+      const isValid = name.length === 0 ? null : validateName(name);
+      if (isValid !== null) {
+        showValidationState('nameGroup', isValid);
+      } else {
+        document.getElementById('nameGroup').classList.remove('valid', 'invalid');
+      }
+      updateSubmitButton();
+    });
+
+    document.getElementById('email').addEventListener('input', function(e) {
+      const email = e.target.value.trim();
+      const isValid = email.length === 0 ? null : validateEmail(email);
+      if (isValid !== null) {
+        showValidationState('emailGroup', isValid);
+      } else {
+        document.getElementById('emailGroup').classList.remove('valid', 'invalid');
+      }
+      updateSubmitButton();
+    });
+
+    document.getElementById('mobile').addEventListener('input', function(e) {
+      // Allow only numbers
+      e.target.value = e.target.value.replace(/\D/g, '').slice(0, 10);
+      const mobile = e.target.value;
+      const isValid = mobile.length === 0 ? null : validateMobile(mobile);
+      if (isValid !== null) {
+        showValidationState('mobileGroup', isValid);
+      } else {
+        document.getElementById('mobileGroup').classList.remove('valid', 'invalid');
+      }
+      updateSubmitButton();
+    });
+
+    document.getElementById('password').addEventListener('input', function(e) {
+      const password = e.target.value;
+      const isValid = password.length === 0 ? null : validatePassword(password);
+
+      // Also validate confirm password when password changes
+      const confirmPassword = document.getElementById('confirmPassword').value;
+      if (confirmPassword.length > 0) {
+        validateConfirmPassword();
+      }
+
+      updateSubmitButton();
+    });
+
+    function validateConfirmPassword() {
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+      const isValid = confirmPassword.length === 0 ? null : password === confirmPassword;
+
+      if (isValid !== null) {
+        showValidationState('confirmPasswordGroup', isValid);
+      } else {
+        document.getElementById('confirmPasswordGroup').classList.remove('valid', 'invalid');
+      }
+    }
+
+    document.getElementById('confirmPassword').addEventListener('input', function(e) {
+      validateConfirmPassword();
+      updateSubmitButton();
+    });
 
     // ===== Role Selection =====
     const roleOptions = document.querySelectorAll('.role-option');
@@ -295,6 +594,19 @@
       });
     }
 
+    // Confirm Password Toggle
+    const confirmTogglePassword = document.getElementById('confirmtogglePassword');
+    const confirmPasswordInput = document.getElementById('confirmPassword');
+
+    if (confirmTogglePassword && confirmPasswordInput) {
+      confirmTogglePassword.addEventListener('click', () => {
+        const type = confirmPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        confirmPasswordInput.setAttribute('type', type);
+        confirmTogglePassword.classList.toggle('bx-hide');
+        confirmTogglePassword.classList.toggle('bx-show');
+      });
+    }
+
     // ===== Signup Form Submission =====
     const signupForm = document.getElementById('signupForm');
 
@@ -304,6 +616,11 @@
       signupForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         console.log("📤 Form submission started");
+
+        if (!isFormValid()) {
+          alert('Please fix all validation errors before submitting.');
+          return;
+        }
 
         const formData = {
           name: document.getElementById('name').value.trim(),
@@ -316,18 +633,7 @@
 
         console.log('📤 Sending signup data:', formData);
 
-        // Basic validation
-        if (!formData.name || !formData.email || !formData.mobile || !formData.password || !formData.confirmPassword) {
-          alert('Please fill in all fields');
-          return;
-        }
-
-        if (formData.password !== formData.confirmPassword) {
-          alert('Passwords do not match');
-          return;
-        }
-
-        const signupBtn = signupForm.querySelector('.login-btn');
+        const signupBtn = document.getElementById('signupBtn');
         const originalText = signupBtn.textContent;
         signupBtn.textContent = 'Creating Account...';
         signupBtn.disabled = true;

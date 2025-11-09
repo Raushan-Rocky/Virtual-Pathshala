@@ -40,4 +40,11 @@ public class PageController {
     public String homepage() {
         return "Homepage";
     }
+
+    @GetMapping("/forgotpass")
+    public String forgotpass() {
+        return "ForgotPass";
+    }
+
+
 }

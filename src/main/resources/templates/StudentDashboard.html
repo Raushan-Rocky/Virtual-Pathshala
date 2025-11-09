@@ -1,10 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Virtual Pathshala | Student Dashboard</title>
-    <link rel="icon" type="image/x-icon" th:href="@{/image/favicon.ico}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -45,6 +44,10 @@
             color: white;
             padding: 20px 0;
             transition: all 0.3s;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 100;
         }
 
         .logo {
@@ -101,6 +104,8 @@
             flex: 1;
             padding: 20px;
             overflow-y: auto;
+            margin-left: 260px;
+            transition: margin-left 0.3s;
         }
 
         .header {
@@ -122,6 +127,7 @@
             display: flex;
             align-items: center;
             gap: 15px;
+            position: relative;
         }
 
         .user-info img {
@@ -130,6 +136,12 @@
             border-radius: 50%;
             object-fit: cover;
             border: 2px solid var(--primary);
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .user-info img:hover {
+            transform: scale(1.05);
         }
 
         .user-details h4 {
@@ -352,6 +364,140 @@
             background-color: #3a9c35;
         }
 
+        /* Logout Dropdown */
+        .logout-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            padding: 10px 0;
+            min-width: 180px;
+            z-index: 1000;
+            display: none;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .logout-dropdown.active {
+            display: block;
+        }
+
+        .logout-dropdown::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            right: 15px;
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-bottom: 8px solid white;
+        }
+
+        .logout-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .logout-item:hover {
+            background: var(--light-gray);
+        }
+
+        .logout-item i {
+            margin-right: 10px;
+            color: var(--danger);
+            width: 20px;
+            text-align: center;
+        }
+
+        .logout-item span {
+            color: var(--dark);
+            font-weight: 500;
+        }
+
+        /* Logout Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            transform: translateY(-20px);
+            transition: transform 0.3s;
+        }
+
+        .modal-overlay.active .modal {
+            transform: translateY(0);
+        }
+
+        .modal-icon {
+            font-size: 48px;
+            color: var(--danger);
+            margin-bottom: 15px;
+        }
+
+        .modal h3 {
+            font-size: 22px;
+            margin-bottom: 10px;
+            color: var(--dark);
+        }
+
+        .modal p {
+            color: var(--gray);
+            margin-bottom: 25px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+
+        .btn-secondary {
+            background-color: var(--gray);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+
         /* Notes Section */
         .notes-grid {
             display: grid;
@@ -484,6 +630,21 @@
             font-weight: 500;
         }
 
+        /* Page Sections */
+        .page-section {
+            display: none;
+        }
+
+        .page-section.active {
+            display: block;
+        }
+
+        /* Animation */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
         /* Responsive Design */
         @media (max-width: 992px) {
             .container {
@@ -492,7 +653,13 @@
 
             .sidebar {
                 width: 100%;
+                height: auto;
+                position: relative;
                 padding: 15px;
+            }
+
+            .main-content {
+                margin-left: 0;
             }
 
             .nav-links {
@@ -549,14 +716,14 @@
             <h1>VIRTUAL PATHSHALA</h1>
         </div>
         <ul class="nav-links">
-            <li class="active"><i class="fas fa-home"></i> <span>Dashboard</span></li>
-            <li><i class="fas fa-book"></i> <span>My Courses</span></li>
-            <li><i class="fas fa-tasks"></i> <span>Assignments</span></li>
-            <li><i class="fas fa-file-alt"></i> <span>Notes</span></li>
-            <li><i class="fas fa-calendar-alt"></i> <span>Calendar</span></li>
-            <li><i class="fas fa-chart-line"></i> <span>Progress</span></li>
-            <li><i class="fas fa-cog"></i> <span>Settings</span></li>
-            <li><i class="fas fa-question-circle"></i> <span>Help</span></li>
+            <li class="active" data-section="dashboard"><i class="fas fa-home"></i> <span>Dashboard</span></li>
+            <li data-section="courses"><i class="fas fa-book"></i> <span>My Courses</span></li>
+            <li data-section="assignments"><i class="fas fa-tasks"></i> <span>Assignments</span></li>
+            <li data-section="notes"><i class="fas fa-file-alt"></i> <span>Notes</span></li>
+            <li data-section="calendar"><i class="fas fa-calendar-alt"></i> <span>Calendar</span></li>
+            <li data-section="progress"><i class="fas fa-chart-line"></i> <span>Progress</span></li>
+            <li data-section="settings"><i class="fas fa-cog"></i> <span>Settings</span></li>
+            <li data-section="help"><i class="fas fa-question-circle"></i> <span>Help</span></li>
         </ul>
     </div>
 
@@ -564,233 +731,652 @@
     <div class="main-content">
         <!-- Header -->
         <div class="header">
-            <h2>STUDENT DASHBOARD</h2>
+            <h2 id="page-title">STUDENT DASHBOARD</h2>
             <div class="user-info">
                 <div class="user-details">
                     <h4 id="userName">Alex Johnson</h4>
                     <p id="userRole">Student</p>
                 </div>
-                <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="User Profile">
-            </div>
-        </div>
-
-        <!-- Profile Section -->
-        <div class="profile-section">
-            <div class="profile-header">
-                <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Profile" class="profile-avatar">
-                <div class="profile-details">
-                    <h3 id="profileName">Alex Johnson</h3>
-                    <p id="profileEmail">alex.johnson@student.edu</p>
-                    <p id="profileRole">Student</p>
-                    <span class="status-badge status-inactive" id="profileStatus">INACTIVE</span>
-                </div>
-            </div>
-            <div class="profile-info-grid">
-                <div class="info-item">
-                    <div class="info-label">Full Name</div>
-                    <div class="info-value" id="infoName">Alex Johnson</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Email Address</div>
-                    <div class="info-value" id="infoEmail">alex.johnson@student.edu</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">User Role</div>
-                    <div class="info-value" id="infoRole">Student</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Account Status</div>
-                    <div class="info-value" id="infoStatus">INACTIVE</div>
+                <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="User Profile" id="userProfileImg">
+                <div class="logout-dropdown" id="logoutDropdown">
+                    <div class="logout-item" id="logoutOption">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Logout</span>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Dashboard Cards -->
-        <div class="dashboard-cards">
+        <!-- Dashboard Section -->
+        <div id="dashboard" class="page-section active">
+            <!-- Profile Section -->
+            <div class="profile-section">
+                <div class="profile-header">
+                    <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Profile" class="profile-avatar">
+                    <div class="profile-details">
+                        <h3 id="profileName">Alex Johnson</h3>
+                        <p id="profileEmail">alex.johnson@student.edu</p>
+                        <p id="profileRole">Student</p>
+                        <span class="status-badge status-active" id="profileStatus">ACTIVE</span>
+                    </div>
+                </div>
+                <div class="profile-info-grid">
+                    <div class="info-item">
+                        <div class="info-label">Full Name</div>
+                        <div class="info-value" id="infoName">Alex Johnson</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Email Address</div>
+                        <div class="info-value" id="infoEmail">alex.johnson@student.edu</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">User Role</div>
+                        <div class="info-value" id="infoRole">Student</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Account Status</div>
+                        <div class="info-value" id="infoStatus">ACTIVE</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dashboard Cards -->
+            <div class="dashboard-cards">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Enrolled Courses</h3>
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <div class="card-content">
+                        <h2>6</h2>
+                        <p>Active this semester</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Assignments Due</h3>
+                        <i class="fas fa-tasks"></i>
+                    </div>
+                    <div class="card-content">
+                        <h2>3</h2>
+                        <p>Next 7 days</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Average Grade</h3>
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="card-content">
+                        <h2>87%</h2>
+                        <p>Current semester</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Study Hours</h3>
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="card-content">
+                        <h2>24.5</h2>
+                        <p>This week</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Enrolled Courses -->
+            <h3 class="section-title">Enrolled Courses</h3>
+            <div class="courses-grid">
+                <div class="course-card">
+                    <div class="course-image" style="background-color: #4361ee;"></div>
+                    <div class="course-content">
+                        <h3 class="course-title">Data Structures & Algorithms</h3>
+                        <p class="course-instructor">Prof. Michael Chen</p>
+                        <div class="course-progress">
+                            <div class="progress-bar">
+                                <div class="progress" style="width: 75%;"></div>
+                            </div>
+                            <div class="progress-text">
+                                <span>Progress</span>
+                                <span>75%</span>
+                            </div>
+                        </div>
+                        <div class="course-actions">
+                            <button class="btn btn-primary">Continue</button>
+                            <button class="btn btn-outline">View Details</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="course-card">
+                    <div class="course-image" style="background-color: #3a0ca3;"></div>
+                    <div class="course-content">
+                        <h3 class="course-title">Database Management Systems</h3>
+                        <p class="course-instructor">Dr. Sarah Williams</p>
+                        <div class="course-progress">
+                            <div class="progress-bar">
+                                <div class="progress" style="width: 60%;"></div>
+                            </div>
+                            <div class="progress-text">
+                                <span>Progress</span>
+                                <span>60%</span>
+                            </div>
+                        </div>
+                        <div class="course-actions">
+                            <button class="btn btn-primary">Continue</button>
+                            <button class="btn btn-outline">View Details</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="course-card">
+                    <div class="course-image" style="background-color: #4cc9f0;"></div>
+                    <div class="course-content">
+                        <h3 class="course-title">Web Development</h3>
+                        <p class="course-instructor">Prof. Robert Garcia</p>
+                        <div class="course-progress">
+                            <div class="progress-bar">
+                                <div class="progress" style="width: 40%;"></div>
+                            </div>
+                            <div class="progress-text">
+                                <span>Progress</span>
+                                <span>40%</span>
+                            </div>
+                        </div>
+                        <div class="course-actions">
+                            <button class="btn btn-primary">Continue</button>
+                            <button class="btn btn-outline">View Details</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Assignments -->
+            <h3 class="section-title">Pending Assignments</h3>
+            <div class="assignments-list">
+                <div class="assignment-item">
+                    <div class="assignment-info">
+                        <h4>Algorithm Analysis Report</h4>
+                        <p>Data Structures & Algorithms</p>
+                    </div>
+                    <div class="assignment-due">
+                        <span class="due-date">Due: Tomorrow, 11:59 PM</span>
+                        <button class="btn btn-success">Submit</button>
+                    </div>
+                </div>
+                <div class="assignment-item">
+                    <div class="assignment-info">
+                        <h4>SQL Query Optimization</h4>
+                        <p>Database Management Systems</p>
+                    </div>
+                    <div class="assignment-due">
+                        <span class="due-date">Due: Oct 15, 11:59 PM</span>
+                        <button class="btn btn-success">Submit</button>
+                    </div>
+                </div>
+                <div class="assignment-item">
+                    <div class="assignment-info">
+                        <h4>Responsive Web Design Project</h4>
+                        <p>Web Development</p>
+                    </div>
+                    <div class="assignment-due">
+                        <span class="due-date">Due: Oct 18, 11:59 PM</span>
+                        <button class="btn btn-success">Submit</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notes -->
+            <h3 class="section-title">Download Notes</h3>
+            <div class="notes-grid">
+                <div class="note-card">
+                    <div class="note-header">
+                        <div class="note-icon">
+                            <i class="fas fa-file-pdf"></i>
+                        </div>
+                        <h4 class="note-title">Data Structures Notes</h4>
+                    </div>
+                    <p class="note-description">Complete notes on arrays, linked lists, trees, and graphs.</p>
+                    <div class="note-actions">
+                        <button class="btn btn-outline"><i class="fas fa-eye"></i> Preview</button>
+                        <button class="btn btn-primary"><i class="fas fa-download"></i> Download</button>
+                    </div>
+                </div>
+                <div class="note-card">
+                    <div class="note-header">
+                        <div class="note-icon">
+                            <i class="fas fa-file-pdf"></i>
+                        </div>
+                        <h4 class="note-title">SQL Cheat Sheet</h4>
+                    </div>
+                    <p class="note-description">Quick reference for SQL queries, functions, and commands.</p>
+                    <div class="note-actions">
+                        <button class="btn btn-outline"><i class="fas fa-eye"></i> Preview</button>
+                        <button class="btn btn-primary"><i class="fas fa-download"></i> Download</button>
+                    </div>
+                </div>
+                <div class="note-card">
+                    <div class="note-header">
+                        <div class="note-icon">
+                            <i class="fas fa-file-pdf"></i>
+                        </div>
+                        <h4 class="note-title">HTML/CSS Guide</h4>
+                    </div>
+                    <p class="note-description">Comprehensive guide to HTML5 and CSS3 with examples.</p>
+                    <div class="note-actions">
+                        <button class="btn btn-outline"><i class="fas fa-eye"></i> Preview</button>
+                        <button class="btn btn-primary"><i class="fas fa-download"></i> Download</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- My Courses Section -->
+        <div id="courses" class="page-section">
+            <h2 class="section-title">My Courses</h2>
+            <div class="courses-grid">
+                <div class="course-card">
+                    <div class="course-image" style="background-color: #4361ee;"></div>
+                    <div class="course-content">
+                        <h3 class="course-title">Data Structures & Algorithms</h3>
+                        <p class="course-instructor">Prof. Michael Chen</p>
+                        <div class="course-progress">
+                            <div class="progress-bar">
+                                <div class="progress" style="width: 75%;"></div>
+                            </div>
+                            <div class="progress-text">
+                                <span>Progress</span>
+                                <span>75%</span>
+                            </div>
+                        </div>
+                        <div class="course-actions">
+                            <button class="btn btn-primary">Continue</button>
+                            <button class="btn btn-outline">View Details</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="course-card">
+                    <div class="course-image" style="background-color: #3a0ca3;"></div>
+                    <div class="course-content">
+                        <h3 class="course-title">Database Management Systems</h3>
+                        <p class="course-instructor">Dr. Sarah Williams</p>
+                        <div class="course-progress">
+                            <div class="progress-bar">
+                                <div class="progress" style="width: 60%;"></div>
+                            </div>
+                            <div class="progress-text">
+                                <span>Progress</span>
+                                <span>60%</span>
+                            </div>
+                        </div>
+                        <div class="course-actions">
+                            <button class="btn btn-primary">Continue</button>
+                            <button class="btn btn-outline">View Details</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="course-card">
+                    <div class="course-image" style="background-color: #4cc9f0;"></div>
+                    <div class="course-content">
+                        <h3 class="course-title">Web Development</h3>
+                        <p class="course-instructor">Prof. Robert Garcia</p>
+                        <div class="course-progress">
+                            <div class="progress-bar">
+                                <div class="progress" style="width: 40%;"></div>
+                            </div>
+                            <div class="progress-text">
+                                <span>Progress</span>
+                                <span>40%</span>
+                            </div>
+                        </div>
+                        <div class="course-actions">
+                            <button class="btn btn-primary">Continue</button>
+                            <button class="btn btn-outline">View Details</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="course-card">
+                    <div class="course-image" style="background-color: #f72585;"></div>
+                    <div class="course-content">
+                        <h3 class="course-title">Machine Learning</h3>
+                        <p class="course-instructor">Dr. Emily Zhang</p>
+                        <div class="course-progress">
+                            <div class="progress-bar">
+                                <div class="progress" style="width: 30%;"></div>
+                            </div>
+                            <div class="progress-text">
+                                <span>Progress</span>
+                                <span>30%</span>
+                            </div>
+                        </div>
+                        <div class="course-actions">
+                            <button class="btn btn-primary">Continue</button>
+                            <button class="btn btn-outline">View Details</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="course-card">
+                    <div class="course-image" style="background-color: #7209b7;"></div>
+                    <div class="course-content">
+                        <h3 class="course-title">Software Engineering</h3>
+                        <p class="course-instructor">Prof. David Wilson</p>
+                        <div class="course-progress">
+                            <div class="progress-bar">
+                                <div class="progress" style="width: 55%;"></div>
+                            </div>
+                            <div class="progress-text">
+                                <span>Progress</span>
+                                <span>55%</span>
+                            </div>
+                        </div>
+                        <div class="course-actions">
+                            <button class="btn btn-primary">Continue</button>
+                            <button class="btn btn-outline">View Details</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="course-card">
+                    <div class="course-image" style="background-color: #4895ef;"></div>
+                    <div class="course-content">
+                        <h3 class="course-title">Computer Networks</h3>
+                        <p class="course-instructor">Dr. Lisa Brown</p>
+                        <div class="course-progress">
+                            <div class="progress-bar">
+                                <div class="progress" style="width: 65%;"></div>
+                            </div>
+                            <div class="progress-text">
+                                <span>Progress</span>
+                                <span>65%</span>
+                            </div>
+                        </div>
+                        <div class="course-actions">
+                            <button class="btn btn-primary">Continue</button>
+                            <button class="btn btn-outline">View Details</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Assignments Section -->
+        <div id="assignments" class="page-section">
+            <h2 class="section-title">All Assignments</h2>
+            <div class="assignments-list">
+                <div class="assignment-item">
+                    <div class="assignment-info">
+                        <h4>Algorithm Analysis Report</h4>
+                        <p>Data Structures & Algorithms</p>
+                    </div>
+                    <div class="assignment-due">
+                        <span class="due-date">Due: Tomorrow, 11:59 PM</span>
+                        <button class="btn btn-success">Submit</button>
+                    </div>
+                </div>
+                <div class="assignment-item">
+                    <div class="assignment-info">
+                        <h4>SQL Query Optimization</h4>
+                        <p>Database Management Systems</p>
+                    </div>
+                    <div class="assignment-due">
+                        <span class="due-date">Due: Oct 15, 11:59 PM</span>
+                        <button class="btn btn-success">Submit</button>
+                    </div>
+                </div>
+                <div class="assignment-item">
+                    <div class="assignment-info">
+                        <h4>Responsive Web Design Project</h4>
+                        <p>Web Development</p>
+                    </div>
+                    <div class="assignment-due">
+                        <span class="due-date">Due: Oct 18, 11:59 PM</span>
+                        <button class="btn btn-success">Submit</button>
+                    </div>
+                </div>
+                <div class="assignment-item">
+                    <div class="assignment-info">
+                        <h4>Linear Regression Implementation</h4>
+                        <p>Machine Learning</p>
+                    </div>
+                    <div class="assignment-due">
+                        <span class="due-date">Due: Oct 22, 11:59 PM</span>
+                        <button class="btn btn-success">Submit</button>
+                    </div>
+                </div>
+                <div class="assignment-item">
+                    <div class="assignment-info">
+                        <h4>Software Requirements Document</h4>
+                        <p>Software Engineering</p>
+                    </div>
+                    <div class="assignment-due">
+                        <span class="due-date">Due: Oct 25, 11:59 PM</span>
+                        <button class="btn btn-success">Submit</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div id="notes" class="page-section">
+            <h2 class="section-title">All Notes</h2>
+            <div class="notes-grid">
+                <div class="note-card">
+                    <div class="note-header">
+                        <div class="note-icon">
+                            <i class="fas fa-file-pdf"></i>
+                        </div>
+                        <h4 class="note-title">Data Structures Notes</h4>
+                    </div>
+                    <p class="note-description">Complete notes on arrays, linked lists, trees, and graphs.</p>
+                    <div class="note-actions">
+                        <button class="btn btn-outline"><i class="fas fa-eye"></i> Preview</button>
+                        <button class="btn btn-primary"><i class="fas fa-download"></i> Download</button>
+                    </div>
+                </div>
+                <div class="note-card">
+                    <div class="note-header">
+                        <div class="note-icon">
+                            <i class="fas fa-file-pdf"></i>
+                        </div>
+                        <h4 class="note-title">SQL Cheat Sheet</h4>
+                    </div>
+                    <p class="note-description">Quick reference for SQL queries, functions, and commands.</p>
+                    <div class="note-actions">
+                        <button class="btn btn-outline"><i class="fas fa-eye"></i> Preview</button>
+                        <button class="btn btn-primary"><i class="fas fa-download"></i> Download</button>
+                    </div>
+                </div>
+                <div class="note-card">
+                    <div class="note-header">
+                        <div class="note-icon">
+                            <i class="fas fa-file-pdf"></i>
+                        </div>
+                        <h4 class="note-title">HTML/CSS Guide</h4>
+                    </div>
+                    <p class="note-description">Comprehensive guide to HTML5 and CSS3 with examples.</p>
+                    <div class="note-actions">
+                        <button class="btn btn-outline"><i class="fas fa-eye"></i> Preview</button>
+                        <button class="btn btn-primary"><i class="fas fa-download"></i> Download</button>
+                    </div>
+                </div>
+                <div class="note-card">
+                    <div class="note-header">
+                        <div class="note-icon">
+                            <i class="fas fa-file-pdf"></i>
+                        </div>
+                        <h4 class="note-title">Machine Learning Basics</h4>
+                    </div>
+                    <p class="note-description">Introduction to ML concepts, algorithms, and applications.</p>
+                    <div class="note-actions">
+                        <button class="btn btn-outline"><i class="fas fa-eye"></i> Preview</button>
+                        <button class="btn btn-primary"><i class="fas fa-download"></i> Download</button>
+                    </div>
+                </div>
+                <div class="note-card">
+                    <div class="note-header">
+                        <div class="note-icon">
+                            <i class="fas fa-file-pdf"></i>
+                        </div>
+                        <h4 class="note-title">Software Engineering Principles</h4>
+                    </div>
+                    <p class="note-description">Key concepts in software development methodologies.</p>
+                    <div class="note-actions">
+                        <button class="btn btn-outline"><i class="fas fa-eye"></i> Preview</button>
+                        <button class="btn btn-primary"><i class="fas fa-download"></i> Download</button>
+                    </div>
+                </div>
+                <div class="note-card">
+                    <div class="note-header">
+                        <div class="note-icon">
+                            <i class="fas fa-file-pdf"></i>
+                        </div>
+                        <h4 class="note-title">Network Protocols</h4>
+                    </div>
+                    <p class="note-description">Detailed explanation of TCP/IP and other network protocols.</p>
+                    <div class="note-actions">
+                        <button class="btn btn-outline"><i class="fas fa-eye"></i> Preview</button>
+                        <button class="btn btn-primary"><i class="fas fa-download"></i> Download</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Calendar Section -->
+        <div id="calendar" class="page-section">
+            <h2 class="section-title">Academic Calendar</h2>
             <div class="card">
                 <div class="card-header">
-                    <h3>Enrolled Courses</h3>
-                    <i class="fas fa-book"></i>
+                    <h3>October 2023</h3>
                 </div>
                 <div class="card-content">
-                    <h2>6</h2>
-                    <p>Active this semester</p>
-                </div>
-            </div>
-            <div class="card">
-                <div class="card-header">
-                    <h3>Assignments Due</h3>
-                    <i class="fas fa-tasks"></i>
-                </div>
-                <div class="card-content">
-                    <h2>3</h2>
-                    <p>Next 7 days</p>
-                </div>
-            </div>
-            <div class="card">
-                <div class="card-header">
-                    <h3>Average Grade</h3>
-                    <i class="fas fa-chart-line"></i>
-                </div>
-                <div class="card-content">
-                    <h2>87%</h2>
-                    <p>Current semester</p>
-                </div>
-            </div>
-            <div class="card">
-                <div class="card-header">
-                    <h3>Study Hours</h3>
-                    <i class="fas fa-clock"></i>
-                </div>
-                <div class="card-content">
-                    <h2>24.5</h2>
-                    <p>This week</p>
+                    <p>Calendar functionality would be implemented here with a full calendar view showing important dates, deadlines, and events.</p>
                 </div>
             </div>
         </div>
 
-        <!-- Enrolled Courses -->
-        <h3 class="section-title">Enrolled Courses</h3>
-        <div class="courses-grid">
-            <div class="course-card">
-                <div class="course-image" style="background-color: #4361ee;"></div>
-                <div class="course-content">
-                    <h3 class="course-title">Data Structures & Algorithms</h3>
-                    <p class="course-instructor">Prof. Michael Chen</p>
-                    <div class="course-progress">
-                        <div class="progress-bar">
-                            <div class="progress" style="width: 75%;"></div>
-                        </div>
-                        <div class="progress-text">
-                            <span>Progress</span>
-                            <span>75%</span>
-                        </div>
+        <!-- Progress Section -->
+        <div id="progress" class="page-section">
+            <h2 class="section-title">Academic Progress</h2>
+            <div class="dashboard-cards">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Overall GPA</h3>
+                        <i class="fas fa-chart-line"></i>
                     </div>
-                    <div class="course-actions">
-                        <button class="btn btn-primary">Continue</button>
-                        <button class="btn btn-outline">View Details</button>
+                    <div class="card-content">
+                        <h2>3.75</h2>
+                        <p>Out of 4.0 scale</p>
                     </div>
                 </div>
-            </div>
-            <div class="course-card">
-                <div class="course-image" style="background-color: #3a0ca3;"></div>
-                <div class="course-content">
-                    <h3 class="course-title">Database Management Systems</h3>
-                    <p class="course-instructor">Dr. Sarah Williams</p>
-                    <div class="course-progress">
-                        <div class="progress-bar">
-                            <div class="progress" style="width: 60%;"></div>
-                        </div>
-                        <div class="progress-text">
-                            <span>Progress</span>
-                            <span>60%</span>
-                        </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Completed Credits</h3>
+                        <i class="fas fa-check-circle"></i>
                     </div>
-                    <div class="course-actions">
-                        <button class="btn btn-primary">Continue</button>
-                        <button class="btn btn-outline">View Details</button>
+                    <div class="card-content">
+                        <h2>96</h2>
+                        <p>Out of 120 required</p>
                     </div>
                 </div>
-            </div>
-            <div class="course-card">
-                <div class="course-image" style="background-color: #4cc9f0;"></div>
-                <div class="course-content">
-                    <h3 class="course-title">Web Development</h3>
-                    <p class="course-instructor">Prof. Robert Garcia</p>
-                    <div class="course-progress">
-                        <div class="progress-bar">
-                            <div class="progress" style="width: 40%;"></div>
-                        </div>
-                        <div class="progress-text">
-                            <span>Progress</span>
-                            <span>40%</span>
-                        </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Attendance Rate</h3>
+                        <i class="fas fa-user-check"></i>
                     </div>
-                    <div class="course-actions">
-                        <button class="btn btn-primary">Continue</button>
-                        <button class="btn btn-outline">View Details</button>
+                    <div class="card-content">
+                        <h2>92%</h2>
+                        <p>This semester</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Assignments -->
-        <h3 class="section-title">Pending Assignments</h3>
-        <div class="assignments-list">
-            <div class="assignment-item">
-                <div class="assignment-info">
-                    <h4>Algorithm Analysis Report</h4>
-                    <p>Data Structures & Algorithms</p>
-                </div>
-                <div class="assignment-due">
-                    <span class="due-date">Due: Tomorrow, 11:59 PM</span>
-                    <button class="btn btn-success">Submit</button>
-                </div>
-            </div>
-            <div class="assignment-item">
-                <div class="assignment-info">
-                    <h4>SQL Query Optimization</h4>
-                    <p>Database Management Systems</p>
-                </div>
-                <div class="assignment-due">
-                    <span class="due-date">Due: Oct 15, 11:59 PM</span>
-                    <button class="btn btn-success">Submit</button>
-                </div>
-            </div>
-            <div class="assignment-item">
-                <div class="assignment-info">
-                    <h4>Responsive Web Design Project</h4>
-                    <p>Web Development</p>
-                </div>
-                <div class="assignment-due">
-                    <span class="due-date">Due: Oct 18, 11:59 PM</span>
-                    <button class="btn btn-success">Submit</button>
+        <!-- Settings Section -->
+        <div id="settings" class="page-section">
+            <h2 class="section-title">Account Settings</h2>
+            <div class="profile-section">
+                <div class="profile-info-grid">
+                    <div class="info-item">
+                        <div class="info-label">Notification Preferences</div>
+                        <div class="info-value">
+                            <button class="btn btn-outline">Manage</button>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Privacy Settings</div>
+                        <div class="info-value">
+                            <button class="btn btn-outline">Configure</button>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Change Password</div>
+                        <div class="info-value">
+                            <button class="btn btn-outline">Update</button>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Language Preference</div>
+                        <div class="info-value">
+                            <button class="btn btn-outline">English</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Notes -->
-        <h3 class="section-title">Download Notes</h3>
-        <div class="notes-grid">
-            <div class="note-card">
-                <div class="note-header">
-                    <div class="note-icon">
-                        <i class="fas fa-file-pdf"></i>
+        <!-- Help Section -->
+        <div id="help" class="page-section">
+            <h2 class="section-title">Help & Support</h2>
+            <div class="notes-grid">
+                <div class="note-card">
+                    <div class="note-header">
+                        <div class="note-icon">
+                            <i class="fas fa-question-circle"></i>
+                        </div>
+                        <h4 class="note-title">FAQs</h4>
                     </div>
-                    <h4 class="note-title">Data Structures Notes</h4>
+                    <p class="note-description">Find answers to frequently asked questions about the platform.</p>
+                    <div class="note-actions">
+                        <button class="btn btn-primary">View FAQs</button>
+                    </div>
                 </div>
-                <p class="note-description">Complete notes on arrays, linked lists, trees, and graphs.</p>
-                <div class="note-actions">
-                    <button class="btn btn-outline"><i class="fas fa-eye"></i> Preview</button>
-                    <button class="btn btn-primary"><i class="fas fa-download"></i> Download</button>
+                <div class="note-card">
+                    <div class="note-header">
+                        <div class="note-icon">
+                            <i class="fas fa-book"></i>
+                        </div>
+                        <h4 class="note-title">User Guide</h4>
+                    </div>
+                    <p class="note-description">Comprehensive guide to using all features of Virtual Pathshala.</p>
+                    <div class="note-actions">
+                        <button class="btn btn-primary">View Guide</button>
+                    </div>
+                </div>
+                <div class="note-card">
+                    <div class="note-header">
+                        <div class="note-icon">
+                            <i class="fas fa-headset"></i>
+                        </div>
+                        <h4 class="note-title">Contact Support</h4>
+                    </div>
+                    <p class="note-description">Get in touch with our support team for personalized assistance.</p>
+                    <div class="note-actions">
+                        <button class="btn btn-primary">Contact Us</button>
+                    </div>
                 </div>
             </div>
-            <div class="note-card">
-                <div class="note-header">
-                    <div class="note-icon">
-                        <i class="fas fa-file-pdf"></i>
-                    </div>
-                    <h4 class="note-title">SQL Cheat Sheet</h4>
-                </div>
-                <p class="note-description">Quick reference for SQL queries, functions, and commands.</p>
-                <div class="note-actions">
-                    <button class="btn btn-outline"><i class="fas fa-eye"></i> Preview</button>
-                    <button class="btn btn-primary"><i class="fas fa-download"></i> Download</button>
-                </div>
-            </div>
-            <div class="note-card">
-                <div class="note-header">
-                    <div class="note-icon">
-                        <i class="fas fa-file-pdf"></i>
-                    </div>
-                    <h4 class="note-title">HTML/CSS Guide</h4>
-                </div>
-                <p class="note-description">Comprehensive guide to HTML5 and CSS3 with examples.</p>
-                <div class="note-actions">
-                    <button class="btn btn-outline"><i class="fas fa-eye"></i> Preview</button>
-                    <button class="btn btn-primary"><i class="fas fa-download"></i> Download</button>
-                </div>
-            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Logout Confirmation Modal -->
+<div class="modal-overlay" id="logoutModal">
+    <div class="modal">
+        <div class="modal-icon">
+            <i class="fas fa-sign-out-alt"></i>
+        </div>
+        <h3>Confirm Logout</h3>
+        <p>Are you sure you want to logout from Virtual Pathshala?</p>
+        <div class="modal-actions">
+            <button class="btn btn-danger" id="confirmLogout">Yes, Logout</button>
+            <button class="btn btn-secondary" id="cancelLogout">Cancel</button>
         </div>
     </div>
 </div>
@@ -800,9 +1386,21 @@
     const userData = {
         name: "Alex Johnson",
         email: "alex.johnson@student.edu",
-        password: "********", // In a real app, password would be hidden
+        password: "********",
         role: "STUDENT",
-        status: "INACTIVE"
+        status: "ACTIVE"
+    };
+
+    // Page titles for each section
+    const pageTitles = {
+        dashboard: "STUDENT DASHBOARD",
+        courses: "MY COURSES",
+        assignments: "ASSIGNMENTS",
+        notes: "NOTES & MATERIALS",
+        calendar: "ACADEMIC CALENDAR",
+        progress: "ACADEMIC PROGRESS",
+        settings: "ACCOUNT SETTINGS",
+        help: "HELP & SUPPORT"
     };
 
     // Simple JavaScript for interactive elements
@@ -822,13 +1420,86 @@
         document.getElementById('infoRole').textContent = formatRole(userData.role);
         document.getElementById('infoStatus').textContent = userData.status;
 
-        // Navigation active state
+        // Navigation functionality
         const navLinks = document.querySelectorAll('.nav-links li');
+        const pageSections = document.querySelectorAll('.page-section');
+        const pageTitle = document.getElementById('page-title');
+
         navLinks.forEach(link => {
             link.addEventListener('click', function() {
+                const targetSection = this.getAttribute('data-section');
+
+                // Update active navigation link
                 navLinks.forEach(l => l.classList.remove('active'));
                 this.classList.add('active');
+
+                // Show the corresponding section
+                pageSections.forEach(section => {
+                    section.classList.remove('active');
+                });
+                document.getElementById(targetSection).classList.add('active');
+
+                // Update page title
+                pageTitle.textContent = pageTitles[targetSection];
             });
+        });
+
+        // Profile image click to show logout dropdown
+        const profileImg = document.getElementById('userProfileImg');
+        const logoutDropdown = document.getElementById('logoutDropdown');
+
+        profileImg.addEventListener('click', function(e) {
+            e.stopPropagation();
+            logoutDropdown.classList.toggle('active');
+        });
+
+        // Prevent dropdown from closing when clicking inside it
+        logoutDropdown.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+
+        // Close dropdown when clicking elsewhere
+        document.addEventListener('click', function() {
+            logoutDropdown.classList.remove('active');
+        });
+
+        // Logout option click
+        const logoutOption = document.getElementById('logoutOption');
+        const logoutModal = document.getElementById('logoutModal');
+        const confirmLogout = document.getElementById('confirmLogout');
+        const cancelLogout = document.getElementById('cancelLogout');
+
+        logoutOption.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            logoutDropdown.classList.remove('active');
+            logoutModal.classList.add('active');
+        });
+
+        // Confirm logout
+        confirmLogout.addEventListener('click', function() {
+
+            window.location.href = '/login'; // Uncomment for actual implementation
+            logoutModal.classList.remove('active');
+
+            // Simulate redirect after alert
+            setTimeout(() => {
+                // This would be the actual redirect in a real application
+                // window.location.href = '/login';
+                console.log('Redirecting to login page...');
+            }, 1000);
+        });
+
+        // Cancel logout
+        cancelLogout.addEventListener('click', function() {
+            logoutModal.classList.remove('active');
+        });
+
+        // Close modal when clicking outside
+        logoutModal.addEventListener('click', function(e) {
+            if (e.target === logoutModal) {
+                logoutModal.classList.remove('active');
+            }
         });
 
         // Assignment submission
@@ -837,7 +1508,6 @@
             button.addEventListener('click', function() {
                 const assignmentName = this.closest('.assignment-item').querySelector('h4').textContent;
                 alert(`Opening submission form for: ${assignmentName}`);
-                // In a real application, this would open a modal or redirect to a submission page
             });
         });
 
@@ -847,7 +1517,6 @@
             button.addEventListener('click', function() {
                 const noteName = this.closest('.note-card').querySelector('.note-title').textContent;
                 alert(`Downloading: ${noteName}`);
-                // In a real application, this would trigger a file download
             });
         });
 
@@ -857,7 +1526,6 @@
             button.addEventListener('click', function() {
                 const courseName = this.closest('.course-card').querySelector('.course-title').textContent;
                 alert(`Continuing: ${courseName}`);
-                // In a real application, this would redirect to the course content
             });
         });
     });
