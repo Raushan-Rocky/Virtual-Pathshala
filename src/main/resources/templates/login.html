@@ -570,7 +570,7 @@
       console.error('❌ Login error:', error);
 
       if (error.message.includes('JSON') || error.message.includes('response format')) {
-        showMessage('errorMessage', 'Server error: Please contact administrator.');
+        showMessage('errorMessage', 'Role Mismatched select valid user Role.');
       } else if (error.message.includes('Network') || error.message.includes('Failed to fetch')) {
         showMessage('errorMessage', 'Network error: Please check your internet connection.');
       } else {

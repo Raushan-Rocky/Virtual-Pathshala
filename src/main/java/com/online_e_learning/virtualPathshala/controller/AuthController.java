@@ -53,11 +53,31 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         try {
+            // 🔹 Role uppercase me convert (Teacher/Student/Admin)
+            String selectedRole = loginRequest.getRole().toUpperCase();
+
+            // 🔹 Get user by email
+            Optional<User> optionalUser = userRepository.findByEmail(loginRequest.getEmail());
+
+            if (optionalUser.isEmpty()) {
+                return ResponseEntity.status(401).body("Invalid Email");
+            }
+
+            User user = optionalUser.get();
+
+            // ✅ ROLE CHECK: Selected role must match user's real role
+            if (!user.getRole().name().equals(selectedRole)) {
+                return ResponseEntity.status(403).body("Role mismatch! Please select correct user role.");
+            }
+
+            // ✅ Password check from AuthService as earlier
             return authService.login(loginRequest);
+
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Login failed: " + e.getMessage());
         }
     }
+
 
     // ✅ SIRF YEH EK METHOD ADD KARO - Teacher dashboard ke liye
     @GetMapping("/teacher/profile")
