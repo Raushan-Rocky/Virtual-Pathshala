@@ -8,6 +8,7 @@ import com.online_e_learning.virtualPathshala.repository.UserRepository;
 import com.online_e_learning.virtualPathshala.requestDto.CourseRequestDto;
 import com.online_e_learning.virtualPathshala.responseDto.ApiResponse;
 import com.online_e_learning.virtualPathshala.responseDto.CourseResponseDto;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,15 +33,20 @@ public class CourseController {
 
     // CREATE COURSE - POST http://localhost:8040/api/courses
     @PostMapping
-    public ResponseEntity<?> createCourse(@RequestBody CourseRequestDto courseRequestDto) {
+    public ResponseEntity<?> createCourse(@RequestBody CourseRequestDto courseRequestDto,
+                                          HttpServletRequest request) {
         try {
             System.out.println("✅ Course Controller reached! Creating course: " + courseRequestDto.getTitle());
 
+            // ✅ IMPROVED: Get teacher ID from logged-in user session (more secure)
+            // For now, using from request body as before
+            int teacherId = courseRequestDto.getTeacherId();
+
             // Check if teacher exists
-            Optional<User> teacherOptional = userRepository.findById(courseRequestDto.getTeacherId());
+            Optional<User> teacherOptional = userRepository.findById(teacherId);
             if (teacherOptional.isEmpty()) {
                 return ResponseEntity.badRequest()
-                        .body(new ApiResponse<>(false, "Teacher not found with ID: " + courseRequestDto.getTeacherId()));
+                        .body(new ApiResponse<>(false, "Teacher not found with ID: " + teacherId));
             }
 
             // Check if course code already exists
@@ -50,9 +56,20 @@ public class CourseController {
             }
 
             User teacher = teacherOptional.get();
+
+            // ✅ VERIFY: Ensure the user is actually a TEACHER
+            if (!"TEACHER".equals(teacher.getRole().toString())) {
+                return ResponseEntity.badRequest()
+                        .body(new ApiResponse<>(false, "User with ID " + teacherId + " is not a teacher"));
+            }
+
             Course course = courseConverter.courseRequestDtoToCourse(courseRequestDto, teacher);
             Course savedCourse = courseRepository.save(course);
             CourseResponseDto responseDto = courseConverter.courseToCourseResponseDto(savedCourse);
+
+            // ✅ DEBUG: Print to verify teacher ID is saved
+            System.out.println("✅ Course created successfully! Teacher ID: " + savedCourse.getUser().getId());
+            System.out.println("✅ Course Teacher Name: " + savedCourse.getUser().getName());
 
             return ResponseEntity.ok(new ApiResponse<>(true, "Course created successfully", responseDto));
 

@@ -2,7 +2,9 @@ package com.online_e_learning.virtualPathshala.controller;
 
 import com.online_e_learning.virtualPathshala.converter.UserConverter;
 import com.online_e_learning.virtualPathshala.model.User;
+import com.online_e_learning.virtualPathshala.repository.UserRepository;
 import com.online_e_learning.virtualPathshala.requestDto.UserRequestDto;
+import com.online_e_learning.virtualPathshala.responseDto.ApiResponse;
 import com.online_e_learning.virtualPathshala.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -24,6 +27,9 @@ public class UserController {
 
     @Autowired
     private UserConverter userConverter;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @PostMapping
     public ResponseEntity<?> createUser(@RequestBody UserRequestDto requestDto) {
@@ -65,21 +71,33 @@ public class UserController {
         }
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<?> getUserById(@PathVariable int id) {
+    @GetMapping("/{userId}")
+    public ResponseEntity<?> getUserById(@PathVariable int userId) {
         try {
-            User user = userService.getUserById(id);
-            UserRequestDto response = userConverter.convertToResponseDto(user);
+            Optional<User> userOptional = userRepository.findById(userId);
 
-            Map<String, Object> responseBody = new HashMap<>();
-            responseBody.put("success", true);
-            responseBody.put("data", response);
-            return new ResponseEntity<>(responseBody, HttpStatus.OK);
+            if (userOptional.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(new ApiResponse<>(false, "User not found with ID: " + userId));
+            }
+
+            User user = userOptional.get();
+
+            // Create response
+            Map<String, Object> userData = new HashMap<>();
+            userData.put("id", user.getId());
+            userData.put("name", user.getName());
+            userData.put("email", user.getEmail());
+            userData.put("role", user.getRole().toString());
+            userData.put("mobile", user.getMobile());
+            userData.put("department", "Computer Science"); // Adjust as per your user model
+            userData.put("status", user.getStatus().toString());
+
+            return ResponseEntity.ok(new ApiResponse<>(true, "User data retrieved successfully", userData));
+
         } catch (Exception e) {
-            Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("success", "false");
-            errorResponse.put("error", e.getMessage());
-            return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>(false, "Error retrieving user: " + e.getMessage()));
         }
     }
 

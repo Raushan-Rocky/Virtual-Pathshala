@@ -23,17 +23,17 @@ public class PageController {
 
     @GetMapping("/student")
     public String student() {
-        return "StudentDashboard"; // Changed from StudentLogin to StudentDashboard
+        return "StudentDashboard";
     }
 
     @GetMapping("/teacher")
     public String teacher() {
-        return "TeacherDashboard"; // Create this new template
+        return "TeacherDashboard"; // ✅ Yeh sahi hai
     }
 
     @GetMapping("/admin")
     public String admin() {
-        return "AdminDashboard"; // Create this new template
+        return "AdminDashboard";
     }
 
     @GetMapping("/homepage")

@@ -1220,134 +1220,225 @@
 <script>
     // API Configuration
     const API_BASE_URL = 'http://localhost:8040/api';
-    let TEACHER_ID = null; // Dynamic teacher ID
+    let TEACHER_ID = null;
+    let CURRENT_TEACHER_DATA = null;
 
-    // Simulated user data
-    const loggedInUser = {
-        id: 1,
-        name: "Dr. Sarah Williams",
-        email: "sarah.williams@university.edu",
-        role: "TEACHER",
-        status: "ACTIVE",
-        department: "Computer Science",
-        avatar: "https://randomuser.me/api/portraits/women/44.jpg",
-        coursesTeaching: 4,
-        totalStudents: 142,
-        assignmentsToGrade: 12,
-        materialsUploaded: 28,
-        avgGrade: "87%",
-        completionRate: "92%",
-        engagementRate: "78%",
-        materialViews: 1245
-    };
+    // Simulated data for courses, assignments, and students (temporary)
+    let courses = [];
+    let assignments = [];
+    let students = [];
 
-    // Simulated data for courses, assignments, and students
-    let courses = [
-        {
-            id: 1,
-            title: "Database Management Systems",
-            code: "CS-301",
-            semester: "Fall 2023",
-            students: 42,
-            assignments: 5,
-            materials: 12,
-            color: "#4361ee"
-        },
-        {
-            id: 2,
-            title: "Advanced Algorithms",
-            code: "CS-405",
-            semester: "Fall 2023",
-            students: 36,
-            assignments: 3,
-            materials: 8,
-            color: "#3a0ca3"
-        },
-        {
-            id: 3,
-            title: "Web Technologies",
-            code: "CS-350",
-            semester: "Fall 2023",
-            students: 48,
-            assignments: 4,
-            materials: 15,
-            color: "#4cc9f0"
-        }
-    ];
-
-    let assignments = [
-        {
-            id: 1,
-            title: "SQL Query Optimization",
-            course: "Database Management Systems",
-            dueDate: "Oct 15, 2023",
-            submitted: 12,
-            total: 42
-        },
-        {
-            id: 2,
-            title: "Graph Algorithm Implementation",
-            course: "Advanced Algorithms",
-            dueDate: "Oct 18, 2023",
-            submitted: 8,
-            total: 36
-        },
-        {
-            id: 3,
-            title: "Responsive Web Design Project",
-            course: "Web Technologies",
-            dueDate: "Oct 20, 2023",
-            submitted: 15,
-            total: 48
-        }
-    ];
-
-    let students = [
-        {
-            id: 1,
-            name: "Alex Johnson",
-            course: "Database Management",
-            grade: "96%",
-            avatar: "https://randomuser.me/api/portraits/men/32.jpg"
-        },
-        {
-            id: 2,
-            name: "Maria Garcia",
-            course: "Advanced Algorithms",
-            grade: "94%",
-            avatar: "https://randomuser.me/api/portraits/women/33.jpg"
-        },
-        {
-            id: 3,
-            name: "James Wilson",
-            course: "Web Technologies",
-            grade: "92%",
-            avatar: "https://randomuser.me/api/portraits/men/22.jpg"
-        },
-        {
-            id: 4,
-            name: "Sophie Brown",
-            course: "Database Management",
-            grade: "91%",
-            avatar: "https://randomuser.me/api/portraits/women/45.jpg"
-        }
-    ];
-
-    // Simple JavaScript for interactive elements
+    // Main initialization function
     document.addEventListener('DOMContentLoaded', function() {
-        // Initialize teacher ID from logged in user
-        TEACHER_ID = loggedInUser.id;
+        initializeTeacherDashboard();
+    });
 
-        // Populate user data
-        populateUserData();
+    // ✅ NEW: Initialize teacher dashboard with actual login data
+    async function initializeTeacherDashboard() {
+        try {
+            // ✅ GET TEACHER ID FROM URL PARAMETERS OR LOCALSTORAGE
+            const urlParams = new URLSearchParams(window.location.search);
+            TEACHER_ID = urlParams.get('userId') || localStorage.getItem('userId');
 
-        // Load dynamic content
-        loadCourses();
-        loadAssignments();
-        loadStudents();
-        loadAnalytics();
-        loadSchedule();
+            if (!TEACHER_ID) {
+                console.error("❌ Teacher ID not found. Redirecting to login...");
+                alert("Please login first.");
+                window.location.href = '/login';
+                return;
+            }
 
+            console.log("✅ Teacher ID from login:", TEACHER_ID);
+
+            // ✅ FETCH ACTUAL TEACHER DATA FROM BACKEND
+            await fetchTeacherData(TEACHER_ID);
+
+            // ✅ LOAD TEACHER'S COURSES
+            await loadCoursesFromBackend();
+
+            // ✅ INITIALIZE ALL UI COMPONENTS
+            initializeUIComponents();
+
+            console.log("🎉 Teacher dashboard initialized successfully");
+
+        } catch (error) {
+            console.error('❌ Error initializing dashboard:', error);
+            alert('Error loading dashboard. Please try again.');
+        }
+    }
+
+    // ✅ NEW: Fetch actual teacher data from backend
+    async function fetchTeacherData(teacherId) {
+        try {
+            const response = await fetch(`${API_BASE_URL}/users/${teacherId}`);
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+                CURRENT_TEACHER_DATA = result.data;
+                console.log("✅ Teacher data fetched:", CURRENT_TEACHER_DATA);
+
+                // Update UI with actual teacher data
+                updateUIWithTeacherData(CURRENT_TEACHER_DATA);
+            } else {
+                throw new Error(result.message || 'Failed to fetch teacher data');
+            }
+        } catch (error) {
+            console.error('Error fetching teacher data:', error);
+            // Fallback to simulated data for demo
+            useFallbackTeacherData();
+        }
+    }
+
+    // ✅ NEW: Update UI with actual teacher data
+    function updateUIWithTeacherData(teacherData) {
+        // Update header
+        document.getElementById('userName').textContent = teacherData.name;
+        document.getElementById('userRole').textContent = formatRole(teacherData.role);
+        document.getElementById('userProfile').src = teacherData.avatar || "https://randomuser.me/api/portraits/women/44.jpg";
+
+        // Update profile section
+        document.getElementById('profileName').textContent = teacherData.name;
+        document.getElementById('profileEmail').textContent = teacherData.email;
+        document.getElementById('profileRole').textContent = `${formatRole(teacherData.role)} - ${teacherData.department || 'Computer Science'}`;
+        document.getElementById('profileAvatar').src = teacherData.avatar || "https://randomuser.me/api/portraits/women/44.jpg";
+
+        // Update profile info grid
+        document.getElementById('infoName').textContent = teacherData.name;
+        document.getElementById('infoEmail').textContent = teacherData.email;
+        document.getElementById('infoRole').textContent = formatRole(teacherData.role);
+        document.getElementById('infoStatus').textContent = teacherData.status || 'ACTIVE';
+        document.getElementById('infoDepartment').textContent = teacherData.department || 'Computer Science';
+
+        console.log("✅ UI updated with actual teacher data");
+    }
+
+    // ✅ NEW: Fallback data if backend fails
+    function useFallbackTeacherData() {
+        console.log("⚠️ Using fallback teacher data");
+
+        const fallbackData = {
+            id: TEACHER_ID,
+            name: "Dr. Sarah Williams",
+            email: "sarah.williams@university.edu",
+            role: "TEACHER",
+            department: "Computer Science",
+            status: "ACTIVE",
+            avatar: "https://randomuser.me/api/portraits/women/44.jpg"
+        };
+
+        CURRENT_TEACHER_DATA = fallbackData;
+        updateUIWithTeacherData(fallbackData);
+    }
+
+    // ✅ UPDATED: Load courses from backend with actual teacher ID
+    async function loadCoursesFromBackend() {
+        try {
+            console.log("📚 Fetching courses for Teacher ID:", TEACHER_ID);
+
+            const response = await fetch(`${API_BASE_URL}/courses/user/${TEACHER_ID}`);
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+                courses = result.data.map(course => ({
+                    id: course.id,
+                    title: course.title,
+                    code: course.code,
+                    semester: course.semester || "Current",
+                    students: course.enrollmentCount || 0,
+                    assignments: course.assignmentCount || 0,
+                    materials: course.materialCount || 0,
+                    color: getRandomColor()
+                }));
+
+                // Update dashboard counts
+                updateDashboardCounts();
+
+                // Load courses in UI
+                loadCourses();
+
+                console.log(`✅ Loaded ${courses.length} courses for Teacher ${TEACHER_ID}`);
+            } else {
+                throw new Error(result.message || 'Failed to load courses');
+            }
+        } catch (error) {
+            console.error('Error loading courses:', error);
+            // Use simulated courses for demo
+            useSimulatedCourses();
+        }
+    }
+
+    // ✅ UPDATED: Add new course with actual teacher ID
+    async function addNewCourseToBackend() {
+        const submitBtn = document.querySelector('#addCourseForm button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+
+        try {
+            // ✅ VERIFY TEACHER ID IS AVAILABLE
+            if (!TEACHER_ID) {
+                alert("Error: Teacher ID not found. Please login again.");
+                window.location.href = '/login';
+                return;
+            }
+
+            // Show loading state
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = 'Creating Course...';
+
+            // ✅ COURSE DATA WITH ACTUAL TEACHER ID
+            const courseData = {
+                title: document.getElementById('courseTitle').value,
+                code: document.getElementById('courseCode').value,
+                category: document.getElementById('courseDepartment').value,
+                description: document.getElementById('courseDescription').value,
+                department: document.getElementById('courseDepartment').value,
+                credits: parseInt(document.getElementById('courseCredits').value),
+                semester: document.getElementById('courseSemester').value,
+                capacity: parseInt(document.getElementById('courseCapacity').value),
+                schedule: document.getElementById('courseSchedule').value,
+                location: document.getElementById('courseLocation').value,
+                prerequisites: document.getElementById('coursePrerequisites').value,
+                teacherId: parseInt(TEACHER_ID) // ✅ ACTUAL LOGGED-IN TEACHER ID
+            };
+
+            console.log("📝 Creating course for Teacher ID:", TEACHER_ID);
+            console.log("Course Data:", courseData);
+
+            const response = await fetch(`${API_BASE_URL}/courses`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(courseData)
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+                alert(`✅ Course "${courseData.title}" created successfully!`);
+                console.log("🎉 Course created with Teacher ID:", TEACHER_ID);
+
+                // Reset form
+                document.getElementById('addCourseForm').reset();
+
+                // Reload courses to show new course
+                await loadCoursesFromBackend();
+
+                // Navigate to courses section
+                document.querySelector('[data-section="courses"]').click();
+            } else {
+                throw new Error(result.message || result.error || 'Failed to create course');
+            }
+        } catch (error) {
+            console.error('❌ Error creating course:', error);
+            alert(`Error: ${error.message}`);
+        } finally {
+            // Reset button state
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        }
+    }
+
+    // ✅ Initialize all UI components
+    function initializeUIComponents() {
         // Navigation active state and section switching
         const navLinks = document.querySelectorAll('.nav-links li');
         const sections = document.querySelectorAll('.section');
@@ -1397,9 +1488,14 @@
             dropdownMenu.classList.remove('active');
         });
 
-        // Dropdown menu actions...
+        // Logout functionality
         document.getElementById('logoutBtn').addEventListener('click', function() {
             if (confirm('Are you sure you want to logout?')) {
+                // Clear stored data
+                localStorage.removeItem('userId');
+                localStorage.removeItem('userEmail');
+                localStorage.removeItem('userRole');
+
                 window.location.href = '/login';
                 dropdownMenu.classList.remove('active');
             }
@@ -1460,7 +1556,7 @@
             this.reset();
         });
 
-        // Add Course Form Submission - BACKEND INTEGRATION
+        // Add Course Form Submission
         document.getElementById('addCourseForm').addEventListener('submit', function(e) {
             e.preventDefault();
             addNewCourseToBackend();
@@ -1470,99 +1566,15 @@
         document.getElementById('uploadHistoryBtn').addEventListener('click', function() {
             alert('Opening upload history...');
         });
-    });
 
-    // API Functions
-    async function addNewCourseToBackend() {
-        const submitBtn = document.querySelector('#addCourseForm button[type="submit"]');
-        const originalText = submitBtn.innerHTML;
-
-        try {
-            // Show loading state
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = 'Creating Course...';
-
-            // Complete course data for backend
-            const courseData = {
-                title: document.getElementById('courseTitle').value,
-                code: document.getElementById('courseCode').value,
-                category: document.getElementById('courseDepartment').value,
-                description: document.getElementById('courseDescription').value,
-                department: document.getElementById('courseDepartment').value,
-                credits: parseInt(document.getElementById('courseCredits').value),
-                semester: document.getElementById('courseSemester').value,
-                capacity: parseInt(document.getElementById('courseCapacity').value),
-                schedule: document.getElementById('courseSchedule').value,
-                location: document.getElementById('courseLocation').value,
-                prerequisites: document.getElementById('coursePrerequisites').value,
-                teacherId: TEACHER_ID
-            };
-
-            const response = await fetch(`${API_BASE_URL}/courses`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(courseData)
-            });
-
-            const result = await response.json();
-
-            if (response.ok && result.success) {
-                alert(`Course "${courseData.title}" created successfully!`);
-
-                // Reset form
-                document.getElementById('addCourseForm').reset();
-
-                // Reload courses from backend
-                await loadCoursesFromBackend();
-
-                // Navigate to courses section
-                document.querySelector('[data-section="courses"]').click();
-            } else {
-                throw new Error(result.error || 'Failed to create course');
-            }
-        } catch (error) {
-            console.error('Error creating course:', error);
-            alert(`Error: ${error.message}`);
-        } finally {
-            // Reset button state
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = originalText;
-        }
+        // Load initial data
+        loadAssignments();
+        loadStudents();
+        loadAnalytics();
+        loadSchedule();
     }
 
-    async function loadCoursesFromBackend() {
-        try {
-            const response = await fetch(`${API_BASE_URL}/courses/user/${TEACHER_ID}`);
-            const result = await response.json();
-
-            if (response.ok && result.success) {
-                // Update courses array with backend data
-                courses = result.data.map(course => ({
-                    id: course.id,
-                    title: course.title,
-                    code: course.code,
-                    semester: course.semester || "Current",
-                    students: 0, // You can update these from backend if available
-                    assignments: 0,
-                    materials: 0,
-                    color: getRandomColor()
-                }));
-
-                // Refresh UI
-                loadCourses();
-                updateDashboardCounts();
-            } else {
-                throw new Error(result.error || 'Failed to load courses');
-            }
-        } catch (error) {
-            console.error('Error loading courses:', error);
-            // Continue with existing courses data
-        }
-    }
-
-    // Helper Functions
+    // Helper Functions (existing - no changes needed)
     function getRandomColor() {
         const colors = ['#4361ee', '#3a0ca3', '#4cc9f0', '#7209b7', '#f72585', '#560bad'];
         return colors[Math.floor(Math.random() * colors.length)];
@@ -1571,35 +1583,11 @@
     function updateDashboardCounts() {
         document.getElementById('coursesCount').textContent = courses.length;
         document.getElementById('infoCoursesCount').textContent = courses.length;
-        loggedInUser.coursesTeaching = courses.length;
-    }
 
-    // Your existing UI functions (NO CHANGES)
-    function populateUserData() {
-        document.getElementById('userName').textContent = loggedInUser.name;
-        document.getElementById('userRole').textContent = formatRole(loggedInUser.role);
-        document.getElementById('userProfile').src = loggedInUser.avatar;
-
-        document.getElementById('profileName').textContent = loggedInUser.name;
-        document.getElementById('profileEmail').textContent = loggedInUser.email;
-        document.getElementById('profileRole').textContent = `${formatRole(loggedInUser.role)} - ${loggedInUser.department}`;
-        document.getElementById('profileAvatar').src = loggedInUser.avatar;
-        document.getElementById('profileStatus').textContent = loggedInUser.status;
-        document.getElementById('profileStatus').className = loggedInUser.status === 'ACTIVE' ?
-            'status-badge status-active' : 'status-badge status-inactive';
-
-        document.getElementById('infoName').textContent = loggedInUser.name;
-        document.getElementById('infoEmail').textContent = loggedInUser.email;
-        document.getElementById('infoRole').textContent = loggedInUser.role;
-        document.getElementById('infoStatus').textContent = loggedInUser.status;
-        document.getElementById('infoDepartment').textContent = loggedInUser.department;
-        document.getElementById('infoCoursesCount').textContent = loggedInUser.coursesTeaching;
-
-        // Dashboard cards
-        document.getElementById('coursesCount').textContent = loggedInUser.coursesTeaching;
-        document.getElementById('studentsCount').textContent = loggedInUser.totalStudents;
-        document.getElementById('assignmentsCount').textContent = loggedInUser.assignmentsToGrade;
-        document.getElementById('materialsCount').textContent = loggedInUser.materialsUploaded;
+        // Update other counts based on actual data
+        document.getElementById('studentsCount').textContent = courses.reduce((sum, course) => sum + course.students, 0);
+        document.getElementById('assignmentsCount').textContent = courses.reduce((sum, course) => sum + course.assignments, 0);
+        document.getElementById('materialsCount').textContent = courses.reduce((sum, course) => sum + course.materials, 0);
     }
 
     function loadCourses() {
@@ -1717,10 +1705,11 @@
     }
 
     function loadAnalytics() {
-        document.getElementById('avgGrade').textContent = loggedInUser.avgGrade;
-        document.getElementById('completionRate').textContent = loggedInUser.completionRate;
-        document.getElementById('engagementRate').textContent = loggedInUser.engagementRate;
-        document.getElementById('materialViews').textContent = loggedInUser.materialViews.toLocaleString();
+        // These would come from backend in real implementation
+        document.getElementById('avgGrade').textContent = "87%";
+        document.getElementById('completionRate').textContent = "92%";
+        document.getElementById('engagementRate').textContent = "78%";
+        document.getElementById('materialViews').textContent = "1245";
     }
 
     function loadSchedule() {
@@ -1760,6 +1749,47 @@
         if (role === 'ADMIN') return 'Administrator';
         return role;
     }
+
+    // Fallback functions for demo
+    function useSimulatedCourses() {
+        console.log("⚠️ Using simulated courses data");
+        courses = [
+            {
+                id: 1,
+                title: "Database Management Systems",
+                code: "CS-301",
+                semester: "Fall 2023",
+                students: 42,
+                assignments: 5,
+                materials: 12,
+                color: "#4361ee"
+            }
+        ];
+        loadCourses();
+        updateDashboardCounts();
+    }
+
+    // Initialize simulated data for assignments and students
+    assignments = [
+        {
+            id: 1,
+            title: "SQL Query Optimization",
+            course: "Database Management Systems",
+            dueDate: "Oct 15, 2023",
+            submitted: 12,
+            total: 42
+        }
+    ];
+
+    students = [
+        {
+            id: 1,
+            name: "Alex Johnson",
+            course: "Database Management",
+            grade: "96%",
+            avatar: "https://randomuser.me/api/portraits/men/32.jpg"
+        }
+    ];
 </script>
 </body>
 </html>
