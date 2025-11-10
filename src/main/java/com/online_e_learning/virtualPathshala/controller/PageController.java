@@ -21,15 +21,19 @@ public class PageController {
         return "signup";
     }
 
+
     @GetMapping("/student")
     public String student() {
         return "StudentDashboard";
     }
 
-    @GetMapping("/teacher")
-    public String teacher() {
-        return "TeacherDashboard"; // ✅ Yeh sahi hai
+    @GetMapping("/studentlogin")
+    public String studentlogin() {
+        return "Studentlogin";
     }
+
+    @GetMapping("/teacher")
+    public String teacher() { return "TeacherDashboard";}
 
     @GetMapping("/admin")
     public String admin() {

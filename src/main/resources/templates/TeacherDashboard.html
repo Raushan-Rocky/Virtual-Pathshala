@@ -1293,13 +1293,13 @@
         // Update header
         document.getElementById('userName').textContent = teacherData.name;
         document.getElementById('userRole').textContent = formatRole(teacherData.role);
-        document.getElementById('userProfile').src = teacherData.avatar || "https://randomuser.me/api/portraits/women/44.jpg";
+        document.getElementById('userProfile').src = teacherData.avatar || "";
 
         // Update profile section
         document.getElementById('profileName').textContent = teacherData.name;
         document.getElementById('profileEmail').textContent = teacherData.email;
         document.getElementById('profileRole').textContent = `${formatRole(teacherData.role)} - ${teacherData.department || 'Computer Science'}`;
-        document.getElementById('profileAvatar').src = teacherData.avatar || "https://randomuser.me/api/portraits/women/44.jpg";
+        document.getElementById('profileAvatar').src = teacherData.avatar || "";
 
         // Update profile info grid
         document.getElementById('infoName').textContent = teacherData.name;
@@ -1317,12 +1317,12 @@
 
         const fallbackData = {
             id: TEACHER_ID,
-            name: "Dr. Sarah Williams",
-            email: "sarah.williams@university.edu",
+            name: "XYZ",
+            email: "xyz.@university.edu",
             role: "TEACHER",
             department: "Computer Science",
             status: "ACTIVE",
-            avatar: "https://randomuser.me/api/portraits/women/44.jpg"
+            avatar: ""
         };
 
         CURRENT_TEACHER_DATA = fallbackData;
