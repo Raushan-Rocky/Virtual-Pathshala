@@ -104,4 +104,23 @@ public class CourseController {
     public String testEndpoint() {
         return "✅ Course Controller is working!";
     }
+
+    // GET ALL COURSES - GET http://localhost:8040/api/courses/all
+    @GetMapping("/all")
+    public ResponseEntity<?> getAllCourses() {
+        try {
+            System.out.println("✅ Fetching all courses for student view");
+
+            List<Course> courses = courseRepository.findAll();
+            List<CourseResponseDto> responseDtos = courses.stream()
+                    .map(courseConverter::courseToCourseResponseDto)
+                    .toList();
+
+            return ResponseEntity.ok(new ApiResponse<>(true, "All courses retrieved successfully", responseDtos));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>(false, "Error retrieving courses: " + e.getMessage()));
+        }
+    }
 }

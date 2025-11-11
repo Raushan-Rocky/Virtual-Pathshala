@@ -11,10 +11,12 @@ import com.online_e_learning.virtualPathshala.repository.EnrollmentRepository;
 import com.online_e_learning.virtualPathshala.repository.UserRepository;
 import com.online_e_learning.virtualPathshala.repository.CourseRepository;
 import com.online_e_learning.virtualPathshala.requestDto.EnrollmentRequestDto;
+import com.online_e_learning.virtualPathshala.responseDto.EnrollmentResponseDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class EnrollmentService {
@@ -32,7 +34,7 @@ public class EnrollmentService {
     private EnrollmentConverter enrollmentConverter;
 
     // CREATE
-    public Enrollment createEnrollment(EnrollmentRequestDto requestDto) {
+    public EnrollmentResponseDto createEnrollment(EnrollmentRequestDto requestDto) {
         User user = userRepository.findById(requestDto.getUserId())
                 .orElseThrow(() -> new UserNotFoundException("User not found with id: " + requestDto.getUserId()));
 
@@ -46,72 +48,110 @@ public class EnrollmentService {
                 });
 
         Enrollment enrollment = enrollmentConverter.convertToEntity(requestDto, user, course);
-        return enrollmentRepository.save(enrollment);
+        Enrollment savedEnrollment = enrollmentRepository.save(enrollment);
+
+        // ✅ Use the method with JOIN FETCH to get complete data
+        Enrollment completeEnrollment = enrollmentRepository.findByIdWithDetails(savedEnrollment.getId())
+                .orElseThrow(() -> new EnrollmentNotFoundException("Enrollment not found after creation"));
+
+        return enrollmentConverter.convertToResponseDto(completeEnrollment);
     }
 
-    // READ ALL
-    public List<Enrollment> getAllEnrollments() {
-        return enrollmentRepository.findAll();
+    // READ ALL - Return Response DTOs with complete data
+    public List<EnrollmentResponseDto> getAllEnrollments() {
+        List<Enrollment> enrollments = enrollmentRepository.findAllWithDetails();
+        return enrollments.stream()
+                .map(enrollmentConverter::convertToResponseDto)
+                .collect(Collectors.toList());
     }
 
-    // READ BY ID
-    public Enrollment getEnrollmentById(int id) {
-        return enrollmentRepository.findById(id)
+    // READ BY ID - Return Response DTO with complete data
+    public EnrollmentResponseDto getEnrollmentById(int id) {
+        Enrollment enrollment = enrollmentRepository.findByIdWithDetails(id)
                 .orElseThrow(() -> new EnrollmentNotFoundException("Enrollment not found with id: " + id));
+        return enrollmentConverter.convertToResponseDto(enrollment);
     }
 
-    // READ BY USER ID
-    public List<Enrollment> getEnrollmentsByUserId(int userId) {
+    // READ BY USER ID - Return Response DTOs with complete data
+    public List<EnrollmentResponseDto> getEnrollmentsByUserId(int userId) {
         if (!userRepository.existsById(userId)) {
             throw new UserNotFoundException("User not found with id: " + userId);
         }
-        return enrollmentRepository.findByUserId(userId);
+        List<Enrollment> enrollments = enrollmentRepository.findByUserIdWithDetails(userId);
+        return enrollments.stream()
+                .map(enrollmentConverter::convertToResponseDto)
+                .collect(Collectors.toList());
     }
 
-    // READ BY COURSE ID
-    public List<Enrollment> getEnrollmentsByCourseId(int courseId) {
+    // READ BY COURSE ID - Return Response DTOs with complete data
+    public List<EnrollmentResponseDto> getEnrollmentsByCourseId(int courseId) {
         if (!courseRepository.existsById(courseId)) {
             throw new CourseNotFoundException("Course not found with id: " + courseId);
         }
-        return enrollmentRepository.findByCourseId(courseId);
+        List<Enrollment> enrollments = enrollmentRepository.findByCourseIdWithDetails(courseId);
+        return enrollments.stream()
+                .map(enrollmentConverter::convertToResponseDto)
+                .collect(Collectors.toList());
     }
 
-    // READ BY USER AND COURSE
-    public Enrollment getEnrollmentByUserAndCourse(int userId, int courseId) {
-        return enrollmentRepository.findByUserIdAndCourseId(userId, courseId)
+    // READ BY USER AND COURSE - Return Response DTO with complete data
+    public EnrollmentResponseDto getEnrollmentByUserAndCourse(int userId, int courseId) {
+        Enrollment enrollment = enrollmentRepository.findByUserIdAndCourseIdWithDetails(userId, courseId)
                 .orElseThrow(() -> new EnrollmentNotFoundException("Enrollment not found for user id: " + userId + " and course id: " + courseId));
+        return enrollmentConverter.convertToResponseDto(enrollment);
     }
 
-    // READ BY STATUS
-    public List<Enrollment> getEnrollmentsByStatus(String status) {
-        return enrollmentRepository.findByStatus(status);
+    // READ BY STATUS - Return Response DTOs with complete data
+    public List<EnrollmentResponseDto> getEnrollmentsByStatus(String status) {
+        List<Enrollment> enrollments = enrollmentRepository.findByStatusWithDetails(status);
+        return enrollments.stream()
+                .map(enrollmentConverter::convertToResponseDto)
+                .collect(Collectors.toList());
     }
 
-    // UPDATE PROGRESS
-    public Enrollment updateProgress(int id, String progress) {
+    // UPDATE PROGRESS - Return Response DTO with complete data
+    public EnrollmentResponseDto updateProgress(int id, String progress) {
         Enrollment enrollment = enrollmentRepository.findById(id)
                 .orElseThrow(() -> new EnrollmentNotFoundException("Enrollment not found with id: " + id));
 
         enrollment.setProgress(progress);
-        return enrollmentRepository.save(enrollment);
+        Enrollment updatedEnrollment = enrollmentRepository.save(enrollment);
+
+        // ✅ Reload with complete data
+        Enrollment completeEnrollment = enrollmentRepository.findByIdWithDetails(updatedEnrollment.getId())
+                .orElseThrow(() -> new EnrollmentNotFoundException("Enrollment not found after update"));
+
+        return enrollmentConverter.convertToResponseDto(completeEnrollment);
     }
 
-    // UPDATE STATUS
-    public Enrollment updateStatus(int id, String status) {
+    // UPDATE STATUS - Return Response DTO with complete data
+    public EnrollmentResponseDto updateStatus(int id, String status) {
         Enrollment enrollment = enrollmentRepository.findById(id)
                 .orElseThrow(() -> new EnrollmentNotFoundException("Enrollment not found with id: " + id));
 
         enrollment.setStatus(status);
-        return enrollmentRepository.save(enrollment);
+        Enrollment updatedEnrollment = enrollmentRepository.save(enrollment);
+
+        // ✅ Reload with complete data
+        Enrollment completeEnrollment = enrollmentRepository.findByIdWithDetails(updatedEnrollment.getId())
+                .orElseThrow(() -> new EnrollmentNotFoundException("Enrollment not found after update"));
+
+        return enrollmentConverter.convertToResponseDto(completeEnrollment);
     }
 
-    // UPDATE
-    public Enrollment updateEnrollment(int id, EnrollmentRequestDto requestDto) {
+    // UPDATE - Return Response DTO with complete data
+    public EnrollmentResponseDto updateEnrollment(int id, EnrollmentRequestDto requestDto) {
         Enrollment enrollment = enrollmentRepository.findById(id)
                 .orElseThrow(() -> new EnrollmentNotFoundException("Enrollment not found with id: " + id));
 
         enrollmentConverter.updateEntityFromDto(requestDto, enrollment);
-        return enrollmentRepository.save(enrollment);
+        Enrollment updatedEnrollment = enrollmentRepository.save(enrollment);
+
+        // ✅ Reload with complete data
+        Enrollment completeEnrollment = enrollmentRepository.findByIdWithDetails(updatedEnrollment.getId())
+                .orElseThrow(() -> new EnrollmentNotFoundException("Enrollment not found after update"));
+
+        return enrollmentConverter.convertToResponseDto(completeEnrollment);
     }
 
     // DELETE
@@ -122,34 +162,13 @@ public class EnrollmentService {
         enrollmentRepository.deleteById(id);
     }
 
-    public Enrollment updateProgressAutomatically(int enrollmentId) {
-        Enrollment enrollment = getEnrollmentById(enrollmentId);
-        Course course = enrollment.getCourse();
-
-        // Calculate progress based on completed lessons/assignments
-        int totalLessons = course.getLessonList().size();
-        int completedLessons = calculateCompletedLessons(enrollment);
-
-        if (totalLessons > 0) {
-            int progress = (completedLessons * 100) / totalLessons;
-            enrollment.setProgress(progress + "%");
-        }
-
-        return enrollmentRepository.save(enrollment);
-    }
-
-    private int calculateCompletedLessons(Enrollment enrollment) {
-        // Logic to calculate completed lessons
-        // This could be based on lesson completion status or quiz scores
-        return 0; // Implement based on your business logic
-    }
-
+    // Existing progress calculation methods...
     public void updateCourseProgress(int enrollmentId) {
-        Enrollment enrollment = getEnrollmentById(enrollmentId);
-        Course course = enrollment.getCourse();
+        Enrollment enrollment = enrollmentRepository.findByIdWithDetails(enrollmentId)
+                .orElseThrow(() -> new EnrollmentNotFoundException("Enrollment not found with id: " + enrollmentId));
 
-        // Calculate based on completed lessons
-        int totalLessons = course.getLessonList().size();
+        Course course = enrollment.getCourse();
+        int totalLessons = course.getLessonList() != null ? course.getLessonList().size() : 0;
         int completedLessons = calculateCompletedLessons(enrollment);
 
         if (totalLessons > 0) {
@@ -157,5 +176,10 @@ public class EnrollmentService {
             enrollment.setProgress(progress + "%");
             enrollmentRepository.save(enrollment);
         }
+    }
+
+    private int calculateCompletedLessons(Enrollment enrollment) {
+        // Implement based on your business logic
+        return 0;
     }
 }

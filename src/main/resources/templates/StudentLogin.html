@@ -39,7 +39,6 @@
             </button>
             <div class="user-popup" id="user-popup">
                 <a th:href="@{/student-dashboard}">Dashboard</a>
-
                 <hr>
                 <button onclick="logout()">Logout</button>
             </div>
@@ -76,102 +75,10 @@
     <h3>🚀 Select Your Course</h3>
     <p class="sub-text">Learn with the best teachers of Kerala. Join live classes and get certified.</p>
 
-    <div class="feature-cards">
-        <!-- Course Cards -->
-        <div class="card">
-            <img th:src="@{/image/divyaG.jpg}" alt="Java Development">
-            <h4>15th Nov - Java Development</h4>
-            <p><b>Live Batch:</b> Zero to Hero (8:00 AM - 9:00 AM)</p>
-            <p><b>Prof Miss Divya G</b></p>
-            <button class="btn-card" onclick="enrollCourse('Java Development')">Enroll Now</button>
-        </div>
-
-        <div class="card">
-            <img th:src="@{/image/deepaNair.jpg}" alt="AI Recommendations">
-            <h4>15 December - DSA with C</h4>
-            <p><b>Live Batch:</b> Zero to Hero (9:15 AM - 10:15 AM)</p>
-            <p><b>Prof Miss Deepa Nair</b></p>
-            <button class="btn-card" onclick="enrollCourse('DSA with C')">Enroll Now</button>
-        </div>
-
-        <div class="card">
-            <img th:src="@{/image/radhikaB.jpg}" alt="Secure Access">
-            <h4>15th Nov - Computer Network</h4>
-            <p><b>Live Batch:</b> Zero to Hero (8:00 AM - 9:00 AM)</p>
-            <p><b>Prof Miss Radhika B</b></p>
-            <button class="btn-card" onclick="enrollCourse('Computer Network')">Enroll Now</button>
-        </div>
-
-        <div class="card">
-            <img th:src="@{/image/riya.jpg}" alt="Expert Teachers">
-            <h4>15 Dec - Android Application Programming</h4>
-            <p><b>Live Batch:</b> Zero to Hero (9:15 AM - 10:15 AM)</p>
-            <p><b>Prof Miss Riya Rashid</b></p>
-            <button class="btn-card" onclick="enrollCourse('Android Application Programming')">Enroll Now</button>
-        </div>
-
-        <div class="card">
-            <img th:src="@{/image/neethuG.jpg}" alt="Certified Courses">
-            <h4>15 Dec - Web Technology & Programming</h4>
-            <p><b>Live Batch:</b> Zero to Hero (9:15 AM - 10:15 AM)</p>
-            <p><b>Prof Miss Neethu Ganesh</b></p>
-            <button class="btn-card" onclick="enrollCourse('Web Technology & Programming')">Enroll Now</button>
-        </div>
-
-        <div class="card">
-            <img th:src="@{/image/anup.jpg}" alt="Community Support">
-            <h4>15 Dec - Python Programming</h4>
-            <p><b>Live Batch:</b> Zero to Hero (9:15 AM - 10:15 AM)</p>
-            <p><b>Prof Miss Anup Suleman</b></p>
-            <button class="btn-card" onclick="enrollCourse('Python Programming')">Enroll Now</button>
-        </div>
-
-        <div class="card">
-            <img th:src="@{/image/softwareRiya.jpg}" alt="Certified Courses">
-            <h4>15 Dec - Software Engineering</h4>
-            <p><b>Live Batch:</b> Zero to Hero (9:15 AM - 10:15 AM)</p>
-            <p><b>Prof Miss Riya Rashid</b></p>
-            <button class="btn-card" onclick="enrollCourse('Software Engineering')">Enroll Now</button>
-        </div>
-
-        <div class="card">
-            <img th:src="@{/image/pythonNeethu.jpg}" alt="Community Support">
-            <h4>15 Dec - Python Programming</h4>
-            <p><b>Live Batch:</b> Zero to Hero (9:15 AM - 10:15 AM)</p>
-            <p><b>Prof Miss Neethu Ganesh</b></p>
-            <button class="btn-card" onclick="enrollCourse('Python Programming')">Enroll Now</button>
-        </div>
-
-        <div class="card">
-            <img th:src="@{/image/osDeepa.jpg}" alt="AI Recommendations">
-            <h4>15 December - Operating System</h4>
-            <p><b>Live Batch:</b> Zero to Hero (9:15 AM - 10:15 AM)</p>
-            <p><b>Prof Miss Deepa Nair</b></p>
-            <button class="btn-card" onclick="enrollCourse('Operating System')">Enroll Now</button>
-        </div>
-
-        <div class="card">
-            <img th:src="@{/image/DFCA.jpg}" alt="Secure Access">
-            <h4>15th Nov - DFCA</h4>
-            <p><b>Live Batch:</b> Zero to Hero (8:00 AM - 9:00 AM)</p>
-            <p><b>Prof Miss Radhika B</b></p>
-            <button class="btn-card" onclick="enrollCourse('DFCA')">Enroll Now</button>
-        </div>
-
-        <div class="card">
-            <img th:src="@{/image/DBMSanup.jpg}" alt="Expert Teachers">
-            <h4>15 Dec - Data Base Management System</h4>
-            <p><b>Live Batch:</b> Zero to Hero (9:15 AM - 10:15 AM)</p>
-            <p><b>Prof Miss Anup Suleman</b></p>
-            <button class="btn-card" onclick="enrollCourse('Database Management System')">Enroll Now</button>
-        </div>
-
-        <div class="card">
-            <img th:src="@{/image/mathDiv.jpg}" alt="Certified Courses">
-            <h4>15 Dec - Mathematical Foundation for Computing</h4>
-            <p><b>Live Batch:</b> Zero to Hero (9:15 AM - 10:15 AM)</p>
-            <p><b>Prof Miss Divya G</b></p>
-            <button class="btn-card" onclick="enrollCourse('Mathematical Foundation for Computing')">Enroll Now</button>
+    <div class="feature-cards" id="dynamic-courses-container">
+        <!-- Courses will be loaded dynamically from backend -->
+        <div class="loading-courses">
+            <p>Loading courses...</p>
         </div>
     </div>
 </section>
@@ -299,8 +206,218 @@
         window.location.href = '/';
     }
 
-    // Course enrollment function
-    async function enrollCourse(courseName) {
+    // ✅ NEW: Check enrollment status for courses
+    async function checkEnrollmentStatus(courses) {
+        try {
+            const userData = localStorage.getItem('user');
+            if (!userData) return courses;
+
+            const user = JSON.parse(userData);
+            const userId = user.id;
+
+            console.log("🔍 Checking enrollment status for user:", userId);
+
+            const response = await fetch(`/api/enrollments/user/${userId}`);
+
+            if (response.ok) {
+                const result = await response.json();
+
+                if (result.success && result.data) {
+                    const userEnrollments = result.data;
+                    console.log("✅ User enrollments found:", userEnrollments.length);
+
+                    // Update courses with enrollment status
+                    const updatedCourses = courses.map(course => {
+                        const isEnrolled = userEnrollments.some(enrollment =>
+                            enrollment.course && enrollment.course.id === course.id
+                        );
+
+                        return {
+                            ...course,
+                            isEnrolled: isEnrolled
+                        };
+                    });
+
+                    return updatedCourses;
+                }
+            }
+
+            console.log("ℹ️ No enrollments found or error checking status");
+            return courses;
+        } catch (error) {
+            console.error('❌ Error checking enrollment status:', error);
+            return courses;
+        }
+    }
+
+    // ✅ UPDATED: Load all courses from backend with enrollment status
+    async function loadAllCoursesFromBackend() {
+        try {
+            console.log("📚 Loading all courses from backend...");
+
+            const response = await fetch('/api/courses/all');
+
+            if (response.ok) {
+                const result = await response.json();
+
+                if (result.success) {
+                    let courses = result.data;
+                    console.log("✅ Courses loaded from backend:", courses);
+
+                    // Check enrollment status for current user
+                    courses = await checkEnrollmentStatus(courses);
+
+                    // Update the courses section with dynamic courses
+                    updateCourseCards(courses);
+                } else {
+                    console.error('❌ Failed to load courses:', result.message);
+                    showDefaultCourses();
+                }
+            } else {
+                console.error('❌ HTTP error loading courses');
+                showDefaultCourses();
+            }
+        } catch (error) {
+            console.error('❌ Error loading courses:', error);
+            showDefaultCourses();
+        }
+    }
+
+    // ✅ UPDATED: Update course cards with enrollment status
+    function updateCourseCards(courses) {
+        const featureCards = document.getElementById('dynamic-courses-container');
+
+        if (!featureCards) {
+            console.error("Courses container not found");
+            return;
+        }
+
+        if (!courses || courses.length === 0) {
+            featureCards.innerHTML = `
+                <div class="no-courses">
+                    <p>No courses available at the moment. Please check back later.</p>
+                </div>
+            `;
+            return;
+        }
+
+        // Clear loading message and add dynamic courses
+        featureCards.innerHTML = '';
+
+        courses.forEach(course => {
+            const courseCard = createCourseCard(course);
+            featureCards.appendChild(courseCard);
+        });
+
+        console.log(`✅ Updated ${courses.length} courses dynamically`);
+    }
+
+    // ✅ UPDATED: Create course card HTML with enrollment status
+    function createCourseCard(course) {
+        const card = document.createElement('div');
+        card.className = 'card';
+
+        // Get teacher image based on teacher name
+        const teacherImage = getTeacherImage(course.teacherName);
+
+        // Format batch details from schedule
+        const batchDetails = course.schedule || 'Flexible Timing';
+
+        // Check if user is already enrolled
+        const isEnrolled = course.isEnrolled || false;
+        const buttonText = isEnrolled ? 'Enrolled ✓' : 'Enroll Now';
+        const buttonStyle = isEnrolled ? 'background: green; cursor: not-allowed;' : '';
+        const disabled = isEnrolled ? 'disabled' : '';
+
+        card.innerHTML = `
+            <img th:src="@{${teacherImage}}" alt="${course.title}" onerror="this.src='/image/default-course.jpg'">
+            <h4>${course.title}</h4>
+            <p><b>Live Batch:</b> ${batchDetails}</p>
+            <p><b>Prof ${course.teacherName || 'Expert Faculty'}</b></p>
+            <button class="btn-card" onclick="enrollCourse('${course.title}', '${course.code} - ${course.title}', 'Prof ${course.teacherName}', '${batchDetails}', this)"
+                    ${disabled} style="${buttonStyle}">
+                ${buttonText}
+            </button>
+        `;
+
+        return card;
+    }
+
+    // ✅ NEW: Get teacher image based on teacher name
+    function getTeacherImage(teacherName) {
+        const teacherImages = {
+            'Divya G': '/image/divyaG.jpg',
+            'Deepa Nair': '/image/deepaNair.jpg',
+            'Radhika B': '/image/radhikaB.jpg',
+            'Riya Rashid': '/image/riya.jpg',
+            'Neethu Ganesh': '/image/neethuG.jpg',
+            'Anup Suleman': '/image/anup.jpg'
+        };
+
+        return teacherImages[teacherName] || '/image/default-teacher.jpg';
+    }
+
+    // ✅ NEW: Show default courses if backend fails
+    function showDefaultCourses() {
+        const featureCards = document.getElementById('dynamic-courses-container');
+
+        if (!featureCards) return;
+
+        featureCards.innerHTML = `
+            <div class="card">
+                <img th:src="@{/image/divyaG.jpg}" alt="Java Development">
+                <h4>15th Nov - Java Development</h4>
+                <p><b>Live Batch:</b> Zero to Hero (8:00 AM - 9:00 AM)</p>
+                <p><b>Prof Miss Divya G</b></p>
+                <button class="btn-card" onclick="enrollCourse('Java Development', '15th Nov - Java Development', 'Prof Miss Divya G', 'Zero to Hero (8:00 AM - 9:00 AM)', this)">Enroll Now</button>
+            </div>
+
+            <div class="card">
+                <img th:src="@{/image/deepaNair.jpg}" alt="AI Recommendations">
+                <h4>15 December - DSA with C</h4>
+                <p><b>Live Batch:</b> Zero to Hero (9:15 AM - 10:15 AM)</p>
+                <p><b>Prof Miss Deepa Nair</b></p>
+                <button class="btn-card" onclick="enrollCourse('DSA with C', '15 December - DSA with C', 'Prof Miss Deepa Nair', 'Zero to Hero (9:15 AM - 10:15 AM)', this)">Enroll Now</button>
+            </div>
+
+            <div class="card">
+                <img th:src="@{/image/radhikaB.jpg}" alt="Secure Access">
+                <h4>15th Nov - Computer Network</h4>
+                <p><b>Live Batch:</b> Zero to Hero (8:00 AM - 9:00 AM)</p>
+                <p><b>Prof Miss Radhika B</b></p>
+                <button class="btn-card" onclick="enrollCourse('Computer Network', '15th Nov - Computer Network', 'Prof Miss Radhika B', 'Zero to Hero (8:00 AM - 9:00 AM)', this)">Enroll Now</button>
+            </div>
+
+            <div class="card">
+                <img th:src="@{/image/riya.jpg}" alt="Expert Teachers">
+                <h4>15 Dec - Android Application Programming</h4>
+                <p><b>Live Batch:</b> Zero to Hero (9:15 AM - 10:15 AM)</p>
+                <p><b>Prof Miss Riya Rashid</b></p>
+                <button class="btn-card" onclick="enrollCourse('Android Application Programming', '15 Dec - Android Application Programming', 'Prof Miss Riya Rashid', 'Zero to Hero (9:15 AM - 10:15 AM)', this)">Enroll Now</button>
+            </div>
+
+            <div class="card">
+                <img th:src="@{/image/neethuG.jpg}" alt="Certified Courses">
+                <h4>15 Dec - Web Technology & Programming</h4>
+                <p><b>Live Batch:</b> Zero to Hero (9:15 AM - 10:15 AM)</p>
+                <p><b>Prof Miss Neethu Ganesh</b></p>
+                <button class="btn-card" onclick="enrollCourse('Web Technology & Programming', '15 Dec - Web Technology & Programming', 'Prof Miss Neethu Ganesh', 'Zero to Hero (9:15 AM - 10:15 AM)', this)">Enroll Now</button>
+            </div>
+
+            <div class="card">
+                <img th:src="@{/image/anup.jpg}" alt="Community Support">
+                <h4>15 Dec - Python Programming</h4>
+                <p><b>Live Batch:</b> Zero to Hero (9:15 AM - 10:15 AM)</p>
+                <p><b>Prof Miss Anup Suleman</b></p>
+                <button class="btn-card" onclick="enrollCourse('Python Programming', '15 Dec - Python Programming', 'Prof Miss Anup Suleman', 'Zero to Hero (9:15 AM - 10:15 AM)', this)">Enroll Now</button>
+            </div>
+        `;
+
+        console.log("📚 Showing default courses as fallback");
+    }
+
+    // ✅ UPDATED: Course enrollment function with actual backend integration
+    async function enrollCourse(courseName, courseTitle, professor, batchDetails, button) {
         console.log("🎯 Enrollment clicked for: " + courseName);
 
         // Get current user
@@ -319,34 +436,105 @@
             }
 
             // Show loading
-            const button = event.target;
             const originalText = button.textContent;
             button.textContent = 'Enrolling...';
             button.disabled = true;
 
+            // First, get course ID from backend
+            const coursesResponse = await fetch('/api/courses/all');
+            if (!coursesResponse.ok) {
+                throw new Error('Failed to fetch courses');
+            }
+
+            const coursesResult = await coursesResponse.json();
+            const courses = coursesResult.data || [];
+
+            // Find the course by title
+            const course = courses.find(c => c.title === courseName);
+            if (!course) {
+                throw new Error('Course not found');
+            }
+
+            // Create enrollment data for backend
+            const enrollmentData = {
+                userId: user.id,
+                courseId: course.id
+            };
+
+            console.log("📝 Enrollment data:", enrollmentData);
+
             // Call enrollment API
-            const response = await fetch(`/api/enroll?userId=${user.id}&courseName=${encodeURIComponent(courseName)}`, {
-                method: 'POST'
+            const response = await fetch('/api/enrollments', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(enrollmentData)
             });
 
-            const result = await response.text();
+            const result = await response.json();
 
-            if (response.ok) {
-                alert('✅ ' + result);
+            if (response.ok && result.success) {
+                // Update local storage with enrollment data
+                updateUserEnrollments(user.id, {
+                    courseName: courseName,
+                    courseTitle: courseTitle,
+                    professor: professor,
+                    batchDetails: batchDetails,
+                    enrollmentDate: new Date().toISOString(),
+                    status: 'Enrolled',
+                    courseId: course.id
+                });
+
+                alert('✅ Successfully enrolled in ' + courseName + '!');
                 button.textContent = 'Enrolled ✓';
                 button.style.background = 'green';
                 button.disabled = true;
+
+                console.log('🎉 Enrollment successful:', result);
+
+                // Reload courses to update enrollment status for all courses
+                setTimeout(() => {
+                    loadAllCoursesFromBackend();
+                }, 1000);
+
             } else {
-                alert('❌ ' + result);
-                button.textContent = originalText;
-                button.disabled = false;
+                throw new Error(result.error || result.message || 'Enrollment failed');
             }
 
         } catch (error) {
             console.error('Enrollment error:', error);
-            alert('❌ Network error. Please try again.');
-            event.target.textContent = 'Enroll Now';
-            event.target.disabled = false;
+            alert('❌ Enrollment failed: ' + error.message);
+            button.textContent = 'Enroll Now';
+            button.disabled = false;
+        }
+    }
+
+    // Update user enrollments in localStorage
+    function updateUserEnrollments(userId, enrollmentData) {
+        // Get existing enrollments
+        let userEnrollments = JSON.parse(localStorage.getItem('userEnrollments')) || {};
+
+        // Initialize user's enrollment array if it doesn't exist
+        if (!userEnrollments[userId]) {
+            userEnrollments[userId] = [];
+        }
+
+        // Check if user is already enrolled in this course
+        const isAlreadyEnrolled = userEnrollments[userId].some(
+            enrollment => enrollment.courseName === enrollmentData.courseName
+        );
+
+        if (!isAlreadyEnrolled) {
+            // Add new enrollment
+            userEnrollments[userId].push(enrollmentData);
+
+            // Save back to localStorage
+            localStorage.setItem('userEnrollments', JSON.stringify(userEnrollments));
+
+            console.log('✅ Enrollment saved for user:', userId);
+        } else {
+            console.log('ℹ️ User already enrolled in this course');
         }
     }
 
@@ -356,6 +544,9 @@
 
         // Check login status immediately
         checkLoginStatus();
+
+        // Load courses from backend
+        loadAllCoursesFromBackend();
 
         // Also check when page becomes visible (in case of multiple tabs)
         document.addEventListener('visibilitychange', function() {

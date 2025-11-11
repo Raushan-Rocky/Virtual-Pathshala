@@ -705,6 +705,24 @@
                 margin-bottom: 15px;
             }
         }
+
+        .no-data-message {
+            text-align: center;
+            padding: 40px;
+            color: var(--gray);
+            font-style: italic;
+        }
+
+        .loading-spinner {
+            text-align: center;
+            padding: 40px;
+            color: var(--primary);
+        }
+
+        .loading-spinner i {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
@@ -827,8 +845,9 @@
             <!-- Enrolled Courses -->
             <h3 class="section-title">Enrolled Courses</h3>
             <div class="courses-grid" id="enrolledCoursesGrid">
-                <div class="no-data-message">
-                    <p>No courses enrolled yet.</p>
+                <div class="loading-spinner">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Loading enrolled courses...</p>
                 </div>
             </div>
 
@@ -853,8 +872,9 @@
         <div id="courses" class="page-section">
             <h2 class="section-title">My Courses</h2>
             <div class="courses-grid" id="allCoursesGrid">
-                <div class="no-data-message">
-                    <p>No courses available.</p>
+                <div class="loading-spinner">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Loading your courses...</p>
                 </div>
             </div>
         </div>
@@ -1035,12 +1055,229 @@
         help: "HELP & SUPPORT"
     };
 
-    // Simple JavaScript for interactive elements
+    // ✅ NEW: Load enrolled courses for student
+    async function loadEnrolledCourses() {
+        try {
+            const userData = localStorage.getItem('user');
+            if (!userData) {
+                console.error('No user data found');
+                return;
+            }
+
+            const user = JSON.parse(userData);
+            const userId = user.id;
+
+            console.log("📚 Loading enrolled courses for user:", userId);
+
+            const response = await fetch(`/api/enrollments/user/${userId}`);
+
+            if (response.ok) {
+                const result = await response.json();
+
+                if (result.success && result.data) {
+                    const enrollments = result.data;
+                    console.log("✅ Enrolled courses loaded:", enrollments);
+
+                    // Update enrolled courses count
+                    document.getElementById('enrolledCoursesCount').textContent = enrollments.length;
+
+                    // Display enrolled courses
+                    displayEnrolledCourses(enrollments);
+                } else {
+                    console.log('No enrolled courses found');
+                    document.getElementById('enrolledCoursesCount').textContent = '0';
+                    showNoEnrolledCourses();
+                }
+            } else {
+                console.error('Failed to load enrolled courses');
+                showNoEnrolledCourses();
+            }
+        } catch (error) {
+            console.error('Error loading enrolled courses:', error);
+            showNoEnrolledCourses();
+        }
+    }
+
+    // ✅ NEW: Display enrolled courses in the dashboard
+    function displayEnrolledCourses(enrollments) {
+        const enrolledCoursesGrid = document.getElementById('enrolledCoursesGrid');
+        const allCoursesGrid = document.getElementById('allCoursesGrid');
+
+        if (!enrolledCoursesGrid) return;
+
+        if (!enrollments || enrollments.length === 0) {
+            showNoEnrolledCourses();
+            return;
+        }
+
+        // Clear existing content
+        enrolledCoursesGrid.innerHTML = '';
+
+        // Add each enrolled course
+        enrollments.forEach(enrollment => {
+            const courseCard = createEnrolledCourseCard(enrollment);
+            enrolledCoursesGrid.appendChild(courseCard);
+        });
+
+        // Also update the "My Courses" section
+        if (allCoursesGrid) {
+            allCoursesGrid.innerHTML = '';
+            enrollments.forEach(enrollment => {
+                const courseCard = createEnrolledCourseCard(enrollment);
+                allCoursesGrid.appendChild(courseCard);
+            });
+        }
+    }
+
+    // ✅ NEW: Show no enrolled courses message
+    function showNoEnrolledCourses() {
+        const enrolledCoursesGrid = document.getElementById('enrolledCoursesGrid');
+        const allCoursesGrid = document.getElementById('allCoursesGrid');
+
+        if (enrolledCoursesGrid) {
+            enrolledCoursesGrid.innerHTML = `
+                <div class="no-data-message">
+                    <p>No courses enrolled yet. <a href="/studentLogin" style="color: var(--primary); text-decoration: none; font-weight: 500;">Browse courses</a></p>
+                </div>
+            `;
+        }
+
+        if (allCoursesGrid) {
+            allCoursesGrid.innerHTML = `
+                <div class="no-data-message">
+                    <p>No courses enrolled yet. <a href="/studentLogin" style="color: var(--primary); text-decoration: none; font-weight: 500;">Browse courses</a></p>
+                </div>
+            `;
+        }
+    }
+
+    // ✅ NEW: Create enrolled course card
+    function createEnrolledCourseCard(enrollment) {
+        const course = enrollment.course;
+        const card = document.createElement('div');
+        card.className = 'course-card';
+
+        // Get course color or use default
+        const courseColor = getCourseColor(course?.id);
+
+        // Format progress
+        const progress = enrollment.progress || '0%';
+        const progressValue = parseInt(progress) || 0;
+
+        card.innerHTML = `
+            <div class="course-image" style="background-color: ${courseColor};">
+                <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: white; font-size: 24px; font-weight: bold;">
+                    ${course?.code?.substring(0, 2) || 'CS'}
+                </div>
+            </div>
+            <div class="course-content">
+                <h3 class="course-title">${course?.title || 'Course Title'}</h3>
+                <p class="course-instructor">Prof ${course?.teacherName || 'Instructor'}</p>
+
+                <div class="course-progress">
+                    <div class="progress-bar">
+                        <div class="progress" style="width: ${progressValue}%"></div>
+                    </div>
+                    <div class="progress-text">
+                        <span>Progress</span>
+                        <span>${progress}</span>
+                    </div>
+                </div>
+
+                <div class="course-actions">
+                    <button class="btn btn-outline" onclick="viewCourseDetails(${course?.id})">
+                        View Details
+                    </button>
+                    <button class="btn btn-primary" onclick="continueCourse(${course?.id}, ${enrollment.id})">
+                        Continue
+                    </button>
+                </div>
+            </div>
+        `;
+
+        return card;
+    }
+
+    // ✅ NEW: Helper function for course colors
+    function getCourseColor(courseId) {
+        const colors = ['#4361ee', '#3a0ca3', '#4cc9f0', '#7209b7', '#f72585', '#560bad'];
+        return colors[courseId % colors.length] || '#4361ee';
+    }
+
+    // ✅ NEW: View course details
+    function viewCourseDetails(courseId) {
+        alert(`Opening course details for ID: ${courseId}`);
+        // You can redirect to course details page
+        // window.location.href = `/course-details?id=${courseId}`;
+    }
+
+    // ✅ NEW: Continue course
+    function continueCourse(courseId, enrollmentId) {
+        alert(`Continuing course ID: ${courseId}`);
+        // You can redirect to course learning page
+        // window.location.href = `/learn?course=${courseId}&enrollment=${enrollmentId}`;
+    }
+
+    // Main initialization function
     document.addEventListener('DOMContentLoaded', function() {
-        // Load user data from localStorage
+        console.log('🎓 Student Dashboard loaded');
+
+        // Load user data
         loadUserData();
 
-        // Navigation functionality
+        // Load enrolled courses
+        loadEnrolledCourses();
+
+        // Initialize navigation and other UI components
+        initializeUIComponents();
+    });
+
+    // Load user data from localStorage
+    function loadUserData() {
+        const userData = JSON.parse(localStorage.getItem('user') || '{}');
+
+        if (userData && userData.name) {
+            // Populate user data in the UI
+            document.getElementById('userName').textContent = userData.name;
+            document.getElementById('userRole').textContent = formatRole(userData.role);
+            document.getElementById('profileName').textContent = userData.name;
+            document.getElementById('profileEmail').textContent = userData.email || 'N/A';
+            document.getElementById('profileRole').textContent = formatRole(userData.role);
+            document.getElementById('infoName').textContent = userData.name;
+            document.getElementById('infoEmail').textContent = userData.email || 'N/A';
+            document.getElementById('infoRole').textContent = formatRole(userData.role);
+
+            console.log('✅ User data loaded:', userData.name);
+        } else {
+            // Redirect to login if no user data found
+            console.error('❌ No user data found, redirecting to login');
+            window.location.href = '/login';
+        }
+    }
+
+    // Helper function to format role for display
+    function formatRole(role) {
+        if (role === 'STUDENT') return 'Student';
+        if (role === 'TEACHER') return 'Teacher';
+        if (role === 'ADMIN') return 'Administrator';
+        return role || 'Student';
+    }
+
+    // Function to load assignments data (to be implemented with actual API calls)
+    function loadAssignmentsData() {
+        // This would be replaced with actual API calls
+        console.log('Loading assignments data...');
+    }
+
+    // Function to load notes data (to be implemented with actual API calls)
+    function loadNotesData() {
+        // This would be replaced with actual API calls
+        console.log('Loading notes data...');
+    }
+
+    // ✅ Initialize all UI components
+    function initializeUIComponents() {
+        // Navigation active state and section switching
         const navLinks = document.querySelectorAll('.nav-links li');
         const pageSections = document.querySelectorAll('.page-section');
         const pageTitle = document.getElementById('page-title');
@@ -1049,18 +1286,25 @@
             link.addEventListener('click', function() {
                 const targetSection = this.getAttribute('data-section');
 
-                // Update active navigation link
+                // Update active nav link
                 navLinks.forEach(l => l.classList.remove('active'));
                 this.classList.add('active');
 
-                // Show the corresponding section
+                // Show target section, hide others
                 pageSections.forEach(section => {
                     section.classList.remove('active');
+                    if (section.id === targetSection) {
+                        section.classList.add('active');
+                    }
                 });
-                document.getElementById(targetSection).classList.add('active');
 
                 // Update page title
                 pageTitle.textContent = pageTitles[targetSection];
+
+                // Load specific section data
+                if (targetSection === 'courses') {
+                    loadEnrolledCourses(); // Reload courses when navigating to My Courses
+                }
             });
         });
 
@@ -1104,6 +1348,8 @@
             localStorage.removeItem('userEmail');
             localStorage.removeItem('userRole');
 
+            console.log('🚪 User logged out');
+
             // Redirect to login page
             window.location.href = '/login';
         });
@@ -1145,62 +1391,6 @@
                 alert(`Continuing: ${courseName}`);
             }
         });
-    });
-
-    // Load user data from localStorage
-    function loadUserData() {
-        const userData = JSON.parse(localStorage.getItem('user') || '{}');
-
-        if (userData && userData.name) {
-            // Populate user data in the UI
-            document.getElementById('userName').textContent = userData.name;
-            document.getElementById('userRole').textContent = formatRole(userData.role);
-            document.getElementById('profileName').textContent = userData.name;
-            document.getElementById('profileEmail').textContent = userData.email || 'N/A';
-            document.getElementById('profileRole').textContent = formatRole(userData.role);
-            document.getElementById('infoName').textContent = userData.name;
-            document.getElementById('infoEmail').textContent = userData.email || 'N/A';
-            document.getElementById('infoRole').textContent = formatRole(userData.role);
-
-            // Set avatar with first letter of name
-            const avatar = document.getElementById('userProfileImg');
-            const profileAvatar = document.querySelector('.profile-avatar');
-            if (!userData.avatar) {
-                // Create avatar with first letter if no image available
-                const firstLetter = userData.name.charAt(0).toUpperCase();
-                avatar.alt = `${userData.name}'s Avatar`;
-                profileAvatar.alt = `${userData.name}'s Avatar`;
-            }
-        } else {
-            // Redirect to login if no user data found
-            window.location.href = '/login';
-        }
-    }
-
-    // Helper function to format role for display
-    function formatRole(role) {
-        if (role === 'STUDENT') return 'Student';
-        if (role === 'TEACHER') return 'Teacher';
-        if (role === 'ADMIN') return 'Administrator';
-        return role || 'Student';
-    }
-
-    // Function to load courses data (to be implemented with actual API calls)
-    function loadCoursesData() {
-        // This would be replaced with actual API calls
-        console.log('Loading courses data...');
-    }
-
-    // Function to load assignments data (to be implemented with actual API calls)
-    function loadAssignmentsData() {
-        // This would be replaced with actual API calls
-        console.log('Loading assignments data...');
-    }
-
-    // Function to load notes data (to be implemented with actual API calls)
-    function loadNotesData() {
-        // This would be replaced with actual API calls
-        console.log('Loading notes data...');
     }
 </script>
 </body>

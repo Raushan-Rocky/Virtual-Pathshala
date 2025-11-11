@@ -1,3 +1,4 @@
+package com.online_e_learning.virtualPathshala.controller;
 import com.online_e_learning.virtualPathshala.service.DashboardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

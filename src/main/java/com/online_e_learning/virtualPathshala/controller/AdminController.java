@@ -1,13 +1,83 @@
 package com.online_e_learning.virtualPathshala.controller;
 
+import com.online_e_learning.virtualPathshala.repository.CourseRepository;
+import com.online_e_learning.virtualPathshala.responseDto.EnrollmentResponseDto;
+import com.online_e_learning.virtualPathshala.service.DashboardService;
+import com.online_e_learning.virtualPathshala.service.UserService;
+import com.online_e_learning.virtualPathshala.service.CourseService;
+import com.online_e_learning.virtualPathshala.service.EnrollmentService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Map;
 
 @Controller
+@RequestMapping("/api/admin")
 public class AdminController {
 
-    @GetMapping("/admin/dashboard")
+    @Autowired
+    private DashboardService dashboardService;
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private CourseService courseService;
+    @Autowired
+    private CourseRepository courseRepository;
+
+    @Autowired
+    private EnrollmentService enrollmentService;
+
+    // Page routes
+    @GetMapping("/dashboard")
     public String adminDashboard() {
         return "AdminDashboard";
+    }
+
+    // Dashboard statistics API
+    @GetMapping("/dashboard/stats")
+    public ResponseEntity<?> getAdminDashboardStats() {
+        try {
+            Map<String, Object> stats = dashboardService.getAdminDashboardStats();
+            return ResponseEntity.ok(Map.of("success", true, "data", stats));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "error", e.getMessage()));
+        }
+    }
+
+    // User management APIs
+    @GetMapping("/users")
+    public ResponseEntity<?> getAllUsers() {
+        try {
+            return ResponseEntity.ok(Map.of("success", true, "data", userService.getAllUsers()));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "error", e.getMessage()));
+        }
+    }
+
+    // Course management APIs
+    @GetMapping("/courses")
+    public ResponseEntity<?> getAllCourses() {
+        try {
+            // You'll need to add getAllCourses method in CourseService
+            return ResponseEntity.ok(Map.of("success", true, "data", courseRepository.findAll()));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "error", e.getMessage()));
+        }
+    }
+
+    // In your AdminController, update the enrollments endpoint:
+    @GetMapping("/enrollments")
+    public ResponseEntity<?> getAllEnrollments() {
+        try {
+            List<EnrollmentResponseDto> enrollments = enrollmentService.getAllEnrollments();
+            return ResponseEntity.ok(Map.of("success", true, "data", enrollments, "count", enrollments.size()));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "error", e.getMessage()));
+        }
     }
 }

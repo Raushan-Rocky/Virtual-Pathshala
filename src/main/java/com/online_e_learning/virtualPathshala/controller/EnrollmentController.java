@@ -1,8 +1,7 @@
 package com.online_e_learning.virtualPathshala.controller;
 
-import com.online_e_learning.virtualPathshala.converter.EnrollmentConverter;
-import com.online_e_learning.virtualPathshala.model.Enrollment;
 import com.online_e_learning.virtualPathshala.requestDto.EnrollmentRequestDto;
+import com.online_e_learning.virtualPathshala.responseDto.EnrollmentResponseDto;
 import com.online_e_learning.virtualPathshala.service.EnrollmentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -12,33 +11,36 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/enrollments")
-@CrossOrigin(origins = "*")
 public class EnrollmentController {
 
     @Autowired
     private EnrollmentService enrollmentService;
 
-    @Autowired
-    private EnrollmentConverter enrollmentConverter;
-
     // CREATE - POST /api/enrollments
     @PostMapping
     public ResponseEntity<?> createEnrollment(@RequestBody EnrollmentRequestDto requestDto) {
         try {
-            Enrollment enrollment = enrollmentService.createEnrollment(requestDto);
-            EnrollmentRequestDto response = enrollmentConverter.convertToResponseDto(enrollment);
+            System.out.println("✅ Enrollment Controller: Creating enrollment for user: " + requestDto.getUserId());
+
+            // ✅ Service returns Response DTO directly
+            EnrollmentResponseDto enrollment = enrollmentService.createEnrollment(requestDto);
 
             Map<String, Object> responseBody = new HashMap<>();
             responseBody.put("success", true);
             responseBody.put("message", "Enrollment created successfully");
-            responseBody.put("data", response);
+            responseBody.put("data", enrollment);
             responseBody.put("enrollmentId", enrollment.getId());
+
+            System.out.println("✅ Enrollment created successfully for user: " + requestDto.getUserId());
             return new ResponseEntity<>(responseBody, HttpStatus.CREATED);
+
         } catch (Exception e) {
+            System.err.println("❌ Enrollment error: " + e.getMessage());
+            e.printStackTrace();
+
             Map<String, String> errorResponse = new HashMap<>();
             errorResponse.put("success", "false");
             errorResponse.put("error", e.getMessage());
@@ -50,15 +52,13 @@ public class EnrollmentController {
     @GetMapping
     public ResponseEntity<?> getAllEnrollments() {
         try {
-            List<Enrollment> enrollments = enrollmentService.getAllEnrollments();
-            List<EnrollmentRequestDto> enrollmentDtos = enrollments.stream()
-                    .map(enrollmentConverter::convertToResponseDto)
-                    .collect(Collectors.toList());
+            // ✅ Service returns Response DTOs directly
+            List<EnrollmentResponseDto> enrollments = enrollmentService.getAllEnrollments();
 
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
-            response.put("data", enrollmentDtos);
-            response.put("count", enrollmentDtos.size());
+            response.put("data", enrollments);
+            response.put("count", enrollments.size());
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
             Map<String, String> errorResponse = new HashMap<>();
@@ -72,12 +72,12 @@ public class EnrollmentController {
     @GetMapping("/{id}")
     public ResponseEntity<?> getEnrollmentById(@PathVariable int id) {
         try {
-            Enrollment enrollment = enrollmentService.getEnrollmentById(id);
-            EnrollmentRequestDto response = enrollmentConverter.convertToResponseDto(enrollment);
+            // ✅ Service returns Response DTO directly
+            EnrollmentResponseDto enrollment = enrollmentService.getEnrollmentById(id);
 
             Map<String, Object> responseBody = new HashMap<>();
             responseBody.put("success", true);
-            responseBody.put("data", response);
+            responseBody.put("data", enrollment);
             return new ResponseEntity<>(responseBody, HttpStatus.OK);
         } catch (Exception e) {
             Map<String, String> errorResponse = new HashMap<>();
@@ -91,17 +91,23 @@ public class EnrollmentController {
     @GetMapping("/user/{userId}")
     public ResponseEntity<?> getEnrollmentsByUserId(@PathVariable int userId) {
         try {
-            List<Enrollment> enrollments = enrollmentService.getEnrollmentsByUserId(userId);
-            List<EnrollmentRequestDto> enrollmentDtos = enrollments.stream()
-                    .map(enrollmentConverter::convertToResponseDto)
-                    .collect(Collectors.toList());
+            System.out.println("✅ Fetching enrollments for user ID: " + userId);
+
+            // ✅ Service returns Response DTOs directly
+            List<EnrollmentResponseDto> enrollments = enrollmentService.getEnrollmentsByUserId(userId);
 
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
-            response.put("data", enrollmentDtos);
-            response.put("count", enrollmentDtos.size());
+            response.put("data", enrollments);
+            response.put("count", enrollments.size());
+
+            System.out.println("✅ Found " + enrollments.size() + " enrollments for user: " + userId);
             return new ResponseEntity<>(response, HttpStatus.OK);
+
         } catch (Exception e) {
+            System.err.println("❌ Error fetching enrollments: " + e.getMessage());
+            e.printStackTrace();
+
             Map<String, String> errorResponse = new HashMap<>();
             errorResponse.put("success", "false");
             errorResponse.put("error", e.getMessage());
@@ -113,15 +119,13 @@ public class EnrollmentController {
     @GetMapping("/course/{courseId}")
     public ResponseEntity<?> getEnrollmentsByCourseId(@PathVariable int courseId) {
         try {
-            List<Enrollment> enrollments = enrollmentService.getEnrollmentsByCourseId(courseId);
-            List<EnrollmentRequestDto> enrollmentDtos = enrollments.stream()
-                    .map(enrollmentConverter::convertToResponseDto)
-                    .collect(Collectors.toList());
+            // ✅ Service returns Response DTOs directly
+            List<EnrollmentResponseDto> enrollments = enrollmentService.getEnrollmentsByCourseId(courseId);
 
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
-            response.put("data", enrollmentDtos);
-            response.put("count", enrollmentDtos.size());
+            response.put("data", enrollments);
+            response.put("count", enrollments.size());
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
             Map<String, String> errorResponse = new HashMap<>();
@@ -135,12 +139,12 @@ public class EnrollmentController {
     @GetMapping("/user/{userId}/course/{courseId}")
     public ResponseEntity<?> getEnrollmentByUserAndCourse(@PathVariable int userId, @PathVariable int courseId) {
         try {
-            Enrollment enrollment = enrollmentService.getEnrollmentByUserAndCourse(userId, courseId);
-            EnrollmentRequestDto response = enrollmentConverter.convertToResponseDto(enrollment);
+            // ✅ Service returns Response DTO directly
+            EnrollmentResponseDto enrollment = enrollmentService.getEnrollmentByUserAndCourse(userId, courseId);
 
             Map<String, Object> responseBody = new HashMap<>();
             responseBody.put("success", true);
-            responseBody.put("data", response);
+            responseBody.put("data", enrollment);
             return new ResponseEntity<>(responseBody, HttpStatus.OK);
         } catch (Exception e) {
             Map<String, String> errorResponse = new HashMap<>();
@@ -154,15 +158,13 @@ public class EnrollmentController {
     @GetMapping("/status/{status}")
     public ResponseEntity<?> getEnrollmentsByStatus(@PathVariable String status) {
         try {
-            List<Enrollment> enrollments = enrollmentService.getEnrollmentsByStatus(status);
-            List<EnrollmentRequestDto> enrollmentDtos = enrollments.stream()
-                    .map(enrollmentConverter::convertToResponseDto)
-                    .collect(Collectors.toList());
+            // ✅ Service returns Response DTOs directly
+            List<EnrollmentResponseDto> enrollments = enrollmentService.getEnrollmentsByStatus(status);
 
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
-            response.put("data", enrollmentDtos);
-            response.put("count", enrollmentDtos.size());
+            response.put("data", enrollments);
+            response.put("count", enrollments.size());
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
             Map<String, String> errorResponse = new HashMap<>();
@@ -177,13 +179,13 @@ public class EnrollmentController {
     public ResponseEntity<?> updateProgress(@PathVariable int id, @RequestBody Map<String, String> progressRequest) {
         try {
             String progress = progressRequest.get("progress");
-            Enrollment enrollment = enrollmentService.updateProgress(id, progress);
-            EnrollmentRequestDto response = enrollmentConverter.convertToResponseDto(enrollment);
+            // ✅ Service returns Response DTO directly
+            EnrollmentResponseDto enrollment = enrollmentService.updateProgress(id, progress);
 
             Map<String, Object> responseBody = new HashMap<>();
             responseBody.put("success", true);
             responseBody.put("message", "Progress updated successfully");
-            responseBody.put("data", response);
+            responseBody.put("data", enrollment);
             return new ResponseEntity<>(responseBody, HttpStatus.OK);
         } catch (Exception e) {
             Map<String, String> errorResponse = new HashMap<>();
@@ -198,13 +200,13 @@ public class EnrollmentController {
     public ResponseEntity<?> updateStatus(@PathVariable int id, @RequestBody Map<String, String> statusRequest) {
         try {
             String status = statusRequest.get("status");
-            Enrollment enrollment = enrollmentService.updateStatus(id, status);
-            EnrollmentRequestDto response = enrollmentConverter.convertToResponseDto(enrollment);
+            // ✅ Service returns Response DTO directly
+            EnrollmentResponseDto enrollment = enrollmentService.updateStatus(id, status);
 
             Map<String, Object> responseBody = new HashMap<>();
             responseBody.put("success", true);
             responseBody.put("message", "Status updated successfully");
-            responseBody.put("data", response);
+            responseBody.put("data", enrollment);
             return new ResponseEntity<>(responseBody, HttpStatus.OK);
         } catch (Exception e) {
             Map<String, String> errorResponse = new HashMap<>();
@@ -218,13 +220,13 @@ public class EnrollmentController {
     @PutMapping("/{id}")
     public ResponseEntity<?> updateEnrollment(@PathVariable int id, @RequestBody EnrollmentRequestDto requestDto) {
         try {
-            Enrollment enrollment = enrollmentService.updateEnrollment(id, requestDto);
-            EnrollmentRequestDto response = enrollmentConverter.convertToResponseDto(enrollment);
+            // ✅ Service returns Response DTO directly
+            EnrollmentResponseDto enrollment = enrollmentService.updateEnrollment(id, requestDto);
 
             Map<String, Object> responseBody = new HashMap<>();
             responseBody.put("success", true);
             responseBody.put("message", "Enrollment updated successfully");
-            responseBody.put("data", response);
+            responseBody.put("data", enrollment);
             return new ResponseEntity<>(responseBody, HttpStatus.OK);
         } catch (Exception e) {
             Map<String, String> errorResponse = new HashMap<>();

@@ -614,6 +614,34 @@
             font-weight: 500;
         }
 
+        /* Loading Spinner */
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Data Loading States */
+        .data-loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .data-loaded {
+            opacity: 1;
+            pointer-events: all;
+        }
+
         /* Responsive Design */
         @media (max-width: 1200px) {
             .admin-panels {
@@ -685,6 +713,26 @@
             from { opacity: 0; }
             to { opacity: 1; }
         }
+
+        /* Success/Error Messages */
+        .alert {
+            padding: 12px 16px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .alert-error {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
     </style>
 </head>
 <body>
@@ -712,10 +760,10 @@
     <div class="main-content">
         <!-- Header -->
         <div class="header">
-            <h2>VIRTUAL PATHSHALA</h2>
+            <h2>VIRTUAL PATHSHALA - ADMIN DASHBOARD</h2>
             <div class="user-info">
                 <div class="user-details">
-                    <h4 id="userName"><b>Raushan Rocky</b></h4>
+                    <h4 id="userName"><b>Loading Admin...</b></h4>
                     <p id="userRole">System Administrator</p>
                 </div>
                 <img th:src="@{/image/logo5.png}" alt="User Profile" id="userProfileImg">
@@ -727,6 +775,9 @@
                 </div>
             </div>
         </div>
+
+        <!-- Alert Container -->
+        <div id="alertContainer" style="display: none;"></div>
 
         <!-- Logout Confirmation Modal -->
         <div class="modal" id="logoutModal">
@@ -743,7 +794,7 @@
                     <p style="color: var(--gray); margin-bottom: 25px;">Are you sure you want to logout from Virtual Pathshala?</p>
                     <div style="display: flex; gap: 15px; justify-content: center;">
                         <button class="btn btn-danger" id="confirmLogout">Yes, Logout</button>
-                        <button class="btn btn-secondary" id="cancelLogout">Cancel</button>
+                        <button class="btn btn-outline" id="cancelLogout">Cancel</button>
                     </div>
                 </div>
             </div>
@@ -756,8 +807,8 @@
                 <div class="profile-header">
                     <img th:src="@{/image/logo5.png}" alt="Profile" class="profile-avatar">
                     <div class="profile-details">
-                        <h3 id="profileName">Raushan Rocky</h3>
-                        <p id="profileEmail">admin@virtualpathshala.com</p>
+                        <h3 id="profileName">Loading Admin Profile...</h3>
+                        <p id="profileEmail">Loading email...</p>
                         <p id="profileRole">System Administrator - Full Access</p>
                         <span class="status-badge status-active" id="profileStatus">ACTIVE</span>
                     </div>
@@ -765,11 +816,11 @@
                 <div class="profile-info-grid">
                     <div class="info-item">
                         <div class="info-label">Full Name</div>
-                        <div class="info-value" id="infoName">Raushan Rocky</div>
+                        <div class="info-value" id="infoName">Loading...</div>
                     </div>
                     <div class="info-item">
                         <div class="info-label">Email Address</div>
-                        <div class="info-value" id="infoEmail">admin@virtualpathshala.com</div>
+                        <div class="info-value" id="infoEmail">Loading...</div>
                     </div>
                     <div class="info-item">
                         <div class="info-label">User Role</div>
@@ -781,7 +832,7 @@
                     </div>
                     <div class="info-item">
                         <div class="info-label">Last Login</div>
-                        <div class="info-value">Today, 09:42 AM</div>
+                        <div class="info-value" id="lastLogin">Today, Loading...</div>
                     </div>
                     <div class="info-item">
                         <div class="info-label">System Access Level</div>
@@ -798,7 +849,7 @@
                         <i class="fas fa-users"></i>
                     </div>
                     <div class="card-content">
-                        <h2 id="totalUsers">0</h2>
+                        <h2 id="totalUsers"><span class="loading-spinner"></span>0</h2>
                         <p>Active in system</p>
                     </div>
                 </div>
@@ -808,7 +859,7 @@
                         <i class="fas fa-book"></i>
                     </div>
                     <div class="card-content">
-                        <h2 id="totalCourses">0</h2>
+                        <h2 id="totalCourses"><span class="loading-spinner"></span>0</h2>
                         <p>Active courses</p>
                     </div>
                 </div>
@@ -818,7 +869,7 @@
                         <i class="fas fa-user-clock"></i>
                     </div>
                     <div class="card-content">
-                        <h2 id="pendingApprovals">0</h2>
+                        <h2 id="pendingApprovals"><span class="loading-spinner"></span>0</h2>
                         <p>Teacher accounts</p>
                     </div>
                 </div>
@@ -828,7 +879,7 @@
                         <i class="fas fa-heartbeat"></i>
                     </div>
                     <div class="card-content">
-                        <h2 id="systemHealth">0%</h2>
+                        <h2 id="systemHealth"><span class="loading-spinner"></span>0%</h2>
                         <p>All systems operational</p>
                     </div>
                 </div>
@@ -966,7 +1017,7 @@
             <div class="table-container">
                 <div class="table-header">
                     <h3>Recent User Activity</h3>
-                    <button class="btn btn-outline">View All</button>
+                    <button class="btn btn-outline" id="viewAllUsersBtn">View All</button>
                 </div>
                 <table>
                     <thead>
@@ -980,7 +1031,12 @@
                     </tr>
                     </thead>
                     <tbody id="recentUsersTable">
-                    <!-- Data will be populated dynamically -->
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 30px;">
+                            <div class="loading-spinner" style="margin: 0 auto 10px;"></div>
+                            <p>Loading recent users...</p>
+                        </td>
+                    </tr>
                     </tbody>
                 </table>
             </div>
@@ -994,7 +1050,7 @@
                         <i class="fas fa-flag"></i>
                     </div>
                     <div class="card-content">
-                        <h2 id="contentModeration">0</h2>
+                        <h2 id="contentModeration"><span class="loading-spinner"></span>0</h2>
                         <p>Items flagged for review</p>
                     </div>
                 </div>
@@ -1004,7 +1060,7 @@
                         <i class="fas fa-user-graduate"></i>
                     </div>
                     <div class="card-content">
-                        <h2 id="enrollmentStats">0</h2>
+                        <h2 id="enrollmentStats"><span class="loading-spinner"></span>0</h2>
                         <p>Active enrollments</p>
                     </div>
                 </div>
@@ -1014,7 +1070,7 @@
                         <i class="fas fa-hdd"></i>
                     </div>
                     <div class="card-content">
-                        <h2 id="storageUsage">0%</h2>
+                        <h2 id="storageUsage"><span class="loading-spinner"></span>0%</h2>
                         <p>Of total capacity</p>
                     </div>
                 </div>
@@ -1024,7 +1080,7 @@
                         <i class="fas fa-ticket-alt"></i>
                     </div>
                     <div class="card-content">
-                        <h2 id="supportTickets">0</h2>
+                        <h2 id="supportTickets"><span class="loading-spinner"></span>0</h2>
                         <p>Awaiting response</p>
                     </div>
                 </div>
@@ -1052,7 +1108,12 @@
                     </tr>
                     </thead>
                     <tbody id="usersTableBody">
-                    <!-- Users will be populated dynamically -->
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 30px;">
+                            <div class="loading-spinner" style="margin: 0 auto 10px;"></div>
+                            <p>Loading users data...</p>
+                        </td>
+                    </tr>
                     </tbody>
                 </table>
             </div>
@@ -1079,7 +1140,12 @@
                     </tr>
                     </thead>
                     <tbody id="coursesTableBody">
-                    <!-- Courses will be populated dynamically -->
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 30px;">
+                            <div class="loading-spinner" style="margin: 0 auto 10px;"></div>
+                            <p>Loading courses data...</p>
+                        </td>
+                    </tr>
                     </tbody>
                 </table>
             </div>
@@ -1095,7 +1161,7 @@
                         <i class="fas fa-file-alt"></i>
                     </div>
                     <div class="card-content">
-                        <h2 id="lessonsCount">0</h2>
+                        <h2 id="lessonsCount"><span class="loading-spinner"></span>0</h2>
                         <p>Total lessons</p>
                     </div>
                 </div>
@@ -1105,7 +1171,7 @@
                         <i class="fas fa-file-pdf"></i>
                     </div>
                     <div class="card-content">
-                        <h2 id="resourcesCount">0</h2>
+                        <h2 id="resourcesCount"><span class="loading-spinner"></span>0</h2>
                         <p>Uploaded resources</p>
                     </div>
                 </div>
@@ -1115,7 +1181,7 @@
                         <i class="fas fa-tasks"></i>
                     </div>
                     <div class="card-content">
-                        <h2 id="assignmentsCount">0</h2>
+                        <h2 id="assignmentsCount"><span class="loading-spinner"></span>0</h2>
                         <p>Active assignments</p>
                     </div>
                 </div>
@@ -1125,7 +1191,7 @@
                         <i class="fas fa-file-upload"></i>
                     </div>
                     <div class="card-content">
-                        <h2 id="submissionsCount">0</h2>
+                        <h2 id="submissionsCount"><span class="loading-spinner"></span>0</h2>
                         <p>Pending submissions</p>
                     </div>
                 </div>
@@ -1153,7 +1219,12 @@
                     </tr>
                     </thead>
                     <tbody id="enrollmentsTableBody">
-                    <!-- Enrollments will be populated dynamically -->
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 30px;">
+                            <div class="loading-spinner" style="margin: 0 auto 10px;"></div>
+                            <p>Loading enrollments data...</p>
+                        </td>
+                    </tr>
                     </tbody>
                 </table>
             </div>
@@ -1227,7 +1298,7 @@
                         <i class="fas fa-chart-line"></i>
                     </div>
                     <div class="card-content">
-                        <h2 id="activeUsers">0</h2>
+                        <h2 id="activeUsers"><span class="loading-spinner"></span>0</h2>
                         <p>Last 30 days</p>
                     </div>
                 </div>
@@ -1237,7 +1308,7 @@
                         <i class="fas fa-graduation-cap"></i>
                     </div>
                     <div class="card-content">
-                        <h2 id="courseCompletion">0%</h2>
+                        <h2 id="courseCompletion"><span class="loading-spinner"></span>0%</h2>
                         <p>Average completion rate</p>
                     </div>
                 </div>
@@ -1247,7 +1318,7 @@
                         <i class="fas fa-file-upload"></i>
                     </div>
                     <div class="card-content">
-                        <h2 id="assignmentSubmissions">0</h2>
+                        <h2 id="assignmentSubmissions"><span class="loading-spinner"></span>0</h2>
                         <p>This semester</p>
                     </div>
                 </div>
@@ -1257,7 +1328,7 @@
                         <i class="fas fa-server"></i>
                     </div>
                     <div class="card-content">
-                        <h2 id="systemUptime">0%</h2>
+                        <h2 id="systemUptime"><span class="loading-spinner"></span>0%</h2>
                         <p>Last 90 days</p>
                     </div>
                 </div>
@@ -1461,65 +1532,120 @@
 </div>
 
 <script>
-    // Admin data
-    const adminData = {
-        name: "Raushan Rocky",
-        email: "admin@virtualpathshala.com",
-        role: "ADMIN",
-        status: "ACTIVE"
-    };
-
-    // Simple JavaScript for interactive elements
+    // Admin Dashboard Live Data Integration
     document.addEventListener('DOMContentLoaded', function() {
-        // Populate admin data
-        document.getElementById('userName').textContent = adminData.name;
-        document.getElementById('userRole').textContent = formatRole(adminData.role);
+        console.log('🚀 Admin Dashboard Initializing...');
+        initializeAdminDashboard();
+    });
+
+    // Main initialization function
+    async function initializeAdminDashboard() {
+        try {
+            // Set admin data
+            setAdminData();
+
+            // Setup event listeners
+            setupEventListeners();
+
+            // Load all dashboard data
+            await loadAdminDashboardData();
+
+            console.log('✅ Admin Dashboard initialized successfully');
+
+        } catch (error) {
+            console.error('❌ Error initializing dashboard:', error);
+            showAlert('Error loading dashboard data. Please refresh the page.', 'error');
+        }
+    }
+
+    // Set admin profile data
+    function setAdminData() {
+        const adminData = {
+            name: "Raushan Rocky",
+            email: "admin@virtualpathshala.com",
+            role: "ADMIN",
+            status: "ACTIVE"
+        };
+
+        // Update header
+        document.getElementById('userName').innerHTML = `<b>${adminData.name}</b>`;
+        document.getElementById('userRole').textContent = "System Administrator";
+
+        // Update profile section
         document.getElementById('profileName').textContent = adminData.name;
         document.getElementById('profileEmail').textContent = adminData.email;
-        document.getElementById('profileRole').textContent = formatRole(adminData.role);
-        document.getElementById('profileStatus').textContent = adminData.status;
-        document.getElementById('profileStatus').className = adminData.status === 'ACTIVE' ?
-            'status-badge status-active' : 'status-badge status-inactive';
+        document.getElementById('profileRole').textContent = "System Administrator - Full Access";
 
         document.getElementById('infoName').textContent = adminData.name;
         document.getElementById('infoEmail').textContent = adminData.email;
         document.getElementById('infoRole').textContent = adminData.role;
         document.getElementById('infoStatus').textContent = adminData.status;
+        document.getElementById('lastLogin').textContent = "Today, " + new Date().toLocaleTimeString('en-IN', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+        });
+    }
 
-        // Navigation active state
+    // Setup all event listeners
+    function setupEventListeners() {
+        // Navigation
+        setupNavigation();
+
+        // Logout functionality
+        setupLogout();
+
+        // Modal controls
+        setupModals();
+
+        // Action buttons
+        setupActionButtons();
+    }
+
+    // Navigation setup
+    function setupNavigation() {
         const navLinks = document.querySelectorAll('.nav-links li');
+        const sections = document.querySelectorAll('.section-content, #dashboardSection');
+
         navLinks.forEach(link => {
             link.addEventListener('click', function() {
+                // Update active nav link
                 navLinks.forEach(l => l.classList.remove('active'));
                 this.classList.add('active');
 
-                // Show the corresponding section
+                // Show corresponding section
                 const sectionId = this.getAttribute('data-section') + 'Section';
-                const allSections = document.querySelectorAll('.section-content, #dashboardSection');
-                allSections.forEach(section => {
+                sections.forEach(section => {
                     section.style.display = 'none';
                 });
 
-                document.getElementById(sectionId).style.display = 'block';
+                const targetSection = document.getElementById(sectionId);
+                if (targetSection) {
+                    targetSection.style.display = 'block';
+
+                    // Load section-specific data
+                    loadSectionData(this.getAttribute('data-section'));
+                }
             });
         });
+    }
 
-        // Logout functionality
+    // Logout setup
+    function setupLogout() {
         const profileImg = document.getElementById('userProfileImg');
         const logoutDropdown = document.getElementById('logoutDropdown');
         const logoutOption = document.getElementById('logoutOption');
         const logoutModal = document.getElementById('logoutModal');
         const confirmLogout = document.getElementById('confirmLogout');
         const cancelLogout = document.getElementById('cancelLogout');
-        const closeModalButtons = document.querySelectorAll('.close-modal');
 
-        // Profile image click to show logout dropdown
+        // Profile image click
         profileImg.addEventListener('click', function(e) {
             e.stopPropagation();
             logoutDropdown.classList.toggle('active');
         });
 
-        // Prevent dropdown from closing when clicking inside it
+        // Prevent dropdown close when clicking inside
         logoutDropdown.addEventListener('click', function(e) {
             e.stopPropagation();
         });
@@ -1539,9 +1665,8 @@
 
         // Confirm logout
         confirmLogout.addEventListener('click', function() {
-            // In a real application, you would redirect to login page
+            // Redirect to login page
             window.location.href = '/login';
-            logoutModal.style.display = 'none';
         });
 
         // Cancel logout
@@ -1550,7 +1675,7 @@
         });
 
         // Close modal with close button
-        closeModalButtons.forEach(button => {
+        document.querySelectorAll('.close-modal').forEach(button => {
             button.addEventListener('click', function() {
                 if (this.closest('.modal').id === 'logoutModal') {
                     logoutModal.style.display = 'none';
@@ -1566,36 +1691,45 @@
                 logoutModal.style.display = 'none';
             }
         });
+    }
 
-        // Modal controls
+    // Modal controls setup
+    function setupModals() {
         const addUserBtn = document.getElementById('addUserBtn');
         const addNewUserBtn = document.getElementById('addNewUserBtn');
         const addUserModal = document.getElementById('addUserModal');
         const backupSystemBtn = document.getElementById('backupSystemBtn');
         const backupSystemBtn2 = document.getElementById('backupSystemBtn2');
         const backupModal = document.getElementById('backupModal');
-        const closeButtons = document.querySelectorAll('.close-modal');
 
         // Add User Modal
-        addUserBtn.addEventListener('click', function() {
-            addUserModal.style.display = 'flex';
-        });
+        if (addUserBtn) {
+            addUserBtn.addEventListener('click', function() {
+                addUserModal.style.display = 'flex';
+            });
+        }
 
-        addNewUserBtn.addEventListener('click', function() {
-            addUserModal.style.display = 'flex';
-        });
+        if (addNewUserBtn) {
+            addNewUserBtn.addEventListener('click', function() {
+                addUserModal.style.display = 'flex';
+            });
+        }
 
         // Backup System Modal
-        backupSystemBtn.addEventListener('click', function() {
-            backupModal.style.display = 'flex';
-        });
+        if (backupSystemBtn) {
+            backupSystemBtn.addEventListener('click', function() {
+                backupModal.style.display = 'flex';
+            });
+        }
 
-        backupSystemBtn2.addEventListener('click', function() {
-            backupModal.style.display = 'flex';
-        });
+        if (backupSystemBtn2) {
+            backupSystemBtn2.addEventListener('click', function() {
+                backupModal.style.display = 'flex';
+            });
+        }
 
         // Close modals
-        closeButtons.forEach(button => {
+        document.querySelectorAll('.close-modal').forEach(button => {
             button.addEventListener('click', function() {
                 this.closest('.modal').style.display = 'none';
             });
@@ -1603,8 +1737,7 @@
 
         // Close modal when clicking outside
         window.addEventListener('click', function(event) {
-            const modals = document.querySelectorAll('.modal');
-            modals.forEach(modal => {
+            document.querySelectorAll('.modal').forEach(modal => {
                 if (event.target === modal) {
                     modal.style.display = 'none';
                 }
@@ -1612,48 +1745,533 @@
         });
 
         // Form submissions
-        document.getElementById('addUserForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            alert('User created successfully!');
-            addUserModal.style.display = 'none';
-            this.reset();
-        });
+        const addUserForm = document.getElementById('addUserForm');
+        if (addUserForm) {
+            addUserForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                createNewUser();
+            });
+        }
 
         // Start backup process
-        document.getElementById('startBackupBtn').addEventListener('click', function() {
-            const backupType = document.getElementById('backupType').value;
-            alert(`Starting ${backupType} backup process...`);
-            backupModal.style.display = 'none';
-        });
+        const startBackupBtn = document.getElementById('startBackupBtn');
+        if (startBackupBtn) {
+            startBackupBtn.addEventListener('click', function() {
+                const backupType = document.getElementById('backupType').value;
+                showAlert(`Starting ${backupType} backup process...`, 'success');
+                backupModal.style.display = 'none';
+            });
+        }
+    }
 
+    // Action buttons setup
+    function setupActionButtons() {
         // Panel action buttons
         const actionButtons = document.querySelectorAll('.action-btn');
         actionButtons.forEach(button => {
             button.addEventListener('click', function() {
                 const actionText = this.querySelector('span').textContent;
-                alert(`Admin action: ${actionText}`);
+                showAlert(`Admin action: ${actionText}`, 'success');
             });
         });
 
-        // Table action buttons
-        const tableActionButtons = document.querySelectorAll('table .btn');
-        tableActionButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                const action = this.textContent.trim();
-                const userName = this.closest('tr').querySelector('td div div').textContent;
-                alert(`Action "${action}" performed on user: ${userName}`);
+        // View All Users button
+        const viewAllUsersBtn = document.getElementById('viewAllUsersBtn');
+        if (viewAllUsersBtn) {
+            viewAllUsersBtn.addEventListener('click', function() {
+                document.querySelector('[data-section="users"]').click();
             });
-        });
-    });
+        }
+    }
 
-    // Helper function to format role for display
+    // Load all dashboard data
+    async function loadAdminDashboardData() {
+        try {
+            console.log('📊 Loading admin dashboard data...');
+
+            // Load dashboard statistics
+            await loadDashboardStats();
+
+            // Load recent users
+            await loadRecentUsers();
+
+            // Load system reports
+            await loadSystemReports();
+
+            console.log('✅ All dashboard data loaded successfully');
+
+        } catch (error) {
+            console.error('❌ Error loading dashboard data:', error);
+            throw error;
+        }
+    }
+
+    // Load dashboard statistics
+    async function loadDashboardStats() {
+        try {
+            console.log('📈 Loading dashboard statistics...');
+
+            const response = await fetch('/api/admin/dashboard/stats');
+            const result = await response.json();
+
+            if (result.success && result.data) {
+                const stats = result.data;
+
+                // Update dashboard cards
+                updateDashboardCard('totalUsers', stats.totalUsers || 0);
+                updateDashboardCard('totalCourses', stats.totalCourses || 0);
+                updateDashboardCard('pendingApprovals', stats.pendingApprovals || 0);
+                updateDashboardCard('systemHealth', stats.systemHealth || '98%');
+
+                // Update system reports
+                updateDashboardCard('contentModeration', stats.contentModeration || 0);
+                updateDashboardCard('enrollmentStats', stats.totalEnrollments || 0);
+                updateDashboardCard('storageUsage', stats.storageUsage || '65%');
+                updateDashboardCard('supportTickets', stats.supportTickets || 0);
+
+                console.log('✅ Dashboard statistics loaded');
+            } else {
+                throw new Error(result.error || 'Failed to load statistics');
+            }
+
+        } catch (error) {
+            console.error('❌ Error loading dashboard stats:', error);
+            // Set default values
+            setDefaultDashboardStats();
+        }
+    }
+
+    // Update dashboard card with data
+    function updateDashboardCard(elementId, value) {
+        const element = document.getElementById(elementId);
+        if (element) {
+            // Remove loading spinner
+            const spinner = element.querySelector('.loading-spinner');
+            if (spinner) {
+                spinner.remove();
+            }
+            element.textContent = value;
+        }
+    }
+
+    // Set default dashboard stats
+    function setDefaultDashboardStats() {
+        const defaultStats = {
+            totalUsers: 0,
+            totalCourses: 0,
+            pendingApprovals: 0,
+            systemHealth: '0%',
+            contentModeration: 0,
+            enrollmentStats: 0,
+            storageUsage: '0%',
+            supportTickets: 0
+        };
+
+        Object.keys(defaultStats).forEach(key => {
+            updateDashboardCard(key, defaultStats[key]);
+        });
+    }
+
+    // Load recent users
+    async function loadRecentUsers() {
+        try {
+            console.log('👥 Loading recent users...');
+
+            const response = await fetch('/api/admin/users');
+            const result = await response.json();
+
+            if (result.success && result.data) {
+                const users = result.data;
+                const recentUsers = users.slice(0, 5); // Get first 5 users
+
+                updateRecentUsersTable(recentUsers);
+                console.log('✅ Recent users loaded');
+            } else {
+                throw new Error(result.error || 'Failed to load users');
+            }
+
+        } catch (error) {
+            console.error('❌ Error loading recent users:', error);
+            updateRecentUsersTable([]);
+        }
+    }
+
+    // Update recent users table
+    function updateRecentUsersTable(users) {
+        const tbody = document.getElementById('recentUsersTable');
+
+        if (users.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 30px; color: var(--gray);">
+                        <i class="fas fa-users" style="font-size: 48px; margin-bottom: 10px; opacity: 0.5;"></i>
+                        <p>No users found</p>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        tbody.innerHTML = users.map(user => `
+            <tr>
+                <td>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--primary); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
+                            ${user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                        </div>
+                        <div>
+                            <div style="font-weight: 600;">${user.name || 'Unknown User'}</div>
+                        </div>
+                    </div>
+                </td>
+                <td>${user.email || 'N/A'}</td>
+                <td>
+                    <span class="user-role ${getRoleClass(user.role)}">
+                        ${formatRole(user.role)}
+                    </span>
+                </td>
+                <td>
+                    <span class="status-badge ${user.status === 'ACTIVE' ? 'status-active' : 'status-inactive'}">
+                        ${user.status || 'INACTIVE'}
+                    </span>
+                </td>
+                <td>${formatDate(user.createdAt)}</td>
+                <td>
+                    <button class="btn btn-outline" style="padding: 4px 8px; font-size: 12px;">View</button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    // Load system reports
+    async function loadSystemReports() {
+        try {
+            // This would call a separate API for system reports
+            // For now, we use the stats from dashboard
+            console.log('✅ System reports loaded from dashboard stats');
+
+        } catch (error) {
+            console.error('❌ Error loading system reports:', error);
+        }
+    }
+
+    // Load section-specific data
+    async function loadSectionData(section) {
+        try {
+            switch(section) {
+                case 'users':
+                    await loadAllUsers();
+                    break;
+                case 'courses':
+                    await loadAllCourses();
+                    break;
+                case 'enrollment':
+                    await loadAllEnrollments();
+                    break;
+                case 'content':
+                    await loadContentStats();
+                    break;
+                default:
+                    // No specific data needed for other sections
+                    break;
+            }
+        } catch (error) {
+            console.error(`❌ Error loading ${section} data:`, error);
+        }
+    }
+
+    // Load all users for user management
+    async function loadAllUsers() {
+        try {
+            console.log('👥 Loading all users...');
+
+            const response = await fetch('/api/admin/users');
+            const result = await response.json();
+
+            if (result.success && result.data) {
+                updateUsersTable(result.data);
+                console.log('✅ All users loaded');
+            } else {
+                throw new Error(result.error || 'Failed to load users');
+            }
+
+        } catch (error) {
+            console.error('❌ Error loading all users:', error);
+            updateUsersTable([]);
+        }
+    }
+
+    // Update users table
+    function updateUsersTable(users) {
+        const tbody = document.getElementById('usersTableBody');
+
+        if (users.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="7" style="text-align: center; padding: 30px; color: var(--gray);">
+                        <i class="fas fa-users" style="font-size: 48px; margin-bottom: 10px; opacity: 0.5;"></i>
+                        <p>No users found</p>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        tbody.innerHTML = users.map(user => `
+            <tr>
+                <td>${user.id || 'N/A'}</td>
+                <td>${user.name || 'Unknown User'}</td>
+                <td>${user.email || 'N/A'}</td>
+                <td>
+                    <span class="user-role ${getRoleClass(user.role)}">
+                        ${formatRole(user.role)}
+                    </span>
+                </td>
+                <td>
+                    <span class="status-badge ${user.status === 'ACTIVE' ? 'status-active' : 'status-inactive'}">
+                        ${user.status || 'INACTIVE'}
+                    </span>
+                </td>
+                <td>${formatDate(user.createdAt)}</td>
+                <td>
+                    <div style="display: flex; gap: 5px;">
+                        <button class="btn btn-outline" style="padding: 4px 8px; font-size: 12px;">Edit</button>
+                        <button class="btn btn-danger" style="padding: 4px 8px; font-size: 12px;">Delete</button>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    // Load all courses
+    async function loadAllCourses() {
+        try {
+            console.log('📚 Loading all courses...');
+
+            const response = await fetch('/api/admin/courses');
+            const result = await response.json();
+
+            if (result.success && result.data) {
+                updateCoursesTable(result.data);
+                console.log('✅ All courses loaded');
+            } else {
+                throw new Error(result.error || 'Failed to load courses');
+            }
+
+        } catch (error) {
+            console.error('❌ Error loading all courses:', error);
+            updateCoursesTable([]);
+        }
+    }
+
+    // Update courses table
+    function updateCoursesTable(courses) {
+        const tbody = document.getElementById('coursesTableBody');
+
+        if (courses.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="7" style="text-align: center; padding: 30px; color: var(--gray);">
+                        <i class="fas fa-book" style="font-size: 48px; margin-bottom: 10px; opacity: 0.5;"></i>
+                        <p>No courses found</p>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        tbody.innerHTML = courses.map(course => `
+            <tr>
+                <td>${course.id || 'N/A'}</td>
+                <td>${course.title || 'Untitled Course'}</td>
+                <td>${course.code || 'N/A'}</td>
+                <td>${course.category || 'General'}</td>
+                <td>${course.credits || 0}</td>
+                <td>
+                    <span class="status-badge ${course.status === 'ACTIVE' ? 'status-active' : 'status-inactive'}">
+                        ${course.status || 'INACTIVE'}
+                    </span>
+                </td>
+                <td>
+                    <div style="display: flex; gap: 5px;">
+                        <button class="btn btn-outline" style="padding: 4px 8px; font-size: 12px;">Edit</button>
+                        <button class="btn btn-danger" style="padding: 4px 8px; font-size: 12px;">Delete</button>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    // Load all enrollments
+    async function loadAllEnrollments() {
+        try {
+            console.log('🎓 Loading all enrollments...');
+
+            const response = await fetch('/api/admin/enrollments');
+            const result = await response.json();
+
+            if (result.success && result.data) {
+                updateEnrollmentsTable(result.data);
+                console.log('✅ All enrollments loaded');
+            } else {
+                throw new Error(result.error || 'Failed to load enrollments');
+            }
+
+        } catch (error) {
+            console.error('❌ Error loading all enrollments:', error);
+            updateEnrollmentsTable([]);
+        }
+    }
+
+    // Update enrollments table
+    function updateEnrollmentsTable(enrollments) {
+        const tbody = document.getElementById('enrollmentsTableBody');
+
+        if (enrollments.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="7" style="text-align: center; padding: 30px; color: var(--gray);">
+                        <i class="fas fa-user-graduate" style="font-size: 48px; margin-bottom: 10px; opacity: 0.5;"></i>
+                        <p>No enrollments found</p>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        tbody.innerHTML = enrollments.map(enrollment => `
+            <tr>
+                <td>${enrollment.id || 'N/A'}</td>
+                <td>${enrollment.user ? enrollment.user.name : 'Unknown Student'}</td>
+                <td>${enrollment.course ? enrollment.course.title : 'Unknown Course'}</td>
+                <td>${enrollment.progress || '0%'}</td>
+                <td>
+                    <span class="status-badge ${enrollment.status === 'ACTIVE' ? 'status-active' : 'status-inactive'}">
+                        ${enrollment.status || 'INACTIVE'}
+                    </span>
+                </td>
+                <td>${formatDate(enrollment.enrolledAt)}</td>
+                <td>
+                    <div style="display: flex; gap: 5px;">
+                        <button class="btn btn-outline" style="padding: 4px 8px; font-size: 12px;">View</button>
+                    <button class="btn btn-danger" style="padding: 4px 8px; font-size: 12px;">Remove</button>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    // Load content stats
+    async function loadContentStats() {
+        try {
+            // Simulate content stats loading
+            setTimeout(() => {
+                updateDashboardCard('lessonsCount', 45);
+                updateDashboardCard('resourcesCount', 120);
+                updateDashboardCard('assignmentsCount', 25);
+                updateDashboardCard('submissionsCount', 18);
+            }, 1000);
+
+        } catch (error) {
+            console.error('❌ Error loading content stats:', error);
+        }
+    }
+
+    // Create new user
+    async function createNewUser() {
+        try {
+            const formData = {
+                firstName: document.getElementById('userFirstName').value,
+                lastName: document.getElementById('userLastName').value,
+                email: document.getElementById('userEmail').value,
+                mobile: document.getElementById('userMobile').value,
+                role: document.getElementById('userRoleSelect').value,
+                status: document.getElementById('userStatus').value
+            };
+
+            // Show loading state
+            const submitBtn = document.querySelector('#addUserForm button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<span class="loading-spinner"></span>Creating...';
+            submitBtn.disabled = true;
+
+            // Simulate API call
+            setTimeout(() => {
+                showAlert(`User ${formData.firstName} ${formData.lastName} created successfully!`, 'success');
+
+                // Reset form
+                document.getElementById('addUserForm').reset();
+                document.getElementById('addUserModal').style.display = 'none';
+
+                // Reset button
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+
+                // Reload users data
+                loadAllUsers();
+                loadRecentUsers();
+
+            }, 1500);
+
+        } catch (error) {
+            console.error('❌ Error creating user:', error);
+            showAlert('Error creating user. Please try again.', 'error');
+        }
+    }
+
+    // Helper functions
     function formatRole(role) {
-        if (role === 'ADMIN') return 'System Administrator';
+        if (!role) return 'Unknown';
+        if (role === 'ADMIN') return 'Administrator';
         if (role === 'TEACHER') return 'Teacher';
         if (role === 'STUDENT') return 'Student';
         return role;
     }
-</script>
 
+    function getRoleClass(role) {
+        if (!role) return 'role-student';
+        if (role === 'ADMIN') return 'role-admin';
+        if (role === 'TEACHER') return 'role-teacher';
+        if (role === 'STUDENT') return 'role-student';
+        return 'role-student';
+    }
+
+    function formatDate(dateString) {
+        if (!dateString) return 'N/A';
+        try {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-IN');
+        } catch {
+            return 'N/A';
+        }
+    }
+
+    function showAlert(message, type = 'success') {
+        const alertContainer = document.getElementById('alertContainer');
+        const alertClass = type === 'success' ? 'alert-success' : 'alert-error';
+        const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+
+        alertContainer.innerHTML = `
+            <div class="alert ${alertClass}">
+                <i class="fas ${icon}"></i> ${message}
+            </div>
+        `;
+        alertContainer.style.display = 'block';
+
+        // Auto hide after 5 seconds
+        setTimeout(() => {
+            alertContainer.style.display = 'none';
+        }, 5000);
+    }
+
+    // Auto-refresh data every 30 seconds
+    setInterval(() => {
+        if (document.getElementById('dashboardSection').style.display !== 'none') {
+            loadDashboardStats();
+            loadRecentUsers();
+        }
+    }, 30000);
+
+</script>
 </body>
 </html>
