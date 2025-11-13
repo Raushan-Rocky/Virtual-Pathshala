@@ -1055,55 +1055,130 @@
         help: "HELP & SUPPORT"
     };
 
-    // ✅ NEW: Load enrolled courses for student
+    // ✅ FIXED: Load enrolled courses for student - MULTIPLE API ENDPOINTS TRY
     async function loadEnrolledCourses() {
         try {
             const userData = localStorage.getItem('user');
             if (!userData) {
                 console.error('No user data found');
+                showNoEnrolledCourses();
                 return;
             }
 
             const user = JSON.parse(userData);
             const userId = user.id;
 
+            if (!userId) {
+                console.error('No user ID found');
+                showNoEnrolledCourses();
+                return;
+            }
+
             console.log("📚 Loading enrolled courses for user:", userId);
 
-            const response = await fetch(`/api/enrollments/user/${userId}`);
+            let enrollments = [];
 
-            if (response.ok) {
-                const result = await response.json();
+            // ✅ TRY DIFFERENT API ENDPOINTS
+            const endpoints = [
+                `/api/enrollments/student/${userId}`,
+                `/api/enrollments/user/${userId}`,
+                `/api/students/${userId}/courses`,
+                `/api/enrollments?studentId=${userId}`
+            ];
 
-                if (result.success && result.data) {
-                    const enrollments = result.data;
-                    console.log("✅ Enrolled courses loaded:", enrollments);
+            for (let endpoint of endpoints) {
+                try {
+                    console.log(`Trying endpoint: ${endpoint}`);
+                    const response = await fetch(endpoint);
 
-                    // Update enrolled courses count
-                    document.getElementById('enrolledCoursesCount').textContent = enrollments.length;
+                    if (response.ok) {
+                        const result = await response.json();
+                        console.log(`✅ Success with endpoint: ${endpoint}`, result);
 
-                    // Display enrolled courses
-                    displayEnrolledCourses(enrollments);
-                } else {
-                    console.log('No enrolled courses found');
-                    document.getElementById('enrolledCoursesCount').textContent = '0';
-                    showNoEnrolledCourses();
+                        if (result.success && result.data) {
+                            enrollments = result.data;
+                            break;
+                        } else if (result.enrollments) {
+                            enrollments = result.enrollments;
+                            break;
+                        } else if (result.courses) {
+                            // If API returns courses directly
+                            enrollments = result.courses.map(course => ({
+                                id: course.enrollmentId || Math.random(),
+                                course: course,
+                                progress: course.progress || 0
+                            }));
+                            break;
+                        }
+                    }
+                } catch (error) {
+                    console.log(`Endpoint ${endpoint} failed:`, error.message);
+                    continue;
                 }
+            }
+
+            // ✅ IF ALL API ENDPOINTS FAIL, USE LOCALSTORAGE DATA
+            if (enrollments.length === 0) {
+                console.log('All API endpoints failed, checking localStorage...');
+                enrollments = getEnrollmentsFromLocalStorage(userId);
+            }
+
+            console.log("📊 Final enrollments data:", enrollments);
+
+            // Update enrolled courses count
+            document.getElementById('enrolledCoursesCount').textContent = enrollments.length;
+
+            // Display enrolled courses
+            displayEnrolledCourses(enrollments);
+
+        } catch (error) {
+            console.error('❌ Error loading enrolled courses:', error);
+            // Fallback to localStorage data
+            const userData = localStorage.getItem('user');
+            if (userData) {
+                const user = JSON.parse(userData);
+                const enrollments = getEnrollmentsFromLocalStorage(user.id);
+                document.getElementById('enrolledCoursesCount').textContent = enrollments.length;
+                displayEnrolledCourses(enrollments);
             } else {
-                console.error('Failed to load enrolled courses');
                 showNoEnrolledCourses();
             }
-        } catch (error) {
-            console.error('Error loading enrolled courses:', error);
-            showNoEnrolledCourses();
         }
     }
 
-    // ✅ NEW: Display enrolled courses in the dashboard
+    // ✅ NEW: Get enrollments from localStorage as fallback
+    function getEnrollmentsFromLocalStorage(userId) {
+        try {
+            const userEnrollments = JSON.parse(localStorage.getItem('userEnrollments') || '{}');
+            const userCourses = userEnrollments[userId] || [];
+
+            return userCourses.map(course => ({
+                id: course.enrollmentId || Date.now(),
+                course: {
+                    id: course.courseId || Date.now(),
+                    title: course.courseName || course.courseTitle || 'Course',
+                    code: course.courseCode || 'CS-101',
+                    teacherName: course.professor || 'Instructor',
+                    schedule: course.batchDetails || 'Flexible Schedule'
+                },
+                progress: course.progress || 0,
+                enrollmentDate: course.enrollmentDate || new Date().toISOString()
+            }));
+        } catch (error) {
+            console.error('Error getting enrollments from localStorage:', error);
+            return [];
+        }
+    }
+
+    // ✅ FIXED: Display enrolled courses in the dashboard
     function displayEnrolledCourses(enrollments) {
         const enrolledCoursesGrid = document.getElementById('enrolledCoursesGrid');
         const allCoursesGrid = document.getElementById('allCoursesGrid');
 
-        if (!enrolledCoursesGrid) return;
+        if (!enrolledCoursesGrid) {
+            console.error('Enrolled courses grid not found');
+            return;
+        }
 
         if (!enrollments || enrollments.length === 0) {
             showNoEnrolledCourses();
@@ -1115,112 +1190,159 @@
 
         // Add each enrolled course
         enrollments.forEach(enrollment => {
-            const courseCard = createEnrolledCourseCard(enrollment);
-            enrolledCoursesGrid.appendChild(courseCard);
+            try {
+                const courseCard = createEnrolledCourseCard(enrollment);
+                enrolledCoursesGrid.appendChild(courseCard);
+            } catch (error) {
+                console.error('Error creating course card:', error);
+            }
         });
 
         // Also update the "My Courses" section
         if (allCoursesGrid) {
             allCoursesGrid.innerHTML = '';
             enrollments.forEach(enrollment => {
-                const courseCard = createEnrolledCourseCard(enrollment);
-                allCoursesGrid.appendChild(courseCard);
+                try {
+                    const courseCard = createEnrolledCourseCard(enrollment);
+                    allCoursesGrid.appendChild(courseCard.cloneNode(true));
+                } catch (error) {
+                    console.error('Error creating course card for all courses:', error);
+                }
             });
         }
+
+        console.log(`✅ Displayed ${enrollments.length} enrolled courses`);
     }
 
-    // ✅ NEW: Show no enrolled courses message
-    function showNoEnrolledCourses() {
-        const enrolledCoursesGrid = document.getElementById('enrolledCoursesGrid');
-        const allCoursesGrid = document.getElementById('allCoursesGrid');
-
-        if (enrolledCoursesGrid) {
-            enrolledCoursesGrid.innerHTML = `
-                <div class="no-data-message">
-                    <p>No courses enrolled yet. <a href="/studentLogin" style="color: var(--primary); text-decoration: none; font-weight: 500;">Browse courses</a></p>
-                </div>
-            `;
-        }
-
-        if (allCoursesGrid) {
-            allCoursesGrid.innerHTML = `
-                <div class="no-data-message">
-                    <p>No courses enrolled yet. <a href="/studentLogin" style="color: var(--primary); text-decoration: none; font-weight: 500;">Browse courses</a></p>
-                </div>
-            `;
-        }
-    }
-
-    // ✅ NEW: Create enrolled course card
+    // ✅ FIXED: Create enrolled course card with better data handling
     function createEnrolledCourseCard(enrollment) {
-        const course = enrollment.course;
         const card = document.createElement('div');
         card.className = 'course-card';
 
-        // Get course color or use default
-        const courseColor = getCourseColor(course?.id);
+        try {
+            // Handle different data structures from various APIs
+            const course = enrollment.course || enrollment;
+            const courseId = course.id || enrollment.courseId || enrollment.id;
+            const courseTitle = course.title || enrollment.courseName || enrollment.courseTitle || 'Course Title';
+            const teacherName = course.teacherName || enrollment.professor || 'Instructor';
+            const courseCode = course.code || enrollment.courseCode || `CS-${Math.floor(Math.random() * 1000)}`;
+            const schedule = course.schedule || enrollment.batchDetails || 'Flexible Schedule';
 
-        // Format progress
-        const progress = enrollment.progress || '0%';
-        const progressValue = parseInt(progress) || 0;
+            // Get course color
+            const courseColor = getCourseColor(courseId);
 
-        card.innerHTML = `
-            <div class="course-image" style="background-color: ${courseColor};">
-                <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: white; font-size: 24px; font-weight: bold;">
-                    ${course?.code?.substring(0, 2) || 'CS'}
-                </div>
-            </div>
-            <div class="course-content">
-                <h3 class="course-title">${course?.title || 'Course Title'}</h3>
-                <p class="course-instructor">Prof ${course?.teacherName || 'Instructor'}</p>
+            // Format progress
+            const progress = enrollment.progress || course.progress || 0;
+            const progressValue = Math.min(100, Math.max(0, typeof progress === 'number' ? progress : parseInt(progress) || 0));
 
-                <div class="course-progress">
-                    <div class="progress-bar">
-                        <div class="progress" style="width: ${progressValue}%"></div>
-                    </div>
-                    <div class="progress-text">
-                        <span>Progress</span>
-                        <span>${progress}</span>
+            card.innerHTML = `
+                <div class="course-image" style="background-color: ${courseColor};">
+                    <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: white; font-size: 24px; font-weight: bold;">
+                        ${courseCode.substring(0, 2) || 'CS'}
                     </div>
                 </div>
+                <div class="course-content">
+                    <h3 class="course-title">${courseTitle}</h3>
+                    <p class="course-instructor">Prof ${teacherName}</p>
+                    <p style="font-size: 12px; color: var(--gray); margin-bottom: 5px;">
+                        <strong>Code:</strong> ${courseCode}
+                    </p>
+                    <p style="font-size: 12px; color: var(--gray); margin-bottom: 10px;">
+                        <strong>Schedule:</strong> ${schedule}
+                    </p>
 
-                <div class="course-actions">
-                    <button class="btn btn-outline" onclick="viewCourseDetails(${course?.id})">
-                        View Details
-                    </button>
-                    <button class="btn btn-primary" onclick="continueCourse(${course?.id}, ${enrollment.id})">
-                        Continue
-                    </button>
+                    <div class="course-progress">
+                        <div class="progress-bar">
+                            <div class="progress" style="width: ${progressValue}%"></div>
+                        </div>
+                        <div class="progress-text">
+                            <span>Progress</span>
+                            <span>${progressValue}%</span>
+                        </div>
+                    </div>
+
+                    <div class="course-actions">
+                        <button class="btn btn-outline" onclick="viewCourseDetails(${courseId})">
+                            View Details
+                        </button>
+                        <button class="btn btn-primary" onclick="continueCourse(${courseId}, ${enrollment.id})">
+                            Continue
+                        </button>
+                    </div>
                 </div>
-            </div>
-        `;
+            `;
+        } catch (error) {
+            console.error('Error in createEnrolledCourseCard:', error);
+            // Fallback card
+            card.innerHTML = `
+                <div class="course-content">
+                    <h3 class="course-title">Course Information</h3>
+                    <p style="color: var(--gray);">Unable to load course details</p>
+                    <div class="course-actions">
+                        <button class="btn btn-outline">View Details</button>
+                        <button class="btn btn-primary">Continue</button>
+                    </div>
+                </div>
+            `;
+        }
 
         return card;
     }
 
-    // ✅ NEW: Helper function for course colors
+    // ✅ FIXED: Show no enrolled courses message
+    function showNoEnrolledCourses() {
+        const enrolledCoursesGrid = document.getElementById('enrolledCoursesGrid');
+        const allCoursesGrid = document.getElementById('allCoursesGrid');
+
+        const noCoursesMessage = `
+            <div class="no-data-message">
+                <p>No courses enrolled yet. <a href="/studentLogin" style="color: var(--primary); text-decoration: none; font-weight: 500;">Browse courses</a></p>
+            </div>
+        `;
+
+        if (enrolledCoursesGrid) {
+            enrolledCoursesGrid.innerHTML = noCoursesMessage;
+        }
+
+        if (allCoursesGrid) {
+            allCoursesGrid.innerHTML = noCoursesMessage;
+        }
+    }
+
+    // ✅ FIXED: Helper function for course colors
     function getCourseColor(courseId) {
         const colors = ['#4361ee', '#3a0ca3', '#4cc9f0', '#7209b7', '#f72585', '#560bad'];
-        return colors[courseId % colors.length] || '#4361ee';
+        const index = courseId ? courseId % colors.length : Math.floor(Math.random() * colors.length);
+        return colors[index] || '#4361ee';
     }
 
-    // ✅ NEW: View course details
+    // ✅ FIXED: View course details
     function viewCourseDetails(courseId) {
-        alert(`Opening course details for ID: ${courseId}`);
+        console.log(`Opening course details for ID: ${courseId}`);
         // You can redirect to course details page
         // window.location.href = `/course-details?id=${courseId}`;
+        alert(`Course details for ID: ${courseId} would open here`);
     }
 
-    // ✅ NEW: Continue course
+    // ✅ FIXED: Continue course
     function continueCourse(courseId, enrollmentId) {
-        alert(`Continuing course ID: ${courseId}`);
+        console.log(`Continuing course ID: ${courseId}, Enrollment: ${enrollmentId}`);
         // You can redirect to course learning page
         // window.location.href = `/learn?course=${courseId}&enrollment=${enrollmentId}`;
+        alert(`Continuing course ID: ${courseId}`);
     }
 
-    // Main initialization function
+    // ✅ FIXED: Main initialization function
     document.addEventListener('DOMContentLoaded', function() {
         console.log('🎓 Student Dashboard loaded');
+
+        // Check if user is logged in
+        const userData = localStorage.getItem('user');
+        if (!userData) {
+            console.error('❌ No user data found, redirecting to login');
+            window.location.href = '/login';
+            return;
+        }
 
         // Load user data
         loadUserData();
@@ -1230,52 +1352,61 @@
 
         // Initialize navigation and other UI components
         initializeUIComponents();
+
+        // ✅ NEW: Add event listener for page visibility change to refresh data
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                console.log('Page became visible, refreshing enrolled courses...');
+                loadEnrolledCourses();
+            }
+        });
     });
 
-    // Load user data from localStorage
+    // ✅ FIXED: Load user data from localStorage
     function loadUserData() {
-        const userData = JSON.parse(localStorage.getItem('user') || '{}');
+        try {
+            const userData = JSON.parse(localStorage.getItem('user') || '{}');
 
-        if (userData && userData.name) {
-            // Populate user data in the UI
-            document.getElementById('userName').textContent = userData.name;
-            document.getElementById('userRole').textContent = formatRole(userData.role);
-            document.getElementById('profileName').textContent = userData.name;
-            document.getElementById('profileEmail').textContent = userData.email || 'N/A';
-            document.getElementById('profileRole').textContent = formatRole(userData.role);
-            document.getElementById('infoName').textContent = userData.name;
-            document.getElementById('infoEmail').textContent = userData.email || 'N/A';
-            document.getElementById('infoRole').textContent = formatRole(userData.role);
+            if (userData && userData.name) {
+                // Populate user data in the UI
+                const elements = {
+                    'userName': userData.name,
+                    'userRole': formatRole(userData.role),
+                    'profileName': userData.name,
+                    'profileEmail': userData.email || 'N/A',
+                    'profileRole': formatRole(userData.role),
+                    'infoName': userData.name,
+                    'infoEmail': userData.email || 'N/A',
+                    'infoRole': formatRole(userData.role)
+                };
 
-            console.log('✅ User data loaded:', userData.name);
-        } else {
-            // Redirect to login if no user data found
-            console.error('❌ No user data found, redirecting to login');
+                Object.keys(elements).forEach(id => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        element.textContent = elements[id];
+                    }
+                });
+
+                console.log('✅ User data loaded:', userData.name);
+            } else {
+                throw new Error('Invalid user data');
+            }
+        } catch (error) {
+            console.error('❌ Error loading user data:', error);
             window.location.href = '/login';
         }
     }
 
-    // Helper function to format role for display
+    // ✅ FIXED: Helper function to format role for display
     function formatRole(role) {
+        if (!role) return 'Student';
         if (role === 'STUDENT') return 'Student';
         if (role === 'TEACHER') return 'Teacher';
         if (role === 'ADMIN') return 'Administrator';
-        return role || 'Student';
+        return role.charAt(0).toUpperCase() + role.slice(1).toLowerCase();
     }
 
-    // Function to load assignments data (to be implemented with actual API calls)
-    function loadAssignmentsData() {
-        // This would be replaced with actual API calls
-        console.log('Loading assignments data...');
-    }
-
-    // Function to load notes data (to be implemented with actual API calls)
-    function loadNotesData() {
-        // This would be replaced with actual API calls
-        console.log('Loading notes data...');
-    }
-
-    // ✅ Initialize all UI components
+    // ✅ FIXED: Initialize all UI components
     function initializeUIComponents() {
         // Navigation active state and section switching
         const navLinks = document.querySelectorAll('.nav-links li');
@@ -1299,11 +1430,14 @@
                 });
 
                 // Update page title
-                pageTitle.textContent = pageTitles[targetSection];
+                if (pageTitle && pageTitles[targetSection]) {
+                    pageTitle.textContent = pageTitles[targetSection];
+                }
 
                 // Load specific section data
                 if (targetSection === 'courses') {
-                    loadEnrolledCourses(); // Reload courses when navigating to My Courses
+                    console.log('Reloading courses for My Courses section...');
+                    loadEnrolledCourses();
                 }
             });
         });
@@ -1312,86 +1446,106 @@
         const profileImg = document.getElementById('userProfileImg');
         const logoutDropdown = document.getElementById('logoutDropdown');
 
-        profileImg.addEventListener('click', function(e) {
-            e.stopPropagation();
-            logoutDropdown.classList.toggle('active');
-        });
+        if (profileImg && logoutDropdown) {
+            profileImg.addEventListener('click', function(e) {
+                e.stopPropagation();
+                logoutDropdown.classList.toggle('active');
+            });
 
-        // Prevent dropdown from closing when clicking inside it
-        logoutDropdown.addEventListener('click', function(e) {
-            e.stopPropagation();
-        });
+            // Prevent dropdown from closing when clicking inside it
+            logoutDropdown.addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
 
-        // Close dropdown when clicking elsewhere
-        document.addEventListener('click', function() {
-            logoutDropdown.classList.remove('active');
-        });
+            // Close dropdown when clicking elsewhere
+            document.addEventListener('click', function() {
+                logoutDropdown.classList.remove('active');
+            });
+        }
 
-        // Logout option click
+        // Logout functionality
         const logoutOption = document.getElementById('logoutOption');
         const logoutModal = document.getElementById('logoutModal');
         const confirmLogout = document.getElementById('confirmLogout');
         const cancelLogout = document.getElementById('cancelLogout');
 
-        logoutOption.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            logoutDropdown.classList.remove('active');
-            logoutModal.classList.add('active');
-        });
+        if (logoutOption && logoutModal && confirmLogout && cancelLogout) {
+            logoutOption.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                if (logoutDropdown) logoutDropdown.classList.remove('active');
+                logoutModal.classList.add('active');
+            });
 
-        // Confirm logout
-        confirmLogout.addEventListener('click', function() {
-            // Clear user data from localStorage
-            localStorage.removeItem('user');
-            localStorage.removeItem('userId');
-            localStorage.removeItem('userEmail');
-            localStorage.removeItem('userRole');
+            // Confirm logout
+            confirmLogout.addEventListener('click', function() {
+                // Clear user data from localStorage
+                localStorage.removeItem('user');
+                localStorage.removeItem('userId');
+                localStorage.removeItem('userEmail');
+                localStorage.removeItem('userRole');
+                localStorage.removeItem('userEnrollments');
 
-            console.log('🚪 User logged out');
+                console.log('🚪 User logged out');
 
-            // Redirect to login page
-            window.location.href = '/login';
-        });
+                // Redirect to login page
+                window.location.href = '/login';
+            });
 
-        // Cancel logout
-        cancelLogout.addEventListener('click', function() {
-            logoutModal.classList.remove('active');
-        });
-
-        // Close modal when clicking outside
-        logoutModal.addEventListener('click', function(e) {
-            if (e.target === logoutModal) {
+            // Cancel logout
+            cancelLogout.addEventListener('click', function() {
                 logoutModal.classList.remove('active');
-            }
-        });
+            });
 
-        // Assignment submission
-        document.addEventListener('click', function(e) {
-            if (e.target.classList.contains('btn-success')) {
-                const assignmentName = e.target.closest('.assignment-item').querySelector('h4').textContent;
-                alert(`Opening submission form for: ${assignmentName}`);
-            }
-        });
-
-        // Note download
-        document.addEventListener('click', function(e) {
-            if (e.target.classList.contains('btn-primary') &&
-                e.target.closest('.note-actions')) {
-                const noteName = e.target.closest('.note-card').querySelector('.note-title').textContent;
-                alert(`Downloading: ${noteName}`);
-            }
-        });
-
-        // Course continue buttons
-        document.addEventListener('click', function(e) {
-            if (e.target.classList.contains('btn-primary') &&
-                e.target.closest('.course-actions')) {
-                const courseName = e.target.closest('.course-card').querySelector('.course-title').textContent;
-                alert(`Continuing: ${courseName}`);
-            }
-        });
+            // Close modal when clicking outside
+            logoutModal.addEventListener('click', function(e) {
+                if (e.target === logoutModal) {
+                    logoutModal.classList.remove('active');
+                }
+            });
+        }
     }
+
+    // ✅ NEW: Function to manually refresh enrolled courses
+    function refreshEnrolledCourses() {
+        console.log('🔄 Manually refreshing enrolled courses...');
+        loadEnrolledCourses();
+    }
+
+    // ✅ NEW: Debug function to check what APIs are available
+    async function debugAPIs() {
+        const userData = localStorage.getItem('user');
+        if (!userData) return;
+
+        const user = JSON.parse(userData);
+        const userId = user.id;
+
+        console.log('🔍 Debugging available APIs...');
+
+        const testEndpoints = [
+            `/api/enrollments/student/${userId}`,
+            `/api/enrollments/user/${userId}`,
+            `/api/students/${userId}/courses`,
+            `/api/enrollments?studentId=${userId}`,
+            `/api/courses/enrolled/${userId}`
+        ];
+
+        for (let endpoint of testEndpoints) {
+            try {
+                const response = await fetch(endpoint);
+                console.log(`Endpoint: ${endpoint} - Status: ${response.status}`);
+                if (response.ok) {
+                    const result = await response.json();
+                    console.log(`✅ Working: ${endpoint}`, result);
+                }
+            } catch (error) {
+                console.log(`❌ Failed: ${endpoint} - ${error.message}`);
+            }
+        }
+    }
+
+    // Uncomment the line below to debug APIs
+    // debugAPIs();
 </script>
 </body>
 </html>

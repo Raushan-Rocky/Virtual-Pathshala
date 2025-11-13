@@ -1122,10 +1122,29 @@
         <!-- Course Management Section -->
         <div id="coursesSection" class="section-content">
             <h3 class="section-title">Course Management</h3>
+
+            <!-- Search and Filter -->
+            <div style="margin-bottom: 20px; display: flex; gap: 15px; align-items: center;">
+                <div style="flex: 1;">
+                    <input type="text" id="courseSearch" class="form-control" placeholder="Search courses by title, code or category...">
+                </div>
+                <select id="courseStatusFilter" class="form-control" style="width: 200px;">
+                    <option value="">All Status</option>
+                    <option value="ACTIVE">Active</option>
+                    <option value="INACTIVE">Inactive</option>
+                    <option value="DRAFT">Draft</option>
+                </select>
+                <button class="btn btn-primary" id="addNewCourseBtn">Add New Course</button>
+            </div>
+
             <div class="table-container">
                 <div class="table-header">
                     <h3>All Courses</h3>
-                    <button class="btn btn-primary" id="addNewCourseBtn">Add New Course</button>
+                    <div>
+                        <button class="btn btn-outline" id="refreshCoursesBtn">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                    </div>
                 </div>
                 <table>
                     <thead>
@@ -1135,64 +1154,138 @@
                         <th>Code</th>
                         <th>Category</th>
                         <th>Credits</th>
+                        <th>Duration</th>
                         <th>Status</th>
                         <th>Actions</th>
                     </tr>
                     </thead>
                     <tbody id="coursesTableBody">
                     <tr>
-                        <td colspan="7" style="text-align: center; padding: 30px;">
+                        <td colspan="8" style="text-align: center; padding: 30px;">
                             <div class="loading-spinner" style="margin: 0 auto 10px;"></div>
                             <p>Loading courses data...</p>
                         </td>
                     </tr>
                     </tbody>
                 </table>
+
+                <!-- Pagination -->
+                <div style="padding: 15px 20px; border-top: 1px solid var(--light-gray); display: flex; justify-content: space-between; align-items: center;">
+                    <div id="coursesPaginationInfo" style="color: var(--gray); font-size: 14px;">
+                        Showing 0 of 0 courses
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-outline" id="prevCoursesPage" disabled>Previous</button>
+                        <button class="btn btn-outline" id="nextCoursesPage" disabled>Next</button>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Content Control Section -->
-        <div id="contentSection" class="section-content">
-            <h3 class="section-title">Content Control</h3>
-            <div class="dashboard-cards">
-                <div class="card">
-                    <div class="card-header">
-                        <h3>Lessons</h3>
-                        <i class="fas fa-file-alt"></i>
-                    </div>
-                    <div class="card-content">
-                        <h2 id="lessonsCount"><span class="loading-spinner"></span>0</h2>
-                        <p>Total lessons</p>
-                    </div>
+        <!-- Add/Edit Course Modal -->
+        <div class="modal" id="courseModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="courseModalTitle">Add New Course</h3>
+                    <button class="close-modal">&times;</button>
                 </div>
-                <div class="card">
-                    <div class="card-header">
-                        <h3>Resources</h3>
-                        <i class="fas fa-file-pdf"></i>
+                <form id="courseForm">
+                    <input type="hidden" id="courseId">
+
+                    <div class="form-group">
+                        <label for="courseTitle">Course Title *</label>
+                        <input type="text" id="courseTitle" class="form-control" placeholder="Enter course title" required>
                     </div>
-                    <div class="card-content">
-                        <h2 id="resourcesCount"><span class="loading-spinner"></span>0</h2>
-                        <p>Uploaded resources</p>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="courseCode">Course Code *</label>
+                            <input type="text" id="courseCode" class="form-control" placeholder="e.g., CS101" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="courseCredits">Credits *</label>
+                            <input type="number" id="courseCredits" class="form-control" placeholder="e.g., 4" min="1" max="10" required>
+                        </div>
                     </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="courseCategory">Category *</label>
+                            <select id="courseCategory" class="form-control" required>
+                                <option value="">Select Category</option>
+                                <option value="PROGRAMMING">Programming</option>
+                                <option value="MATHEMATICS">Mathematics</option>
+                                <option value="SCIENCE">Science</option>
+                                <option value="HUMANITIES">Humanities</option>
+                                <option value="BUSINESS">Business</option>
+                                <option value="ARTS">Arts</option>
+                                <option value="LANGUAGES">Languages</option>
+                                <option value="OTHER">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="courseDuration">Duration (weeks) *</label>
+                            <input type="number" id="courseDuration" class="form-control" placeholder="e.g., 12" min="1" max="52" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="courseDescription">Description</label>
+                        <textarea id="courseDescription" class="form-control" placeholder="Enter course description" rows="3"></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="coursePrice">Price (₹)</label>
+                            <input type="number" id="coursePrice" class="form-control" placeholder="e.g., 2999" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="courseStatus">Status *</label>
+                            <select id="courseStatus" class="form-control" required>
+                                <option value="ACTIVE">Active</option>
+                                <option value="INACTIVE">Inactive</option>
+                                <option value="DRAFT">Draft</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="courseInstructor">Instructor</label>
+                        <input type="text" id="courseInstructor" class="form-control" placeholder="Enter instructor name">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="coursePrerequisites">Prerequisites</label>
+                        <input type="text" id="coursePrerequisites" class="form-control" placeholder="e.g., Basic programming knowledge">
+                    </div>
+
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary" style="width: 100%;" id="courseSubmitBtn">
+                            Create Course
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Delete Confirmation Modal -->
+        <div class="modal" id="deleteCourseModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Delete Course</h3>
+                    <button class="close-modal">&times;</button>
                 </div>
-                <div class="card">
-                    <div class="card-header">
-                        <h3>Assignments</h3>
-                        <i class="fas fa-tasks"></i>
+                <div style="text-align: center; padding: 20px 0;">
+                    <div style="font-size: 48px; color: var(--danger); margin-bottom: 15px;">
+                        <i class="fas fa-exclamation-triangle"></i>
                     </div>
-                    <div class="card-content">
-                        <h2 id="assignmentsCount"><span class="loading-spinner"></span>0</h2>
-                        <p>Active assignments</p>
-                    </div>
-                </div>
-                <div class="card">
-                    <div class="card-header">
-                        <h3>Submissions</h3>
-                        <i class="fas fa-file-upload"></i>
-                    </div>
-                    <div class="card-content">
-                        <h2 id="submissionsCount"><span class="loading-spinner"></span>0</h2>
-                        <p>Pending submissions</p>
+                    <h3 style="margin-bottom: 10px;">Confirm Deletion</h3>
+                    <p style="color: var(--gray); margin-bottom: 25px;" id="deleteCourseMessage">
+                        Are you sure you want to delete this course? This action cannot be undone.
+                    </p>
+                    <div style="display: flex; gap: 15px; justify-content: center;">
+                        <button class="btn btn-danger" id="confirmDeleteCourse">Yes, Delete</button>
+                        <button class="btn btn-outline" id="cancelDeleteCourse">Cancel</button>
                     </div>
                 </div>
             </div>
@@ -1589,18 +1682,21 @@
 
     // Setup all event listeners
     function setupEventListeners() {
-        // Navigation
-        setupNavigation();
+    // Navigation
+    setupNavigation();
 
-        // Logout functionality
-        setupLogout();
+    // Logout functionality
+    setupLogout();
 
-        // Modal controls
-        setupModals();
+    // Modal controls
+    setupModals();
 
-        // Action buttons
-        setupActionButtons();
-    }
+    // Action buttons
+    setupActionButtons();
+
+    // Course management
+    setupCourseManagement(); // ← YEH LINE ADD KARO
+}
 
     // Navigation setup
     function setupNavigation() {
@@ -2271,6 +2367,372 @@
             loadRecentUsers();
         }
     }, 30000);
+
+    // Course Management Functions
+let currentCoursesPage = 1;
+const coursesPerPage = 10;
+let allCourses = [];
+
+// Setup course management
+function setupCourseManagement() {
+    const addNewCourseBtn = document.getElementById('addNewCourseBtn');
+    const courseModal = document.getElementById('courseModal');
+    const courseForm = document.getElementById('courseForm');
+    const refreshCoursesBtn = document.getElementById('refreshCoursesBtn');
+    const courseSearch = document.getElementById('courseSearch');
+    const courseStatusFilter = document.getElementById('courseStatusFilter');
+    const prevCoursesPage = document.getElementById('prevCoursesPage');
+    const nextCoursesPage = document.getElementById('nextCoursesPage');
+
+    // Add new course button
+    if (addNewCourseBtn) {
+        addNewCourseBtn.addEventListener('click', function() {
+            openCourseModal();
+        });
+    }
+
+    // Refresh courses
+    if (refreshCoursesBtn) {
+        refreshCoursesBtn.addEventListener('click', function() {
+            loadAllCourses();
+        });
+    }
+
+    // Search functionality
+    if (courseSearch) {
+        courseSearch.addEventListener('input', function() {
+            filterAndDisplayCourses();
+        });
+    }
+
+    // Status filter
+    if (courseStatusFilter) {
+        courseStatusFilter.addEventListener('change', function() {
+            filterAndDisplayCourses();
+        });
+    }
+
+    // Pagination
+    if (prevCoursesPage) {
+        prevCoursesPage.addEventListener('click', function() {
+            if (currentCoursesPage > 1) {
+                currentCoursesPage--;
+                displayCourses();
+            }
+        });
+    }
+
+    if (nextCoursesPage) {
+        nextCoursesPage.addEventListener('click', function() {
+            const totalPages = Math.ceil(filteredCourses.length / coursesPerPage);
+            if (currentCoursesPage < totalPages) {
+                currentCoursesPage++;
+                displayCourses();
+            }
+        });
+    }
+
+    // Course form submission
+    if (courseForm) {
+        courseForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            saveCourse();
+        });
+    }
+}
+
+// Open course modal for add/edit
+function openCourseModal(course = null) {
+    const modal = document.getElementById('courseModal');
+    const modalTitle = document.getElementById('courseModalTitle');
+    const submitBtn = document.getElementById('courseSubmitBtn');
+    const form = document.getElementById('courseForm');
+
+    if (course) {
+        // Edit mode
+        modalTitle.textContent = 'Edit Course';
+        submitBtn.textContent = 'Update Course';
+
+        // Fill form with course data
+        document.getElementById('courseId').value = course.id;
+        document.getElementById('courseTitle').value = course.title || '';
+        document.getElementById('courseCode').value = course.code || '';
+        document.getElementById('courseCredits').value = course.credits || 0;
+        document.getElementById('courseCategory').value = course.category || '';
+        document.getElementById('courseDuration').value = course.duration || 12;
+        document.getElementById('courseDescription').value = course.description || '';
+        document.getElementById('coursePrice').value = course.price || 0;
+        document.getElementById('courseStatus').value = course.status || 'ACTIVE';
+        document.getElementById('courseInstructor').value = course.instructor || '';
+        document.getElementById('coursePrerequisites').value = course.prerequisites || '';
+    } else {
+        // Add mode
+        modalTitle.textContent = 'Add New Course';
+        submitBtn.textContent = 'Create Course';
+        form.reset();
+        document.getElementById('courseId').value = '';
+    }
+
+    modal.style.display = 'flex';
+}
+
+// Save course (create or update)
+async function saveCourse() {
+    try {
+        const courseId = document.getElementById('courseId').value;
+        const formData = {
+            title: document.getElementById('courseTitle').value,
+            code: document.getElementById('courseCode').value,
+            credits: parseInt(document.getElementById('courseCredits').value),
+            category: document.getElementById('courseCategory').value,
+            duration: parseInt(document.getElementById('courseDuration').value),
+            description: document.getElementById('courseDescription').value,
+            price: parseFloat(document.getElementById('coursePrice').value) || 0,
+            status: document.getElementById('courseStatus').value,
+            instructor: document.getElementById('courseInstructor').value,
+            prerequisites: document.getElementById('coursePrerequisites').value
+        };
+
+        // Show loading state
+        const submitBtn = document.getElementById('courseSubmitBtn');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<span class="loading-spinner"></span>Saving...';
+        submitBtn.disabled = true;
+
+        let response;
+        if (courseId) {
+            // Update existing course
+            response = await fetch(`/api/admin/courses/${courseId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            });
+        } else {
+            // Create new course
+            response = await fetch('/api/admin/courses', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            });
+        }
+
+        const result = await response.json();
+
+        if (result.success) {
+            showAlert(`Course ${courseId ? 'updated' : 'created'} successfully!`, 'success');
+            document.getElementById('courseModal').style.display = 'none';
+            await loadAllCourses(); // Reload courses
+        } else {
+            throw new Error(result.error || 'Failed to save course');
+        }
+
+        // Reset button
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+
+    } catch (error) {
+        console.error('❌ Error saving course:', error);
+        showAlert('Error saving course. Please try again.', 'error');
+
+        // Reset button
+        const submitBtn = document.getElementById('courseSubmitBtn');
+        submitBtn.innerHTML = courseId ? 'Update Course' : 'Create Course';
+        submitBtn.disabled = false;
+    }
+}
+
+// Delete course
+async function deleteCourse(courseId, courseTitle) {
+    const modal = document.getElementById('deleteCourseModal');
+    const message = document.getElementById('deleteCourseMessage');
+
+    message.textContent = `Are you sure you want to delete the course "${courseTitle}"? This action cannot be undone.`;
+
+    modal.style.display = 'flex';
+
+    // Setup confirmation handlers
+    const confirmDelete = document.getElementById('confirmDeleteCourse');
+    const cancelDelete = document.getElementById('cancelDeleteCourse');
+
+    const confirmHandler = async () => {
+        try {
+            const response = await fetch(`/api/admin/courses/${courseId}`, {
+                method: 'DELETE'
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                showAlert('Course deleted successfully!', 'success');
+                modal.style.display = 'none';
+                await loadAllCourses(); // Reload courses
+            } else {
+                throw new Error(result.error || 'Failed to delete course');
+            }
+        } catch (error) {
+            console.error('❌ Error deleting course:', error);
+            showAlert('Error deleting course. Please try again.', 'error');
+        } finally {
+            // Clean up event listeners
+            confirmDelete.removeEventListener('click', confirmHandler);
+            cancelDelete.removeEventListener('click', cancelHandler);
+        }
+    };
+
+    const cancelHandler = () => {
+        modal.style.display = 'none';
+        // Clean up event listeners
+        confirmDelete.removeEventListener('click', confirmHandler);
+        cancelDelete.removeEventListener('click', cancelHandler);
+    };
+
+    confirmDelete.addEventListener('click', confirmHandler);
+    cancelDelete.addEventListener('click', cancelHandler);
+}
+
+// Filter and display courses
+let filteredCourses = [];
+
+function filterAndDisplayCourses() {
+    const searchTerm = document.getElementById('courseSearch').value.toLowerCase();
+    const statusFilter = document.getElementById('courseStatusFilter').value;
+
+    filteredCourses = allCourses.filter(course => {
+        const matchesSearch = !searchTerm ||
+            course.title.toLowerCase().includes(searchTerm) ||
+            course.code.toLowerCase().includes(searchTerm) ||
+            course.category.toLowerCase().includes(searchTerm);
+
+        const matchesStatus = !statusFilter || course.status === statusFilter;
+
+        return matchesSearch && matchesStatus;
+    });
+
+    currentCoursesPage = 1;
+    displayCourses();
+}
+
+// Display courses in table
+function displayCourses() {
+    const tbody = document.getElementById('coursesTableBody');
+    const paginationInfo = document.getElementById('coursesPaginationInfo');
+    const prevBtn = document.getElementById('prevCoursesPage');
+    const nextBtn = document.getElementById('nextCoursesPage');
+
+    if (filteredCourses.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="8" style="text-align: center; padding: 30px; color: var(--gray);">
+                    <i class="fas fa-book" style="font-size: 48px; margin-bottom: 10px; opacity: 0.5;"></i>
+                    <p>No courses found</p>
+                </td>
+            </tr>
+        `;
+        paginationInfo.textContent = 'Showing 0 of 0 courses';
+        prevBtn.disabled = true;
+        nextBtn.disabled = true;
+        return;
+    }
+
+    // Calculate pagination
+    const startIndex = (currentCoursesPage - 1) * coursesPerPage;
+    const endIndex = startIndex + coursesPerPage;
+    const currentCourses = filteredCourses.slice(startIndex, endIndex);
+    const totalPages = Math.ceil(filteredCourses.length / coursesPerPage);
+
+    // Update pagination info
+    paginationInfo.textContent = `Showing ${startIndex + 1}-${Math.min(endIndex, filteredCourses.length)} of ${filteredCourses.length} courses`;
+
+    // Update pagination buttons
+    prevBtn.disabled = currentCoursesPage === 1;
+    nextBtn.disabled = currentCoursesPage === totalPages;
+
+    // Render courses
+    tbody.innerHTML = currentCourses.map(course => `
+        <tr>
+            <td>${course.id || 'N/A'}</td>
+            <td>
+                <div style="font-weight: 600;">${course.title || 'Untitled Course'}</div>
+                ${course.description ? `<div style="font-size: 12px; color: var(--gray); margin-top: 4px;">${course.description.substring(0, 50)}${course.description.length > 50 ? '...' : ''}</div>` : ''}
+            </td>
+            <td>
+                <span style="font-family: monospace; font-weight: 600; color: var(--primary);">
+                    ${course.code || 'N/A'}
+                </span>
+            </td>
+            <td>
+                <span class="user-role role-student">
+                    ${course.category || 'General'}
+                </span>
+            </td>
+            <td>${course.credits || 0}</td>
+            <td>${course.duration || 12} weeks</td>
+            <td>
+                <span class="status-badge ${course.status === 'ACTIVE' ? 'status-active' : course.status === 'DRAFT' ? 'status-inactive' : 'status-inactive'}">
+                    ${course.status || 'INACTIVE'}
+                </span>
+            </td>
+            <td>
+                <div style="display: flex; gap: 5px; flex-wrap: wrap;">
+                    <button class="btn btn-outline edit-course-btn" data-id="${course.id}" style="padding: 4px 8px; font-size: 12px;">
+                        <i class="fas fa-edit"></i> Edit
+                    </button>
+                    <button class="btn btn-danger delete-course-btn" data-id="${course.id}" data-title="${course.title}" style="padding: 4px 8px; font-size: 12px;">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                </div>
+            </td>
+        </tr>
+    `).join('');
+
+    // Add event listeners to action buttons
+    document.querySelectorAll('.edit-course-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const courseId = this.getAttribute('data-id');
+            const course = allCourses.find(c => c.id == courseId);
+            if (course) {
+                openCourseModal(course);
+            }
+        });
+    });
+
+    document.querySelectorAll('.delete-course-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const courseId = this.getAttribute('data-id');
+            const courseTitle = this.getAttribute('data-title');
+            deleteCourse(courseId, courseTitle);
+        });
+    });
+}
+
+// Load all courses
+async function loadAllCourses() {
+    try {
+        console.log('📚 Loading all courses...');
+
+        const response = await fetch('/api/admin/courses');
+        const result = await response.json();
+
+        if (result.success && result.data) {
+            allCourses = result.data;
+            filteredCourses = [...allCourses];
+            displayCourses();
+            console.log('✅ All courses loaded');
+        } else {
+            throw new Error(result.error || 'Failed to load courses');
+        }
+
+    } catch (error) {
+        console.error('❌ Error loading all courses:', error);
+        allCourses = [];
+        filteredCourses = [];
+        displayCourses();
+    }
+}
 
 </script>
 </body>
