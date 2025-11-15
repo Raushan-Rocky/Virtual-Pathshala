@@ -8,9 +8,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @SpringBootApplication
 public class VirtualPathshalaApplication {
@@ -21,7 +19,7 @@ public class VirtualPathshalaApplication {
 
 	// ✅ Create default admin user when app starts
 	@Bean
-	CommandLineRunner initAdmin(UserRepository userRepository) {
+	CommandLineRunner initAdmin(UserRepository userRepository, PasswordEncoder passwordEncoder) {
 		return args -> {
 			String adminEmail = "admin@virtualpathshala.com";
 
@@ -31,36 +29,27 @@ public class VirtualPathshalaApplication {
 				return;
 			}
 
-			// ✅ Create a new admin
+			// ✅ Create a new admin with BCrypt password
 			User admin = new User();
 			admin.setName("Super Admin");
 			admin.setEmail(adminEmail);
 			admin.setMobile("+91 7644014111");
 			admin.setRole(Role.ADMIN);
 			admin.setStatus(Status.ACTIVE);
-			admin.setPasswordHash(hashPassword("teamRaushan$04")); // ✅ Default password
 
-			userRepository.save(admin);
+			// ✅ Use BCryptPasswordEncoder
+			admin.setPasswordHash(passwordEncoder.encode("teamRaushan$04"));
+
+			User savedAdmin = userRepository.save(admin);
+
 			System.out.println("✅ Default Admin Created ✅");
-			System.out.println("📌 Email: admin@virtualpathshala.com");
+			System.out.println("📌 Email: " + savedAdmin.getEmail());
 			System.out.println("🔑 Password: teamRaushan$04");
+			System.out.println("🎯 Role: " + savedAdmin.getRole());
+			System.out.println("🔐 Password Encoded with: BCrypt");
+			System.out.println("📱 Mobile: " + savedAdmin.getMobile());
+			System.out.println("📊 Status: " + savedAdmin.getStatus());
+			System.out.println("🆔 User ID: " + savedAdmin.getId());
 		};
-	}
-
-	// ✅ Hash Password (same used in AuthService)
-	private String hashPassword(String password) {
-		try {
-			MessageDigest md = MessageDigest.getInstance("SHA-256");
-			byte[] hash = md.digest(password.getBytes());
-			StringBuilder hexString = new StringBuilder();
-			for (byte b : hash) {
-				String hex = Integer.toHexString(0xff & b);
-				if (hex.length() == 1) hexString.append('0');
-				hexString.append(hex);
-			}
-			return hexString.toString();
-		} catch (NoSuchAlgorithmException e) {
-			throw new RuntimeException("Error hashing password", e);
-		}
 	}
 }

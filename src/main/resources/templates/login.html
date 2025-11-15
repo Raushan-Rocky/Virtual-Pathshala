@@ -333,14 +333,15 @@
       <!-- Role Selection -->
       <div class="role-selection">
         <label>Select User Type</label>
+        <!-- ✅ CORRECT - All three roles for login -->
         <div class="role-options">
           <div class="role-option" data-role="admin">
             <input type="radio" id="role-admin" name="role" value="admin" required>
-            <i class='bx bx-user-circle role-icon'></i>
+            <i class='bx bx-user-shield role-icon'></i> <!-- Better icon for admin -->
             <span>ADMIN</span>
           </div>
           <div class="role-option" data-role="student">
-            <input type="radio" id="role-student" name="role" value="student" required checked>
+            <input type="radio" id="role-student" name="role" value="student" required>
             <i class='bx bx-book-alt role-icon'></i>
             <span>STUDENT</span>
           </div>
@@ -484,69 +485,64 @@
         passwordLength: password.length
       });
 
-      const response = await fetch('/api/login', {
+      // ✅ FIX 1: Correct endpoint
+      const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        credentials: 'include',
         body: JSON.stringify({
           email,
           password,
-          role: selectedRole
+          // ✅ FIX 4: Role in uppercase
+          role: selectedRole.toUpperCase()
         })
       });
 
       console.log('📡 Response status:', response.status);
 
-      // Handle response
-      const contentType = response.headers.get('content-type');
-      let data;
+      const data = await response.json();
+      console.log('📄 JSON Response:', data);
 
-      if (contentType && contentType.includes('application/json')) {
-        data = await response.json();
-        console.log('📄 JSON Response:', data);
-      } else {
-        const text = await response.text();
-        console.log('📄 Text Response:', text);
-        throw new Error('Server returned invalid response format');
-      }
-
-      if (data.success) {
+      if (response.ok && data.success) {
         console.log('✅ Login successful!');
         showMessage('successMessage', 'Login successful! Redirecting...', false);
 
-        // Store user data in localStorage
-        if (data.data) {
-          localStorage.setItem('user', JSON.stringify(data.data));
-          localStorage.setItem('userId', data.data.id);
-          localStorage.setItem('userEmail', data.data.email);
-          localStorage.setItem('userRole', data.data.role);
+        // ✅ FIX 2 & 3: Store token and user data correctly
+        if (data.token) {
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('tokenType', data.tokenType || 'Bearer');
+        }
+
+        if (data.user) {
+          localStorage.setItem('user', JSON.stringify(data.user));
+          localStorage.setItem('userId', data.user.id);
+          localStorage.setItem('userEmail', data.user.email);
+          localStorage.setItem('userRole', data.user.role);
 
           console.log('💾 User data stored:', {
-            id: data.data.id,
-            name: data.data.name,
-            email: data.data.email,
-            role: data.data.role
+            id: data.user.id,
+            name: data.user.name,
+            email: data.user.email,
+            role: data.user.role
           });
 
-          // ✅ REDIRECT BASED ON USER ROLE
-          const userRole = data.data.role?.toLowerCase() || selectedRole;
-          let redirectPath = '/student';
+          // ✅ FIX 5: Updated redirect paths
+          const userRole = data.user.role?.toLowerCase() || selectedRole;
+          let redirectPath = '/student-dashboard';
 
-          switch(userRole) {
+          switch(userRole.toLowerCase()) {
             case 'admin':
               redirectPath = '/admin';
               console.log('🎯 Redirecting to Admin Dashboard');
               break;
             case 'teacher':
-              // ✅ TEACHER DASHBOARD WITH USER ID
-              redirectPath = `/teacher?userId=${data.data.id}`;
-              console.log(`🎯 Redirecting to Teacher Dashboard with ID: ${data.data.id}`);
+              redirectPath = '/teacher';
+              console.log('🎯 Redirecting to Teacher Dashboard');
               break;
             case 'student':
             default:
-              redirectPath = '/studentlogin';
+              redirectPath = '/student-dashboard';
               console.log('🎯 Redirecting to Student Dashboard');
           }
 
@@ -562,14 +558,14 @@
         }
       } else {
         console.error('❌ Login failed:', data.error);
-        showMessage('errorMessage', data.error || 'Login failed. Please check your credentials.');
+        showMessage('errorMessage', data.error || data.message || 'Login failed. Please check your credentials.');
       }
 
     } catch (error) {
       console.error('❌ Login error:', error);
 
       if (error.message.includes('JSON') || error.message.includes('response format')) {
-        showMessage('errorMessage', 'Role Mismatched select valid user Role.');
+        showMessage('errorMessage', 'Server error: Please try again later.');
       } else if (error.message.includes('Network') || error.message.includes('Failed to fetch')) {
         showMessage('errorMessage', 'Network error: Please check your internet connection.');
       } else {
@@ -607,6 +603,5 @@
 
   console.log('🚀 Login page initialized successfully');
 </script>
-
 </body>
 </html>

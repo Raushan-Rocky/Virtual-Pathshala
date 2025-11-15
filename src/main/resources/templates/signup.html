@@ -354,6 +354,7 @@ footer {
       <!-- Role Selection -->
       <div class="role-selection">
         <label>Select User Type</label>
+        <!-- ✅ CORRECT - Only STUDENT and TEACHER can signup -->
         <div class="role-options">
           <div class="role-option" data-role="student">
             <input type="radio" id="role-student" name="role" value="student" required checked>
@@ -440,7 +441,8 @@ footer {
     }
 
     function validateEmail(email) {
-      const emailRegex = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/i;
+      // ✅ FIXED EMAIL REGEX
+      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
       return emailRegex.test(email);
     }
 
@@ -626,7 +628,8 @@ footer {
           name: document.getElementById('name').value.trim(),
           email: document.getElementById('email').value.trim(),
           mobile: document.getElementById('mobile').value.trim(),
-          role: document.querySelector('input[name="role"]:checked').value,
+          // ✅ FIX: Role in uppercase
+          role: document.querySelector('input[name="role"]:checked').value.toUpperCase(),
           password: document.getElementById('password').value,
           confirmPassword: document.getElementById('confirmPassword').value
         };
@@ -639,7 +642,8 @@ footer {
         signupBtn.disabled = true;
 
         try {
-          const response = await fetch('/api/signup', {
+          // ✅ FIX: Correct endpoint
+          const response = await fetch('/api/auth/signup', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -651,7 +655,11 @@ footer {
           console.log('📥 Signup response:', data);
 
           if (data.success) {
-            alert('✅ Registration successful! Please login.');
+            if (data.requiresApproval) {
+              alert('✅ Registration submitted! Waiting for admin approval.');
+            } else {
+              alert('✅ Registration successful! Please login.');
+            }
             window.location.href = '/login';
           } else {
             alert('❌ ' + (data.error || data.message || 'Registration failed'));
