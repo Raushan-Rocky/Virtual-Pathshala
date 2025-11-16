@@ -108,10 +108,31 @@ public class UserController {
     }
 
     // ✅ Get User by ID - Users can access their own data, ADMIN/TEACHER can access any
+    // ✅ Get User by ID - Users can access their own data, ADMIN/TEACHER can access any
     @GetMapping("/{userId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER') or @userSecurity.isOwnProfile(#userId)")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER', 'STUDENT')")
     public ResponseEntity<?> getUserById(@PathVariable int userId) {
         try {
+            // ✅ SECURITY: Get current user
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String currentUsername = authentication.getName();
+
+            Optional<User> currentUserOptional = userRepository.findByEmail(currentUsername);
+            if (currentUserOptional.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(new ApiResponse<>(false, "User not found"));
+            }
+
+            User currentUser = currentUserOptional.get();
+
+            // ✅ SECURITY: Users can only access their own data unless admin/teacher
+            if (!currentUser.getRole().name().equals("ADMIN") &&
+                    !currentUser.getRole().name().equals("TEACHER") &&
+                    currentUser.getId() != userId) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body(new ApiResponse<>(false, "Access denied"));
+            }
+
             Optional<User> userOptional = userRepository.findById(userId);
 
             if (userOptional.isEmpty()) {
@@ -120,8 +141,6 @@ public class UserController {
             }
 
             User user = userOptional.get();
-
-            // Create secure response (exclude sensitive data)
             Map<String, Object> userData = createSecureUserData(user);
 
             return ResponseEntity.ok(new ApiResponse<>(true, "User data retrieved successfully", userData));

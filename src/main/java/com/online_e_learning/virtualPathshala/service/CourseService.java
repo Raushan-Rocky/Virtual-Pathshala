@@ -66,4 +66,17 @@ public class CourseService {
     }
 
     // Add other methods as needed...
+    // CourseService.java - ye method add karein
+    public ApiResponse<List<CourseResponseDto>> getAllCourses() {
+        try {
+            List<Course> courses = courseRepository.findAll();
+            List<CourseResponseDto> responseDtos = courses.stream()
+                    .map(courseConverter::courseToCourseResponseDto)
+                    .collect(Collectors.toList());
+
+            return ApiResponse.success("All courses retrieved successfully", responseDtos);
+        } catch (Exception e) {
+            return ApiResponse.error("Error retrieving all courses: " + e.getMessage());
+        }
+    }
 }

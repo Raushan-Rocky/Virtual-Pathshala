@@ -8,10 +8,14 @@ import com.online_e_learning.virtualPathshala.repository.UserRepository;
 import com.online_e_learning.virtualPathshala.requestDto.CourseRequestDto;
 import com.online_e_learning.virtualPathshala.responseDto.ApiResponse;
 import com.online_e_learning.virtualPathshala.responseDto.CourseResponseDto;
+import com.online_e_learning.virtualPathshala.service.CourseService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,7 +23,6 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/courses")
-//@CrossOrigin(origins = "http://localhost:3000")
 public class CourseController {
 
     @Autowired
@@ -31,47 +34,53 @@ public class CourseController {
     @Autowired
     private CourseConverter courseConverter;
 
-    // CREATE COURSE - POST http://localhost:8040/api/courses
+    @Autowired
+    private CourseService courseService;
+
+    // ✅ CREATE COURSE - POST http://localhost:8040/api/courses
     @PostMapping
+    @PreAuthorize("hasAnyRole('TEACHER', 'ADMIN')")
     public ResponseEntity<?> createCourse(@RequestBody CourseRequestDto courseRequestDto,
                                           HttpServletRequest request) {
         try {
             System.out.println("✅ Course Controller reached! Creating course: " + courseRequestDto.getTitle());
 
-            // ✅ IMPROVED: Get teacher ID from logged-in user session (more secure)
-            // For now, using from request body as before
-            int teacherId = courseRequestDto.getTeacherId();
+            // ✅ SECURITY: Get logged-in teacher ID from security context
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String currentUsername = authentication.getName();
 
-            // Check if teacher exists
-            Optional<User> teacherOptional = userRepository.findById(teacherId);
-            if (teacherOptional.isEmpty()) {
-                return ResponseEntity.badRequest()
-                        .body(new ApiResponse<>(false, "Teacher not found with ID: " + teacherId));
+            // Get current user from database
+            Optional<User> currentUserOptional = userRepository.findByEmail(currentUsername);
+            if (currentUserOptional.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(new ApiResponse<>(false, "User not found"));
             }
 
-            // Check if course code already exists
-            if (courseRequestDto.getCode() != null && courseRepository.existsByCode(courseRequestDto.getCode())) {
-                return ResponseEntity.badRequest()
-                        .body(new ApiResponse<>(false, "Course with code " + courseRequestDto.getCode() + " already exists"));
+            User currentUser = currentUserOptional.get();
+
+            // ✅ VERIFY: Only teachers can create courses (unless admin)
+            if (!currentUser.getRole().name().equals("TEACHER") &&
+                    !currentUser.getRole().name().equals("ADMIN")) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body(new ApiResponse<>(false, "Only teachers and admins can create courses"));
             }
 
-            User teacher = teacherOptional.get();
-
-            // ✅ VERIFY: Ensure the user is actually a TEACHER
-            if (!"TEACHER".equals(teacher.getRole().toString())) {
-                return ResponseEntity.badRequest()
-                        .body(new ApiResponse<>(false, "User with ID " + teacherId + " is not a teacher"));
+            // ✅ SECURITY: Ensure teacher can only create courses for themselves
+            // If user is TEACHER, override the teacherId with their own ID
+            if (currentUser.getRole().name().equals("TEACHER")) {
+                courseRequestDto.setTeacherId(currentUser.getId());
+                System.out.println("✅ Overriding teacherId to current user ID: " + currentUser.getId());
             }
 
-            Course course = courseConverter.courseRequestDtoToCourse(courseRequestDto, teacher);
-            Course savedCourse = courseRepository.save(course);
-            CourseResponseDto responseDto = courseConverter.courseToCourseResponseDto(savedCourse);
+            // ✅ Use CourseService instead of direct repository calls
+            ApiResponse<CourseResponseDto> serviceResponse = courseService.createCourse(courseRequestDto);
 
-            // ✅ DEBUG: Print to verify teacher ID is saved
-            System.out.println("✅ Course created successfully! Teacher ID: " + savedCourse.getUser().getId());
-            System.out.println("✅ Course Teacher Name: " + savedCourse.getUser().getName());
-
-            return ResponseEntity.ok(new ApiResponse<>(true, "Course created successfully", responseDto));
+            if (serviceResponse.isSuccess()) {
+                System.out.println("✅ Course created successfully via Service!");
+                return ResponseEntity.ok(serviceResponse);
+            } else {
+                return ResponseEntity.badRequest().body(serviceResponse);
+            }
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -80,18 +89,40 @@ public class CourseController {
         }
     }
 
-    // GET COURSES BY TEACHER - GET http://localhost:8040/api/courses/user/1
+    // ✅ GET COURSES BY TEACHER - GET http://localhost:8040/api/courses/user/{teacherId}
     @GetMapping("/user/{teacherId}")
+    @PreAuthorize("hasAnyRole('TEACHER', 'ADMIN', 'STUDENT')")
     public ResponseEntity<?> getCoursesByTeacher(@PathVariable int teacherId) {
         try {
             System.out.println("✅ Fetching courses for teacher ID: " + teacherId);
 
-            List<Course> courses = courseRepository.findByUserId(teacherId);
-            List<CourseResponseDto> responseDtos = courses.stream()
-                    .map(courseConverter::courseToCourseResponseDto)
-                    .toList();
+            // ✅ SECURITY: Check if user has access to these courses
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String currentUsername = authentication.getName();
 
-            return ResponseEntity.ok(new ApiResponse<>(true, "Courses retrieved successfully", responseDtos));
+            Optional<User> currentUserOptional = userRepository.findByEmail(currentUsername);
+            if (currentUserOptional.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(new ApiResponse<>(false, "User not found"));
+            }
+
+            User currentUser = currentUserOptional.get();
+
+            // ✅ SECURITY: Users can only access their own courses unless admin
+            if (currentUser.getRole().name().equals("TEACHER") && currentUser.getId() != teacherId) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body(new ApiResponse<>(false, "Access denied: You can only view your own courses"));
+            }
+
+            // ✅ Use Service method
+            ApiResponse<List<CourseResponseDto>> serviceResponse = courseService.getCoursesByTeacher(teacherId);
+
+            if (serviceResponse.isSuccess()) {
+                return ResponseEntity.ok(serviceResponse);
+            } else {
+                return ResponseEntity.badRequest().body(serviceResponse);
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -99,14 +130,9 @@ public class CourseController {
         }
     }
 
-    // TEST ENDPOINT - DIFFERENT URL PE RAKHO
-    @GetMapping("/test")
-    public String testEndpoint() {
-        return "✅ Course Controller is working!";
-    }
-
-    // GET ALL COURSES - GET http://localhost:8040/api/courses/all
+    // ✅ GET ALL COURSES - GET http://localhost:8040/api/courses/all
     @GetMapping("/all")
+    @PreAuthorize("hasAnyRole('TEACHER', 'ADMIN', 'STUDENT')")
     public ResponseEntity<?> getAllCourses() {
         try {
             System.out.println("✅ Fetching all courses for student view");
@@ -122,5 +148,11 @@ public class CourseController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ApiResponse<>(false, "Error retrieving courses: " + e.getMessage()));
         }
+    }
+
+    // ✅ TEST ENDPOINT - GET http://localhost:8040/api/courses/test
+    @GetMapping("/test")
+    public String testEndpoint() {
+        return "✅ Course Controller is working!";
     }
 }

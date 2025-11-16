@@ -1223,7 +1223,19 @@
     const API_BASE_URL = 'http://localhost:8040/api';
     let TEACHER_ID = null;
     let CURRENT_TEACHER_DATA = null;
+    let JWT_TOKEN = null; // ✅ ADD THIS
 
+function getJwtToken() {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get('token') || localStorage.getItem('jwtToken');
+}
+function getAuthHeaders() {
+    const token = getJwtToken();
+    return {
+        'Content-Type': 'application/json',
+        'Authorization': token ? `Bearer ${token}` : ''
+    };
+}
     // Simulated data for courses, assignments, and students (temporary)
     let courses = [];
     let assignments = [];
@@ -1236,58 +1248,68 @@
 
     // ✅ NEW: Initialize teacher dashboard with actual login data
     async function initializeTeacherDashboard() {
-        try {
-            // ✅ GET TEACHER ID FROM URL PARAMETERS OR LOCALSTORAGE
-            const urlParams = new URLSearchParams(window.location.search);
-            TEACHER_ID = urlParams.get('userId') || localStorage.getItem('userId');
+    try {
+        // ✅ GET TEACHER ID AND TOKEN FROM URL PARAMETERS OR LOCALSTORAGE
+        const urlParams = new URLSearchParams(window.location.search);
+        TEACHER_ID = urlParams.get('userId') || localStorage.getItem('userId');
+        JWT_TOKEN = getJwtToken(); // ✅ GET TOKEN
 
-            if (!TEACHER_ID) {
-                console.error("❌ Teacher ID not found. Redirecting to login...");
-                alert("Please login first.");
-                window.location.href = '/login';
-                return;
-            }
-
-            console.log("✅ Teacher ID from login:", TEACHER_ID);
-
-            // ✅ FETCH ACTUAL TEACHER DATA FROM BACKEND
-            await fetchTeacherData(TEACHER_ID);
-
-            // ✅ LOAD TEACHER'S COURSES
-            await loadCoursesFromBackend();
-
-            // ✅ INITIALIZE ALL UI COMPONENTS
-            initializeUIComponents();
-
-            console.log("🎉 Teacher dashboard initialized successfully");
-
-        } catch (error) {
-            console.error('❌ Error initializing dashboard:', error);
-            alert('Error loading dashboard. Please try again.');
+        if (!TEACHER_ID || !JWT_TOKEN) {
+            console.error("❌ Teacher ID or Token not found. Redirecting to login...");
+            alert("Please login first.");
+            window.location.href = '/login';
+            return;
         }
+
+        console.log("✅ Teacher ID from login:", TEACHER_ID);
+        console.log("✅ JWT Token available:", JWT_TOKEN ? "Yes" : "No");
+
+        // ✅ STORE TOKEN IN LOCALSTORAGE FOR FUTURE USE
+        localStorage.setItem('jwtToken', JWT_TOKEN);
+
+        // ✅ FETCH ACTUAL TEACHER DATA FROM BACKEND
+        await fetchTeacherData(TEACHER_ID);
+
+        // ✅ LOAD TEACHER'S COURSES
+        await loadCoursesFromBackend();
+
+        // ✅ INITIALIZE ALL UI COMPONENTS
+        initializeUIComponents();
+
+        console.log("🎉 Teacher dashboard initialized successfully");
+
+    } catch (error) {
+        console.error('❌ Error initializing dashboard:', error);
+        alert('Error loading dashboard. Please try again.');
     }
+}
 
     // ✅ NEW: Fetch actual teacher data from backend
     async function fetchTeacherData(teacherId) {
-        try {
-            const response = await fetch(`${API_BASE_URL}/users/${teacherId}`);
-            const result = await response.json();
+    try {
+        const response = await fetch(`${API_BASE_URL}/users/${teacherId}`, {
+            method: 'GET',
+            headers: getAuthHeaders() // ✅ ADD HEADERS
+        });
 
-            if (response.ok && result.success) {
-                CURRENT_TEACHER_DATA = result.data;
-                console.log("✅ Teacher data fetched:", CURRENT_TEACHER_DATA);
-
-                // Update UI with actual teacher data
-                updateUIWithTeacherData(CURRENT_TEACHER_DATA);
-            } else {
-                throw new Error(result.message || 'Failed to fetch teacher data');
-            }
-        } catch (error) {
-            console.error('Error fetching teacher data:', error);
-            // Fallback to simulated data for demo
-            useFallbackTeacherData();
+        if (response.status === 401) {
+            throw new Error('Authentication failed. Please login again.');
         }
+
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+            CURRENT_TEACHER_DATA = result.data;
+            console.log("✅ Teacher data fetched:", CURRENT_TEACHER_DATA);
+            updateUIWithTeacherData(CURRENT_TEACHER_DATA);
+        } else {
+            throw new Error(result.message || 'Failed to fetch teacher data');
+        }
+    } catch (error) {
+        console.error('Error fetching teacher data:', error);
+        useFallbackTeacherData();
     }
+}
 
     // ✅ NEW: Update UI with actual teacher data
     function updateUIWithTeacherData(teacherData) {
@@ -1331,112 +1353,122 @@
     }
 
     // ✅ UPDATED: Load courses from backend with actual teacher ID
-    async function loadCoursesFromBackend() {
-        try {
-            console.log("📚 Fetching courses for Teacher ID:", TEACHER_ID);
+   async function loadCoursesFromBackend() {
+    try {
+        console.log("📚 Fetching courses for Teacher ID:", TEACHER_ID);
 
-            const response = await fetch(`${API_BASE_URL}/courses/user/${TEACHER_ID}`);
-            const result = await response.json();
+        const response = await fetch(`${API_BASE_URL}/courses/user/${TEACHER_ID}`, {
+            method: 'GET',
+            headers: getAuthHeaders() // ✅ ADD HEADERS
+        });
 
-            if (response.ok && result.success) {
-                courses = result.data.map(course => ({
-                    id: course.id,
-                    title: course.title,
-                    code: course.code,
-                    semester: course.semester || "Current",
-                    students: course.enrollmentCount || 0,
-                    assignments: course.assignmentCount || 0,
-                    materials: course.materialCount || 0,
-                    color: getRandomColor()
-                }));
-
-                // Update dashboard counts
-                updateDashboardCounts();
-
-                // Load courses in UI
-                loadCourses();
-
-                console.log(`✅ Loaded ${courses.length} courses for Teacher ${TEACHER_ID}`);
-            } else {
-                throw new Error(result.message || 'Failed to load courses');
-            }
-        } catch (error) {
-            console.error('Error loading courses:', error);
-            // Use simulated courses for demo
-            useSimulatedCourses();
+        if (response.status === 401) {
+            throw new Error('Authentication failed. Please login again.');
         }
+
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+            courses = result.data.map(course => ({
+                id: course.id,
+                title: course.title,
+                code: course.code,
+                semester: course.semester || "Current",
+                students: course.enrollmentCount || 0,
+                assignments: course.assignmentCount || 0,
+                materials: course.materialCount || 0,
+                color: getRandomColor()
+            }));
+
+            updateDashboardCounts();
+            loadCourses();
+            console.log(`✅ Loaded ${courses.length} courses for Teacher ${TEACHER_ID}`);
+        } else {
+            throw new Error(result.message || 'Failed to load courses');
+        }
+    } catch (error) {
+        console.error('Error loading courses:', error);
+        useSimulatedCourses();
     }
+}
 
     // ✅ UPDATED: Add new course with actual teacher ID
     async function addNewCourseToBackend() {
-        const submitBtn = document.querySelector('#addCourseForm button[type="submit"]');
-        const originalText = submitBtn.innerHTML;
+    const submitBtn = document.querySelector('#addCourseForm button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
 
-        try {
-            // ✅ VERIFY TEACHER ID IS AVAILABLE
-            if (!TEACHER_ID) {
-                alert("Error: Teacher ID not found. Please login again.");
-                window.location.href = '/login';
-                return;
-            }
-
-            // Show loading state
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = 'Creating Course...';
-
-            // ✅ COURSE DATA WITH ACTUAL TEACHER ID
-            const courseData = {
-                title: document.getElementById('courseTitle').value,
-                code: document.getElementById('courseCode').value,
-                category: document.getElementById('courseDepartment').value,
-                description: document.getElementById('courseDescription').value,
-                department: document.getElementById('courseDepartment').value,
-                credits: parseInt(document.getElementById('courseCredits').value),
-                semester: document.getElementById('courseSemester').value,
-                capacity: parseInt(document.getElementById('courseCapacity').value),
-                schedule: document.getElementById('courseSchedule').value,
-                location: document.getElementById('courseLocation').value,
-                prerequisites: document.getElementById('coursePrerequisites').value,
-                teacherId: parseInt(TEACHER_ID) // ✅ ACTUAL LOGGED-IN TEACHER ID
-            };
-
-            console.log("📝 Creating course for Teacher ID:", TEACHER_ID);
-            console.log("Course Data:", courseData);
-
-            const response = await fetch(`${API_BASE_URL}/courses`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(courseData)
-            });
-
-            const result = await response.json();
-
-            if (response.ok && result.success) {
-                alert(`✅ Course "${courseData.title}" created successfully!`);
-                console.log("🎉 Course created with Teacher ID:", TEACHER_ID);
-
-                // Reset form
-                document.getElementById('addCourseForm').reset();
-
-                // Reload courses to show new course
-                await loadCoursesFromBackend();
-
-                // Navigate to courses section
-                document.querySelector('[data-section="courses"]').click();
-            } else {
-                throw new Error(result.message || result.error || 'Failed to create course');
-            }
-        } catch (error) {
-            console.error('❌ Error creating course:', error);
-            alert(`Error: ${error.message}`);
-        } finally {
-            // Reset button state
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = originalText;
+    try {
+        // ✅ VERIFY TEACHER ID IS AVAILABLE
+        if (!TEACHER_ID) {
+            alert("Error: Teacher ID not found. Please login again.");
+            window.location.href = '/login';
+            return;
         }
+
+        // Show loading state
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = 'Creating Course...';
+
+        // ✅ COURSE DATA WITH ACTUAL TEACHER ID
+        const courseData = {
+            title: document.getElementById('courseTitle').value,
+            code: document.getElementById('courseCode').value,
+            category: document.getElementById('courseDepartment').value,
+            description: document.getElementById('courseDescription').value,
+            department: document.getElementById('courseDepartment').value,
+            credits: parseInt(document.getElementById('courseCredits').value),
+            semester: document.getElementById('courseSemester').value,
+            capacity: parseInt(document.getElementById('courseCapacity').value),
+            schedule: document.getElementById('courseSchedule').value,
+            location: document.getElementById('courseLocation').value,
+            prerequisites: document.getElementById('coursePrerequisites').value,
+            teacherId: parseInt(TEACHER_ID)
+        };
+
+        console.log("📝 Creating course for Teacher ID:", TEACHER_ID);
+        console.log("Course Data:", courseData);
+
+        const response = await fetch(`${API_BASE_URL}/courses`, {
+            method: 'POST',
+            headers: getAuthHeaders(), // ✅ ADD HEADERS
+            body: JSON.stringify(courseData)
+        });
+
+        if (response.status === 401) {
+            throw new Error('Authentication failed. Please login again.');
+        }
+
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+            alert(`✅ Course "${courseData.title}" created successfully!`);
+            console.log("🎉 Course created with Teacher ID:", TEACHER_ID);
+
+            // Reset form
+            document.getElementById('addCourseForm').reset();
+
+            // Reload courses to show new course
+            await loadCoursesFromBackend();
+
+            // Navigate to courses section
+            document.querySelector('[data-section="courses"]').click();
+        } else {
+            throw new Error(result.message || result.error || 'Failed to create course');
+        }
+    } catch (error) {
+        console.error('❌ Error creating course:', error);
+        alert(`Error: ${error.message}`);
+
+        // If authentication error, redirect to login
+        if (error.message.includes('Authentication failed')) {
+            window.location.href = '/login';
+        }
+    } finally {
+        // Reset button state
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
     }
+}
 
     // ✅ Initialize all UI components
     function initializeUIComponents() {
