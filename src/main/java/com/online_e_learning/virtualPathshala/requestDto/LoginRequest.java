@@ -3,15 +3,15 @@ package com.online_e_learning.virtualPathshala.requestDto;
 public class LoginRequest {
     private String email;
     private String password;
-    private String role;
+    private String role; // ADMIN, TEACHER, STUDENT
 
     // Constructors
     public LoginRequest() {}
 
-    public LoginRequest(String email, String password,String role) {
+    public LoginRequest(String email, String password, String role) {
         this.email = email;
         this.password = password;
-        this.role =role;
+        this.role = role;
     }
 
     // Getters and Setters
@@ -37,5 +37,14 @@ public class LoginRequest {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    @Override
+    public String toString() {
+        return "LoginRequest{" +
+                "email='" + email + '\'' +
+                ", password='[PROTECTED]'" +
+                ", role='" + role + '\'' +
+                '}';
     }
 }

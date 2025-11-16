@@ -485,7 +485,6 @@
         passwordLength: password.length
       });
 
-      // ✅ FIX 1: Correct endpoint
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: {
@@ -494,7 +493,6 @@
         body: JSON.stringify({
           email,
           password,
-          // ✅ FIX 4: Role in uppercase
           role: selectedRole.toUpperCase()
         })
       });
@@ -508,10 +506,11 @@
         console.log('✅ Login successful!');
         showMessage('successMessage', 'Login successful! Redirecting...', false);
 
-        // ✅ FIX 2 & 3: Store token and user data correctly
+        // ✅ Store token and user data
         if (data.token) {
           localStorage.setItem('token', data.token);
           localStorage.setItem('tokenType', data.tokenType || 'Bearer');
+          sessionStorage.setItem('token', data.token);
         }
 
         if (data.user) {
@@ -527,23 +526,23 @@
             role: data.user.role
           });
 
-          // ✅ FIX 5: Updated redirect paths
+          // ✅ FIX: Use token-based redirect
           const userRole = data.user.role?.toLowerCase() || selectedRole;
-          let redirectPath = '/student-dashboard';
+          let redirectPath = '/student';
 
           switch(userRole.toLowerCase()) {
             case 'admin':
-              redirectPath = '/admin';
-              console.log('🎯 Redirecting to Admin Dashboard');
+              redirectPath = '/admin?token=' + encodeURIComponent(data.token);
+              console.log('🎯 Redirecting to Admin Dashboard with token');
               break;
             case 'teacher':
-              redirectPath = '/teacher';
-              console.log('🎯 Redirecting to Teacher Dashboard');
+              redirectPath = '/teacher?token=' + encodeURIComponent(data.token);
+              console.log('🎯 Redirecting to Teacher Dashboard with token');
               break;
             case 'student':
             default:
-              redirectPath = '/student-dashboard';
-              console.log('🎯 Redirecting to Student Dashboard');
+              redirectPath = '/student?token=' + encodeURIComponent(data.token);
+              console.log('🎯 Redirecting to Student Dashboard with token');
           }
 
           // Redirect after short delay
@@ -603,5 +602,7 @@
 
   console.log('🚀 Login page initialized successfully');
 </script>
+
+
 </body>
 </html>

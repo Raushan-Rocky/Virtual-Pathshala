@@ -2,6 +2,7 @@ package com.online_e_learning.virtualPathshala.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 public class PageController {
@@ -21,9 +22,8 @@ public class PageController {
         return "signup";
     }
 
-
     @GetMapping("/student")
-    public String student() {
+    public String student(@RequestParam(value = "token", required = false) String token) {
         return "StudentDashboard";
     }
 
@@ -33,11 +33,14 @@ public class PageController {
     }
 
     @GetMapping("/teacher")
-    public String teacher() { return "TeacherDashboard";}
+    public String teacher(@RequestParam(value = "token", required = false) String token) {
+        return "TeacherDashboard";
+    }
 
+    // ✅ FIXED: Add direct /admin route with token support
     @GetMapping("/admin")
-    public String admin() {
-        return "AdminDashboard";
+    public String admin(@RequestParam(value = "token", required = false) String token) {
+        return "redirect:/api/admin/dashboard?token=" + (token != null ? token : "");
     }
 
     @GetMapping("/homepage")
@@ -49,6 +52,4 @@ public class PageController {
     public String forgotpass() {
         return "ForgotPass";
     }
-
-
 }

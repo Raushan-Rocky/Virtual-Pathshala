@@ -64,7 +64,7 @@ public class SecurityConfig {
                                 "/api/signup",        // ✅ SIGNUP ENDPOINT PUBLIC
                                 "/api/login",         // ✅ LOGIN ENDPOINT PUBLIC
                                 "/api/public/**",
-                                "/css/**", "/js/**", "/images/**", "/webjars/**",
+                                "/css/**", "/js/**", "/image/**", "/webjars/**",
                                 "/uploads/**", "/favicon.ico", "/error"
                         ).permitAll()
 

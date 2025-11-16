@@ -26,16 +26,24 @@ public class AdminController {
 
     @Autowired
     private CourseService courseService;
+
     @Autowired
     private CourseRepository courseRepository;
 
     @Autowired
     private EnrollmentService enrollmentService;
 
-    // Page routes
+    // ✅ FIXED: Page route with token support
     @GetMapping("/dashboard")
-    public String adminDashboard() {
+    public String adminDashboard(@RequestParam(value = "token", required = false) String token) {
+        // Token parameter is handled by JwtAuthenticationFilter
         return "AdminDashboard";
+    }
+
+    // ✅ FIXED: Also add direct /admin route
+    @GetMapping("/")
+    public String adminRoot(@RequestParam(value = "token", required = false) String token) {
+        return "redirect:/api/admin/dashboard";
     }
 
     // Dashboard statistics API
@@ -63,14 +71,13 @@ public class AdminController {
     @GetMapping("/courses")
     public ResponseEntity<?> getAllCourses() {
         try {
-            // You'll need to add getAllCourses method in CourseService
             return ResponseEntity.ok(Map.of("success", true, "data", courseRepository.findAll()));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("success", false, "error", e.getMessage()));
         }
     }
 
-    // In your AdminController, update the enrollments endpoint:
+    // Enrollment management
     @GetMapping("/enrollments")
     public ResponseEntity<?> getAllEnrollments() {
         try {
