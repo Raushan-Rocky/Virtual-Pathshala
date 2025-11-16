@@ -331,22 +331,26 @@
     <form class="login-form" id="loginForm">
 
       <!-- Role Selection -->
+      <!-- Role Selection -->
       <div class="role-selection">
         <label>Select User Type</label>
         <!-- ✅ CORRECT - All three roles for login -->
         <div class="role-options">
           <div class="role-option" data-role="admin">
-            <input type="radio" id="role-admin" name="role" value="admin" required>
-            <i class='bx bx-user-shield role-icon'></i> <!-- Better icon for admin -->
+            <!-- ✅ REMOVED required attribute -->
+            <input type="radio" id="role-admin" name="role" value="admin">
+            <i class='bx bx-user-shield role-icon'></i>
             <span>ADMIN</span>
           </div>
           <div class="role-option" data-role="student">
-            <input type="radio" id="role-student" name="role" value="student" required>
+            <!-- ✅ REMOVED required attribute -->
+            <input type="radio" id="role-student" name="role" value="student">
             <i class='bx bx-book-alt role-icon'></i>
             <span>STUDENT</span>
           </div>
           <div class="role-option" data-role="teacher">
-            <input type="radio" id="role-teacher" name="role" value="teacher" required>
+            <!-- ✅ REMOVED required attribute -->
+            <input type="radio" id="role-teacher" name="role" value="teacher">
             <i class='bx bx-user-circle role-icon'></i>
             <span>TEACHER</span>
           </div>
@@ -413,6 +417,7 @@
 
   // Initialize with student role selected
   document.querySelector('.role-option[data-role="student"]').classList.add('selected');
+  document.querySelector('#role-student').checked = true;
 
   // ===== Password Visibility Toggle =====
   document.getElementById('togglePassword').addEventListener('click', function() {
@@ -460,7 +465,15 @@
 
     const email = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value;
-    const selectedRole = document.querySelector('input[name="role"]:checked').value;
+    const selectedRole = document.querySelector('input[name="role"]:checked');
+
+    // ✅ FIXED: Role validation
+    if (!selectedRole) {
+      showMessage('errorMessage', 'Please select a user type');
+      return;
+    }
+
+    const roleValue = selectedRole.value;
 
     // Basic validation
     if (!email || !password) {
@@ -481,7 +494,7 @@
     try {
       console.log('🔐 Sending login request:', {
         email: email,
-        role: selectedRole,
+        role: roleValue,
         passwordLength: password.length
       });
 
@@ -493,7 +506,7 @@
         body: JSON.stringify({
           email,
           password,
-          role: selectedRole.toUpperCase()
+          role: roleValue.toUpperCase()
         })
       });
 
@@ -526,9 +539,9 @@
             role: data.user.role
           });
 
-          // ✅ FIX: Use token-based redirect
-          const userRole = data.user.role?.toLowerCase() || selectedRole;
-          let redirectPath = '/student';
+          // ✅ FIXED: Use correct redirect paths
+          const userRole = data.user.role?.toLowerCase() || roleValue;
+          let redirectPath = '/student'; // This will serve StudentLogin.html
 
           switch(userRole.toLowerCase()) {
             case 'admin':
@@ -542,7 +555,7 @@
             case 'student':
             default:
               redirectPath = '/student?token=' + encodeURIComponent(data.token);
-              console.log('🎯 Redirecting to Student Dashboard with token');
+              console.log('🎯 Redirecting to Student Login Page with token');
           }
 
           // Redirect after short delay
@@ -602,7 +615,5 @@
 
   console.log('🚀 Login page initialized successfully');
 </script>
-
-
 </body>
 </html>

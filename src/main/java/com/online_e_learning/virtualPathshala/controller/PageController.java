@@ -22,14 +22,15 @@ public class PageController {
         return "signup";
     }
 
+    // ✅ FIXED: Student route should point to StudentLogin.html
     @GetMapping("/student")
     public String student(@RequestParam(value = "token", required = false) String token) {
-        return "StudentDashboard";
+        return "StudentLogin"; // This will serve StudentLogin.html
     }
 
     @GetMapping("/studentlogin")
     public String studentlogin() {
-        return "Studentlogin";
+        return "StudentLogin";
     }
 
     @GetMapping("/teacher")
@@ -37,7 +38,6 @@ public class PageController {
         return "TeacherDashboard";
     }
 
-    // ✅ FIXED: Add direct /admin route with token support
     @GetMapping("/admin")
     public String admin(@RequestParam(value = "token", required = false) String token) {
         return "redirect:/api/admin/dashboard?token=" + (token != null ? token : "");

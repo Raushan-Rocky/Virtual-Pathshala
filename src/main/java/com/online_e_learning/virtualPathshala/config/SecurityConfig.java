@@ -68,6 +68,10 @@ public class SecurityConfig {
                                 "/uploads/**", "/favicon.ico", "/error"
                         ).permitAll()
 
+                        // ✅ STUDENT ENDPOINTS - Add this section
+                        .requestMatchers("/student").hasRole("STUDENT")
+                        .requestMatchers("/student/**").hasRole("STUDENT")
+
                         // ✅ USER ENDPOINTS - Role-based access
                         .requestMatchers(HttpMethod.POST, "/api/users").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/users").hasRole("ADMIN")

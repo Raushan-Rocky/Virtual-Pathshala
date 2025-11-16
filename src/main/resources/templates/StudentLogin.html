@@ -130,6 +130,7 @@
 </footer>
 
 <script th:src="@{/js/auth.js}"></script>
+
 <script>
     // Auto update year in footer
     document.getElementById("year").textContent = new Date().getFullYear();
@@ -152,13 +153,60 @@
         if (popup) popup.classList.remove('show');
     });
 
-    // ✅ IMPROVED LOGIN STATUS CHECK
+    // ✅ NEW: Check authentication and redirect if not student
+    function checkStudentAuthentication() {
+        const token = localStorage.getItem('token');
+        const userData = localStorage.getItem('user');
+
+        if (!token || !userData) {
+            console.log('❌ No authentication found, redirecting to login');
+            window.location.href = '/login';
+            return false;
+        }
+
+        try {
+            const user = JSON.parse(userData);
+
+            // Check if user is actually a student
+            if (user.role !== 'STUDENT') {
+                console.log(`🚫 User role is ${user.role}, redirecting to appropriate dashboard`);
+
+                // Redirect based on actual role
+                switch(user.role?.toLowerCase()) {
+                    case 'admin':
+                        window.location.href = '/admin';
+                        break;
+                    case 'teacher':
+                        window.location.href = '/teacher';
+                        break;
+                    default:
+                        window.location.href = '/login';
+                }
+                return false;
+            }
+
+            console.log('✅ Student authenticated:', user.name || user.email);
+            return true;
+
+        } catch (error) {
+            console.error('❌ Error parsing user data:', error);
+            window.location.href = '/login';
+            return false;
+        }
+    }
+
+    // ✅ UPDATED: Check login status with authentication
     function checkLoginStatus() {
         const userMenu = document.getElementById('user-menu');
         const guestButtons = document.getElementById('guest-buttons');
         const welcomeText = document.getElementById('welcome-text');
 
-        // Check if user is logged in
+        // First check authentication
+        if (!checkStudentAuthentication()) {
+            return;
+        }
+
+        // Then update UI
         const userData = localStorage.getItem('user');
 
         if (userData) {
@@ -172,7 +220,7 @@
                     welcomeText.textContent = `Welcome, ${user.name || user.email}`;
                 }
 
-                console.log('✅ User is logged in:', user.name || user.email);
+                console.log('✅ Student is logged in:', user.name || user.email);
 
             } catch (error) {
                 console.error('Error parsing user data:', error);
@@ -199,6 +247,7 @@
         // Clear localStorage
         localStorage.removeItem('user');
         localStorage.removeItem('authToken');
+        localStorage.removeItem('token');
 
         console.log('🚪 User logged out');
 
@@ -538,11 +587,11 @@
         }
     }
 
-    // ✅ BETTER INITIALIZATION
+    // ✅ UPDATED: Better initialization
     document.addEventListener('DOMContentLoaded', function() {
         console.log('🎓 StudentLogin page loaded');
 
-        // Check login status immediately
+        // Check authentication and login status
         checkLoginStatus();
 
         // Load courses from backend
@@ -554,9 +603,6 @@
                 checkLoginStatus();
             }
         });
-
-        // Optional: Check every 5 seconds for login status changes
-        setInterval(checkLoginStatus, 5000);
     });
 </script>
 </body>
