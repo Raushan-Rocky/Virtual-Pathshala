@@ -60,9 +60,9 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/", "/homepage", "/login", "/signup", "/forgotpass",
                                 "/studentlogin",
-                                "/api/auth/**",       // All auth endpoints (signup, login, refresh)
-                                "/api/signup",        // ✅ SIGNUP ENDPOINT PUBLIC
-                                "/api/login",         // ✅ LOGIN ENDPOINT PUBLIC
+                                "/api/auth/**",       // All auth endpoints
+                                "/api/signup",        // Signup endpoint
+                                "/api/login",         // Login endpoint
                                 "/api/public/**",
                                 "/css/**", "/js/**", "/image/**", "/webjars/**",
                                 "/uploads/**", "/favicon.ico", "/error"
@@ -83,14 +83,29 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/users/profile").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/api/users/change-password").authenticated()
 
+                        // ✅ ADMIN USER MANAGEMENT ENDPOINTS - CRITICAL SECURITY
+                        .requestMatchers(HttpMethod.GET, "/api/admin/users/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/admin/users/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/admin/users/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/admin/users/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/admin/users").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/admin/users/role").hasRole("ADMIN")
+
+                        // ✅ ADMIN DASHBOARD ENDPOINTS
+                        .requestMatchers(HttpMethod.GET, "/api/admin/dashboard/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/admin/dashboard").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/admin/dashboard/stats").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/admin/courses").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/admin/enrollments").hasRole("ADMIN")
+
+                        // ✅ ADMIN PAGES
+                        .requestMatchers("/admin/**", "/api/admin/**").hasRole("ADMIN")
+
                         // ✅ STUDENT ENDPOINTS
                         .requestMatchers("/student/**", "/api/student/**").hasRole("STUDENT")
 
                         // ✅ TEACHER ENDPOINTS
                         .requestMatchers("/teacher/**", "/api/teacher/**").hasRole("TEACHER")
-
-                        // ✅ ADMIN ENDPOINTS
-                        .requestMatchers("/admin/**", "/api/admin/**").hasRole("ADMIN")
 
                         // ✅ COURSE ENDPOINTS
                         .requestMatchers(HttpMethod.POST, "/api/courses/create").hasAnyRole("TEACHER", "ADMIN")
@@ -126,7 +141,7 @@ public class SecurityConfig {
                         // ✅ GRADES ENDPOINTS
                         .requestMatchers("/api/grades/**").hasAnyRole("STUDENT", "TEACHER", "ADMIN")
 
-                        // ✅ DASHBOARD ENDPOINTS
+                        // ✅ DASHBOARD ENDPOINTS - Add this in SecurityConfig
                         .requestMatchers("/api/dashboard/admin").hasRole("ADMIN")
                         .requestMatchers("/api/dashboard/teacher/**").hasRole("TEACHER")
                         .requestMatchers("/api/dashboard/student/**").hasRole("STUDENT")

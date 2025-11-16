@@ -31,4 +31,6 @@ public interface SubmissionRepository extends JpaRepository<Submission, Integer>
     // ✅ Method to get graded submissions for a course
     @Query("SELECT s FROM Submission s WHERE s.assignment.course.id = :courseId AND s.grade IS NOT NULL")
     List<Submission> findGradedSubmissionsByCourseId(@Param("courseId") int courseId);
+
+
 }

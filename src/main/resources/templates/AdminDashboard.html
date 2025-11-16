@@ -1623,7 +1623,6 @@
         </div>
     </div>
 </div>
-
 <script>
     // Admin Dashboard Live Data Integration
     document.addEventListener('DOMContentLoaded', function() {
@@ -1653,50 +1652,61 @@
 
     // Set admin profile data
     function setAdminData() {
-        const adminData = {
-            name: "Raushan Rocky",
-            email: "admin@virtualpathshala.com",
-            role: "ADMIN",
-            status: "ACTIVE"
-        };
+        try {
+            const userData = JSON.parse(localStorage.getItem('user') || '{}');
+            const token = localStorage.getItem('token');
 
-        // Update header
-        document.getElementById('userName').innerHTML = `<b>${adminData.name}</b>`;
-        document.getElementById('userRole').textContent = "System Administrator";
+            if (!token) {
+                console.warn('⚠️ No token found, redirecting to login');
+                window.location.href = '/login';
+                return;
+            }
 
-        // Update profile section
-        document.getElementById('profileName').textContent = adminData.name;
-        document.getElementById('profileEmail').textContent = adminData.email;
-        document.getElementById('profileRole').textContent = "System Administrator - Full Access";
+            const adminData = {
+                name: userData.name || "Super Admin",
+                email: userData.email || "admin@virtualpathshala.com",
+                role: userData.role || "ADMIN",
+                status: "ACTIVE"
+            };
 
-        document.getElementById('infoName').textContent = adminData.name;
-        document.getElementById('infoEmail').textContent = adminData.email;
-        document.getElementById('infoRole').textContent = adminData.role;
-        document.getElementById('infoStatus').textContent = adminData.status;
-        document.getElementById('lastLogin').textContent = "Today, " + new Date().toLocaleTimeString('en-IN', {
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: true
-        });
+            // Update header
+            document.getElementById('userName').innerHTML = `<b>${adminData.name}</b>`;
+            document.getElementById('userRole').textContent = "System Administrator";
+
+            // Update profile section
+            document.getElementById('profileName').textContent = adminData.name;
+            document.getElementById('profileEmail').textContent = adminData.email;
+            document.getElementById('profileRole').textContent = "System Administrator - Full Access";
+
+            document.getElementById('infoName').textContent = adminData.name;
+            document.getElementById('infoEmail').textContent = adminData.email;
+            document.getElementById('infoRole').textContent = adminData.role;
+            document.getElementById('infoStatus').textContent = adminData.status;
+            document.getElementById('lastLogin').textContent = "Today, " + new Date().toLocaleTimeString('en-IN', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+            });
+
+        } catch (error) {
+            console.error('❌ Error setting admin data:', error);
+        }
     }
 
     // Setup all event listeners
     function setupEventListeners() {
-    // Navigation
-    setupNavigation();
+        // Navigation
+        setupNavigation();
 
-    // Logout functionality
-    setupLogout();
+        // Logout functionality
+        setupLogout();
 
-    // Modal controls
-    setupModals();
+        // Modal controls
+        setupModals();
 
-    // Action buttons
-    setupActionButtons();
-
-    // Course management
-    setupCourseManagement(); // ← YEH LINE ADD KARO
-}
+        // Action buttons
+        setupActionButtons();
+    }
 
     // Navigation setup
     function setupNavigation() {
@@ -1761,6 +1771,9 @@
 
         // Confirm logout
         confirmLogout.addEventListener('click', function() {
+            // Clear all storage
+            localStorage.clear();
+            sessionStorage.clear();
             // Redirect to login page
             window.location.href = '/login';
         });
@@ -1878,6 +1891,14 @@
                 document.querySelector('[data-section="users"]').click();
             });
         }
+
+        // View Users in User Management section
+        const viewUsersBtn = document.getElementById('viewUsersBtn');
+        if (viewUsersBtn) {
+            viewUsersBtn.addEventListener('click', function() {
+                document.querySelector('[data-section="users"]').click();
+            });
+        }
     }
 
     // Load all dashboard data
@@ -1907,7 +1928,22 @@
         try {
             console.log('📈 Loading dashboard statistics...');
 
-            const response = await fetch('/api/admin/dashboard/stats');
+            const token = localStorage.getItem('token');
+            if (!token) {
+                throw new Error('No authentication token found');
+            }
+
+            const response = await fetch('/api/admin/dashboard/stats', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
             const result = await response.json();
 
             if (result.success && result.data) {
@@ -1973,7 +2009,22 @@
         try {
             console.log('👥 Loading recent users...');
 
-            const response = await fetch('/api/admin/users');
+            const token = localStorage.getItem('token');
+            if (!token) {
+                throw new Error('No authentication token found');
+            }
+
+            const response = await fetch('/api/admin/users', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
             const result = await response.json();
 
             if (result.success && result.data) {
@@ -2073,15 +2124,33 @@
             }
         } catch (error) {
             console.error(`❌ Error loading ${section} data:`, error);
+            showAlert(`Error loading ${section} data: ${error.message}`, 'error');
         }
     }
 
-    // Load all users for user management
+    // ✅ USER MANAGEMENT SECTION - Complete Implementation
     async function loadAllUsers() {
         try {
             console.log('👥 Loading all users...');
 
-            const response = await fetch('/api/admin/users');
+            const token = localStorage.getItem('token');
+            if (!token) {
+                throw new Error('No authentication token found');
+            }
+
+            showLoadingState('usersTableBody', 'Loading users data...');
+
+            const response = await fetch('/api/admin/users', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
             const result = await response.json();
 
             if (result.success && result.data) {
@@ -2093,7 +2162,7 @@
 
         } catch (error) {
             console.error('❌ Error loading all users:', error);
-            updateUsersTable([]);
+            showErrorState('usersTableBody', 'Error loading users: ' + error.message);
         }
     }
 
@@ -2116,7 +2185,14 @@
         tbody.innerHTML = users.map(user => `
             <tr>
                 <td>${user.id || 'N/A'}</td>
-                <td>${user.name || 'Unknown User'}</td>
+                <td>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div style="width: 35px; height: 35px; border-radius: 50%; background: var(--primary); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 14px;">
+                            ${user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                        </div>
+                        <div style="font-weight: 600;">${user.name || 'Unknown User'}</div>
+                    </div>
+                </td>
                 <td>${user.email || 'N/A'}</td>
                 <td>
                     <span class="user-role ${getRoleClass(user.role)}">
@@ -2130,13 +2206,222 @@
                 </td>
                 <td>${formatDate(user.createdAt)}</td>
                 <td>
-                    <div style="display: flex; gap: 5px;">
-                        <button class="btn btn-outline" style="padding: 4px 8px; font-size: 12px;">Edit</button>
-                        <button class="btn btn-danger" style="padding: 4px 8px; font-size: 12px;">Delete</button>
+                    <div style="display: flex; gap: 5px; flex-wrap: wrap;">
+                        <button class="btn btn-outline edit-user-btn" data-id="${user.id}" style="padding: 4px 8px; font-size: 12px;">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="btn btn-danger delete-user-btn" data-id="${user.id}" data-name="${user.name}" style="padding: 4px 8px; font-size: 12px;">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                        <button class="btn btn-warning role-user-btn" data-id="${user.id}" data-name="${user.name}" data-role="${user.role}" style="padding: 4px 8px; font-size: 12px;">
+                            <i class="fas fa-user-cog"></i> Role
+                        </button>
                     </div>
                 </td>
             </tr>
         `).join('');
+
+        // Add event listeners to action buttons
+        setupUserActionButtons();
+    }
+
+    // Setup user action buttons
+    function setupUserActionButtons() {
+        // Edit user buttons
+        document.querySelectorAll('.edit-user-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const userId = this.getAttribute('data-id');
+                editUser(userId);
+            });
+        });
+
+        // Delete user buttons
+        document.querySelectorAll('.delete-user-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const userId = this.getAttribute('data-id');
+                const userName = this.getAttribute('data-name');
+                deleteUser(userId, userName);
+            });
+        });
+
+        // Change role buttons
+        document.querySelectorAll('.role-user-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const userId = this.getAttribute('data-id');
+                const userName = this.getAttribute('data-name');
+                const currentRole = this.getAttribute('data-role');
+                changeUserRole(userId, userName, currentRole);
+            });
+        });
+    }
+
+    // Edit user function
+    async function editUser(userId) {
+        showAlert('Edit user functionality coming soon...', 'success');
+        // Implementation for edit user modal
+    }
+
+    // Delete user function
+    async function deleteUser(userId, userName) {
+        if (!confirm(`Are you sure you want to delete user "${userName}"? This action cannot be undone.`)) {
+            return;
+        }
+
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                throw new Error('No authentication token found');
+            }
+
+            const response = await fetch(`/api/admin/users/${userId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                showAlert(`User "${userName}" deleted successfully!`, 'success');
+                // Reload users
+                await loadAllUsers();
+                // Also reload recent users in dashboard
+                await loadRecentUsers();
+            } else {
+                throw new Error(result.error || 'Failed to delete user');
+            }
+
+        } catch (error) {
+            console.error('❌ Error deleting user:', error);
+            showAlert('Error deleting user: ' + error.message, 'error');
+        }
+    }
+
+    // Change user role function
+    async function changeUserRole(userId, userName, currentRole) {
+        const newRole = prompt(`Change role for "${userName}" (current: ${currentRole}):\n\nEnter new role (ADMIN, TEACHER, STUDENT):`, currentRole);
+
+        if (!newRole) return;
+
+        const validRoles = ['ADMIN', 'TEACHER', 'STUDENT'];
+        if (!validRoles.includes(newRole.toUpperCase())) {
+            showAlert('Invalid role. Please use ADMIN, TEACHER, or STUDENT.', 'error');
+            return;
+        }
+
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                throw new Error('No authentication token found');
+            }
+
+            const response = await fetch(`/api/admin/users/role`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    userId: userId,
+                    role: newRole.toUpperCase()
+                })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                showAlert(`User role updated successfully! ${userName} is now ${newRole.toUpperCase()}`, 'success');
+                // Reload users
+                await loadAllUsers();
+                // Also reload recent users in dashboard
+                await loadRecentUsers();
+            } else {
+                throw new Error(result.error || 'Failed to update user role');
+            }
+
+        } catch (error) {
+            console.error('❌ Error updating user role:', error);
+            showAlert('Error updating user role: ' + error.message, 'error');
+        }
+    }
+
+    // Create new user
+    async function createNewUser() {
+        try {
+            const formData = {
+                firstName: document.getElementById('userFirstName').value,
+                lastName: document.getElementById('userLastName').value,
+                email: document.getElementById('userEmail').value,
+                mobile: document.getElementById('userMobile').value,
+                role: document.getElementById('userRoleSelect').value,
+                status: document.getElementById('userStatus').value
+            };
+
+            // Basic validation
+            if (!formData.firstName || !formData.lastName || !formData.email) {
+                showAlert('Please fill in all required fields', 'error');
+                return;
+            }
+
+            // Show loading state
+            const submitBtn = document.querySelector('#addUserForm button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<span class="loading-spinner"></span>Creating...';
+            submitBtn.disabled = true;
+
+            const token = localStorage.getItem('token');
+            if (!token) {
+                throw new Error('No authentication token found');
+            }
+
+            const userData = {
+                name: `${formData.firstName} ${formData.lastName}`,
+                email: formData.email,
+                mobile: formData.mobile,
+                role: formData.role,
+                status: formData.status,
+                password: "TempPassword123!" // Default password
+            };
+
+            const response = await fetch('/api/admin/users', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(userData)
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                showAlert(`User ${userData.name} created successfully!`, 'success');
+
+                // Reset form
+                document.getElementById('addUserForm').reset();
+                document.getElementById('addUserModal').style.display = 'none';
+
+                // Reload users data
+                await loadAllUsers();
+                await loadRecentUsers();
+
+            } else {
+                throw new Error(result.error || 'Failed to create user');
+            }
+
+        } catch (error) {
+            console.error('❌ Error creating user:', error);
+            showAlert('Error creating user: ' + error.message, 'error');
+        } finally {
+            // Reset button
+            const submitBtn = document.querySelector('#addUserForm button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.innerHTML = 'Create User';
+                submitBtn.disabled = false;
+            }
+        }
     }
 
     // Load all courses
@@ -2144,7 +2429,24 @@
         try {
             console.log('📚 Loading all courses...');
 
-            const response = await fetch('/api/admin/courses');
+            const token = localStorage.getItem('token');
+            if (!token) {
+                throw new Error('No authentication token found');
+            }
+
+            showLoadingState('coursesTableBody', 'Loading courses data...');
+
+            const response = await fetch('/api/admin/courses', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
             const result = await response.json();
 
             if (result.success && result.data) {
@@ -2156,7 +2458,7 @@
 
         } catch (error) {
             console.error('❌ Error loading all courses:', error);
-            updateCoursesTable([]);
+            showErrorState('coursesTableBody', 'Error loading courses: ' + error.message);
         }
     }
 
@@ -2203,7 +2505,24 @@
         try {
             console.log('🎓 Loading all enrollments...');
 
-            const response = await fetch('/api/admin/enrollments');
+            const token = localStorage.getItem('token');
+            if (!token) {
+                throw new Error('No authentication token found');
+            }
+
+            showLoadingState('enrollmentsTableBody', 'Loading enrollments data...');
+
+            const response = await fetch('/api/admin/enrollments', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
             const result = await response.json();
 
             if (result.success && result.data) {
@@ -2215,7 +2534,7 @@
 
         } catch (error) {
             console.error('❌ Error loading all enrollments:', error);
-            updateEnrollmentsTable([]);
+            showErrorState('enrollmentsTableBody', 'Error loading enrollments: ' + error.message);
         }
     }
 
@@ -2250,7 +2569,7 @@
                 <td>
                     <div style="display: flex; gap: 5px;">
                         <button class="btn btn-outline" style="padding: 4px 8px; font-size: 12px;">View</button>
-                    <button class="btn btn-danger" style="padding: 4px 8px; font-size: 12px;">Remove</button>
+                        <button class="btn btn-danger" style="padding: 4px 8px; font-size: 12px;">Remove</button>
                     </div>
                 </td>
             </tr>
@@ -2270,48 +2589,6 @@
 
         } catch (error) {
             console.error('❌ Error loading content stats:', error);
-        }
-    }
-
-    // Create new user
-    async function createNewUser() {
-        try {
-            const formData = {
-                firstName: document.getElementById('userFirstName').value,
-                lastName: document.getElementById('userLastName').value,
-                email: document.getElementById('userEmail').value,
-                mobile: document.getElementById('userMobile').value,
-                role: document.getElementById('userRoleSelect').value,
-                status: document.getElementById('userStatus').value
-            };
-
-            // Show loading state
-            const submitBtn = document.querySelector('#addUserForm button[type="submit"]');
-            const originalText = submitBtn.innerHTML;
-            submitBtn.innerHTML = '<span class="loading-spinner"></span>Creating...';
-            submitBtn.disabled = true;
-
-            // Simulate API call
-            setTimeout(() => {
-                showAlert(`User ${formData.firstName} ${formData.lastName} created successfully!`, 'success');
-
-                // Reset form
-                document.getElementById('addUserForm').reset();
-                document.getElementById('addUserModal').style.display = 'none';
-
-                // Reset button
-                submitBtn.innerHTML = originalText;
-                submitBtn.disabled = false;
-
-                // Reload users data
-                loadAllUsers();
-                loadRecentUsers();
-
-            }, 1500);
-
-        } catch (error) {
-            console.error('❌ Error creating user:', error);
-            showAlert('Error creating user. Please try again.', 'error');
         }
     }
 
@@ -2360,6 +2637,37 @@
         }, 5000);
     }
 
+    function showLoadingState(elementId, message = 'Loading...') {
+        const element = document.getElementById(elementId);
+        if (element) {
+            element.innerHTML = `
+                <tr>
+                    <td colspan="7" style="text-align: center; padding: 30px;">
+                        <div class="loading-spinner" style="margin: 0 auto 10px;"></div>
+                        <p>${message}</p>
+                    </td>
+                </tr>
+            `;
+        }
+    }
+
+    function showErrorState(elementId, message = 'Error loading data') {
+        const element = document.getElementById(elementId);
+        if (element) {
+            element.innerHTML = `
+                <tr>
+                    <td colspan="7" style="text-align: center; padding: 30px; color: var(--danger);">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 10px;"></i>
+                        <p>${message}</p>
+                        <button class="btn btn-outline" onclick="location.reload()" style="margin-top: 10px;">
+                            <i class="fas fa-redo"></i> Retry
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }
+    }
+
     // Auto-refresh data every 30 seconds
     setInterval(() => {
         if (document.getElementById('dashboardSection').style.display !== 'none') {
@@ -2368,372 +2676,24 @@
         }
     }, 30000);
 
-    // Course Management Functions
-let currentCoursesPage = 1;
-const coursesPerPage = 10;
-let allCourses = [];
-
-// Setup course management
-function setupCourseManagement() {
-    const addNewCourseBtn = document.getElementById('addNewCourseBtn');
-    const courseModal = document.getElementById('courseModal');
-    const courseForm = document.getElementById('courseForm');
-    const refreshCoursesBtn = document.getElementById('refreshCoursesBtn');
-    const courseSearch = document.getElementById('courseSearch');
-    const courseStatusFilter = document.getElementById('courseStatusFilter');
-    const prevCoursesPage = document.getElementById('prevCoursesPage');
-    const nextCoursesPage = document.getElementById('nextCoursesPage');
-
-    // Add new course button
-    if (addNewCourseBtn) {
-        addNewCourseBtn.addEventListener('click', function() {
-            openCourseModal();
-        });
-    }
-
-    // Refresh courses
-    if (refreshCoursesBtn) {
-        refreshCoursesBtn.addEventListener('click', function() {
-            loadAllCourses();
-        });
-    }
-
-    // Search functionality
-    if (courseSearch) {
-        courseSearch.addEventListener('input', function() {
-            filterAndDisplayCourses();
-        });
-    }
-
-    // Status filter
-    if (courseStatusFilter) {
-        courseStatusFilter.addEventListener('change', function() {
-            filterAndDisplayCourses();
-        });
-    }
-
-    // Pagination
-    if (prevCoursesPage) {
-        prevCoursesPage.addEventListener('click', function() {
-            if (currentCoursesPage > 1) {
-                currentCoursesPage--;
-                displayCourses();
-            }
-        });
-    }
-
-    if (nextCoursesPage) {
-        nextCoursesPage.addEventListener('click', function() {
-            const totalPages = Math.ceil(filteredCourses.length / coursesPerPage);
-            if (currentCoursesPage < totalPages) {
-                currentCoursesPage++;
-                displayCourses();
-            }
-        });
-    }
-
-    // Course form submission
-    if (courseForm) {
-        courseForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            saveCourse();
-        });
-    }
-}
-
-// Open course modal for add/edit
-function openCourseModal(course = null) {
-    const modal = document.getElementById('courseModal');
-    const modalTitle = document.getElementById('courseModalTitle');
-    const submitBtn = document.getElementById('courseSubmitBtn');
-    const form = document.getElementById('courseForm');
-
-    if (course) {
-        // Edit mode
-        modalTitle.textContent = 'Edit Course';
-        submitBtn.textContent = 'Update Course';
-
-        // Fill form with course data
-        document.getElementById('courseId').value = course.id;
-        document.getElementById('courseTitle').value = course.title || '';
-        document.getElementById('courseCode').value = course.code || '';
-        document.getElementById('courseCredits').value = course.credits || 0;
-        document.getElementById('courseCategory').value = course.category || '';
-        document.getElementById('courseDuration').value = course.duration || 12;
-        document.getElementById('courseDescription').value = course.description || '';
-        document.getElementById('coursePrice').value = course.price || 0;
-        document.getElementById('courseStatus').value = course.status || 'ACTIVE';
-        document.getElementById('courseInstructor').value = course.instructor || '';
-        document.getElementById('coursePrerequisites').value = course.prerequisites || '';
-    } else {
-        // Add mode
-        modalTitle.textContent = 'Add New Course';
-        submitBtn.textContent = 'Create Course';
-        form.reset();
-        document.getElementById('courseId').value = '';
-    }
-
-    modal.style.display = 'flex';
-}
-
-// Save course (create or update)
-async function saveCourse() {
-    try {
-        const courseId = document.getElementById('courseId').value;
-        const formData = {
-            title: document.getElementById('courseTitle').value,
-            code: document.getElementById('courseCode').value,
-            credits: parseInt(document.getElementById('courseCredits').value),
-            category: document.getElementById('courseCategory').value,
-            duration: parseInt(document.getElementById('courseDuration').value),
-            description: document.getElementById('courseDescription').value,
-            price: parseFloat(document.getElementById('coursePrice').value) || 0,
-            status: document.getElementById('courseStatus').value,
-            instructor: document.getElementById('courseInstructor').value,
-            prerequisites: document.getElementById('coursePrerequisites').value
-        };
-
-        // Show loading state
-        const submitBtn = document.getElementById('courseSubmitBtn');
-        const originalText = submitBtn.innerHTML;
-        submitBtn.innerHTML = '<span class="loading-spinner"></span>Saving...';
-        submitBtn.disabled = true;
-
-        let response;
-        if (courseId) {
-            // Update existing course
-            response = await fetch(`/api/admin/courses/${courseId}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(formData)
-            });
-        } else {
-            // Create new course
-            response = await fetch('/api/admin/courses', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(formData)
-            });
+    // Check authentication on page load
+    function checkAuthentication() {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            console.warn('⚠️ No authentication token found, redirecting to login');
+            window.location.href = '/login';
+            return false;
         }
-
-        const result = await response.json();
-
-        if (result.success) {
-            showAlert(`Course ${courseId ? 'updated' : 'created'} successfully!`, 'success');
-            document.getElementById('courseModal').style.display = 'none';
-            await loadAllCourses(); // Reload courses
-        } else {
-            throw new Error(result.error || 'Failed to save course');
-        }
-
-        // Reset button
-        submitBtn.innerHTML = originalText;
-        submitBtn.disabled = false;
-
-    } catch (error) {
-        console.error('❌ Error saving course:', error);
-        showAlert('Error saving course. Please try again.', 'error');
-
-        // Reset button
-        const submitBtn = document.getElementById('courseSubmitBtn');
-        submitBtn.innerHTML = courseId ? 'Update Course' : 'Create Course';
-        submitBtn.disabled = false;
-    }
-}
-
-// Delete course
-async function deleteCourse(courseId, courseTitle) {
-    const modal = document.getElementById('deleteCourseModal');
-    const message = document.getElementById('deleteCourseMessage');
-
-    message.textContent = `Are you sure you want to delete the course "${courseTitle}"? This action cannot be undone.`;
-
-    modal.style.display = 'flex';
-
-    // Setup confirmation handlers
-    const confirmDelete = document.getElementById('confirmDeleteCourse');
-    const cancelDelete = document.getElementById('cancelDeleteCourse');
-
-    const confirmHandler = async () => {
-        try {
-            const response = await fetch(`/api/admin/courses/${courseId}`, {
-                method: 'DELETE'
-            });
-
-            const result = await response.json();
-
-            if (result.success) {
-                showAlert('Course deleted successfully!', 'success');
-                modal.style.display = 'none';
-                await loadAllCourses(); // Reload courses
-            } else {
-                throw new Error(result.error || 'Failed to delete course');
-            }
-        } catch (error) {
-            console.error('❌ Error deleting course:', error);
-            showAlert('Error deleting course. Please try again.', 'error');
-        } finally {
-            // Clean up event listeners
-            confirmDelete.removeEventListener('click', confirmHandler);
-            cancelDelete.removeEventListener('click', cancelHandler);
-        }
-    };
-
-    const cancelHandler = () => {
-        modal.style.display = 'none';
-        // Clean up event listeners
-        confirmDelete.removeEventListener('click', confirmHandler);
-        cancelDelete.removeEventListener('click', cancelHandler);
-    };
-
-    confirmDelete.addEventListener('click', confirmHandler);
-    cancelDelete.addEventListener('click', cancelHandler);
-}
-
-// Filter and display courses
-let filteredCourses = [];
-
-function filterAndDisplayCourses() {
-    const searchTerm = document.getElementById('courseSearch').value.toLowerCase();
-    const statusFilter = document.getElementById('courseStatusFilter').value;
-
-    filteredCourses = allCourses.filter(course => {
-        const matchesSearch = !searchTerm ||
-            course.title.toLowerCase().includes(searchTerm) ||
-            course.code.toLowerCase().includes(searchTerm) ||
-            course.category.toLowerCase().includes(searchTerm);
-
-        const matchesStatus = !statusFilter || course.status === statusFilter;
-
-        return matchesSearch && matchesStatus;
-    });
-
-    currentCoursesPage = 1;
-    displayCourses();
-}
-
-// Display courses in table
-function displayCourses() {
-    const tbody = document.getElementById('coursesTableBody');
-    const paginationInfo = document.getElementById('coursesPaginationInfo');
-    const prevBtn = document.getElementById('prevCoursesPage');
-    const nextBtn = document.getElementById('nextCoursesPage');
-
-    if (filteredCourses.length === 0) {
-        tbody.innerHTML = `
-            <tr>
-                <td colspan="8" style="text-align: center; padding: 30px; color: var(--gray);">
-                    <i class="fas fa-book" style="font-size: 48px; margin-bottom: 10px; opacity: 0.5;"></i>
-                    <p>No courses found</p>
-                </td>
-            </tr>
-        `;
-        paginationInfo.textContent = 'Showing 0 of 0 courses';
-        prevBtn.disabled = true;
-        nextBtn.disabled = true;
-        return;
+        return true;
     }
 
-    // Calculate pagination
-    const startIndex = (currentCoursesPage - 1) * coursesPerPage;
-    const endIndex = startIndex + coursesPerPage;
-    const currentCourses = filteredCourses.slice(startIndex, endIndex);
-    const totalPages = Math.ceil(filteredCourses.length / coursesPerPage);
-
-    // Update pagination info
-    paginationInfo.textContent = `Showing ${startIndex + 1}-${Math.min(endIndex, filteredCourses.length)} of ${filteredCourses.length} courses`;
-
-    // Update pagination buttons
-    prevBtn.disabled = currentCoursesPage === 1;
-    nextBtn.disabled = currentCoursesPage === totalPages;
-
-    // Render courses
-    tbody.innerHTML = currentCourses.map(course => `
-        <tr>
-            <td>${course.id || 'N/A'}</td>
-            <td>
-                <div style="font-weight: 600;">${course.title || 'Untitled Course'}</div>
-                ${course.description ? `<div style="font-size: 12px; color: var(--gray); margin-top: 4px;">${course.description.substring(0, 50)}${course.description.length > 50 ? '...' : ''}</div>` : ''}
-            </td>
-            <td>
-                <span style="font-family: monospace; font-weight: 600; color: var(--primary);">
-                    ${course.code || 'N/A'}
-                </span>
-            </td>
-            <td>
-                <span class="user-role role-student">
-                    ${course.category || 'General'}
-                </span>
-            </td>
-            <td>${course.credits || 0}</td>
-            <td>${course.duration || 12} weeks</td>
-            <td>
-                <span class="status-badge ${course.status === 'ACTIVE' ? 'status-active' : course.status === 'DRAFT' ? 'status-inactive' : 'status-inactive'}">
-                    ${course.status || 'INACTIVE'}
-                </span>
-            </td>
-            <td>
-                <div style="display: flex; gap: 5px; flex-wrap: wrap;">
-                    <button class="btn btn-outline edit-course-btn" data-id="${course.id}" style="padding: 4px 8px; font-size: 12px;">
-                        <i class="fas fa-edit"></i> Edit
-                    </button>
-                    <button class="btn btn-danger delete-course-btn" data-id="${course.id}" data-title="${course.title}" style="padding: 4px 8px; font-size: 12px;">
-                        <i class="fas fa-trash"></i> Delete
-                    </button>
-                </div>
-            </td>
-        </tr>
-    `).join('');
-
-    // Add event listeners to action buttons
-    document.querySelectorAll('.edit-course-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const courseId = this.getAttribute('data-id');
-            const course = allCourses.find(c => c.id == courseId);
-            if (course) {
-                openCourseModal(course);
-            }
-        });
-    });
-
-    document.querySelectorAll('.delete-course-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const courseId = this.getAttribute('data-id');
-            const courseTitle = this.getAttribute('data-title');
-            deleteCourse(courseId, courseTitle);
-        });
-    });
-}
-
-// Load all courses
-async function loadAllCourses() {
-    try {
-        console.log('📚 Loading all courses...');
-
-        const response = await fetch('/api/admin/courses');
-        const result = await response.json();
-
-        if (result.success && result.data) {
-            allCourses = result.data;
-            filteredCourses = [...allCourses];
-            displayCourses();
-            console.log('✅ All courses loaded');
-        } else {
-            throw new Error(result.error || 'Failed to load courses');
-        }
-
-    } catch (error) {
-        console.error('❌ Error loading all courses:', error);
-        allCourses = [];
-        filteredCourses = [];
-        displayCourses();
+    // Initialize authentication check
+    if (!checkAuthentication()) {
+        // Redirect will happen automatically
     }
-}
 
+    console.log('✅ Admin Dashboard JavaScript loaded successfully');
 </script>
+
 </body>
 </html>

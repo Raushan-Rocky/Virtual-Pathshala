@@ -55,12 +55,20 @@ public class UserService {
                 .orElseThrow(() -> new UserNotFoundException("User not found with email: " + email));
     }
 
+    // ✅ Ensure this method exists in your UserService.java
     public void updateUserRole(int userId, Role newRole) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
 
+        // Prevent changing the main admin role
+        if (user.getEmail().equals("admin@virtualpathshala.com") && user.getRole() == Role.ADMIN) {
+            throw new RuntimeException("Cannot change role of the main administrator");
+        }
+
         user.setRole(newRole);
         userRepository.save(user);
+
+        System.out.println("✅ User role updated: " + user.getEmail() + " -> " + newRole);
     }
 
     public List<User> getUsersByRole(String role) {
@@ -127,4 +135,6 @@ public class UserService {
     public long getUsersCountByRole(Role role) {
         return userRepository.findByRole(role).size();
     }
+
+
 }

@@ -1,11 +1,10 @@
 package com.online_e_learning.virtualPathshala.controller;
+
 import com.online_e_learning.virtualPathshala.service.DashboardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
@@ -16,24 +15,39 @@ public class DashboardController {
     @Autowired
     private DashboardService dashboardService;
 
-    // Admin Dashboard
+    // ✅ Admin Dashboard Stats
     @GetMapping("/admin")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> getAdminDashboard() {
-        Map<String, Object> stats = dashboardService.getAdminDashboardStats();
-        return ResponseEntity.ok(stats);
+        try {
+            Map<String, Object> stats = dashboardService.getAdminDashboardStats();
+            return ResponseEntity.ok(Map.of("success", true, "data", stats));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "error", e.getMessage()));
+        }
     }
 
-    // Teacher Dashboard
+    // ✅ Teacher Dashboard Stats
     @GetMapping("/teacher/{teacherId}")
+    @PreAuthorize("hasRole('TEACHER')")
     public ResponseEntity<?> getTeacherDashboard(@PathVariable int teacherId) {
-        Map<String, Object> stats = dashboardService.getTeacherDashboardStats(teacherId);
-        return ResponseEntity.ok(stats);
+        try {
+            Map<String, Object> stats = dashboardService.getTeacherDashboardStats(teacherId);
+            return ResponseEntity.ok(Map.of("success", true, "data", stats));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "error", e.getMessage()));
+        }
     }
 
-    // Student Dashboard
+    // ✅ Student Dashboard Stats
     @GetMapping("/student/{studentId}")
+    @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<?> getStudentDashboard(@PathVariable int studentId) {
-        Map<String, Object> stats = dashboardService.getStudentDashboardStats(studentId);
-        return ResponseEntity.ok(stats);
+        try {
+            Map<String, Object> stats = dashboardService.getStudentDashboardStats(studentId);
+            return ResponseEntity.ok(Map.of("success", true, "data", stats));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "error", e.getMessage()));
+        }
     }
 }
