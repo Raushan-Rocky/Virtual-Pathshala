@@ -131,6 +131,7 @@
 
 <script th:src="@{/js/auth.js}"></script>
 
+
 <script>
     // Auto update year in footer
     document.getElementById("year").textContent = new Date().getFullYear();
@@ -153,9 +154,46 @@
         if (popup) popup.classList.remove('show');
     });
 
+    // ✅ Get authentication token from URL or localStorage
+    function getAuthToken() {
+        // First try to get token from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlToken = urlParams.get('token');
+
+        if (urlToken) {
+            console.log('🔑 Token found in URL');
+            localStorage.setItem('token', urlToken);
+            // Clean URL
+            window.history.replaceState({}, document.title, window.location.pathname);
+            return urlToken;
+        }
+
+        // Then try localStorage
+        const localToken = localStorage.getItem('token');
+        if (localToken) {
+            console.log('🔑 Token found in localStorage');
+            return localToken;
+        }
+
+        console.log('❌ No token found');
+        return null;
+    }
+
+    // ✅ Get auth headers for API calls
+    function getAuthHeaders() {
+        const token = getAuthToken();
+        if (!token) {
+            return { 'Content-Type': 'application/json' };
+        }
+        return {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        };
+    }
+
     // ✅ NEW: Check authentication and redirect if not student
     function checkStudentAuthentication() {
-        const token = localStorage.getItem('token');
+        const token = getAuthToken();
         const userData = localStorage.getItem('user');
 
         if (!token || !userData) {
@@ -266,7 +304,9 @@
 
             console.log("🔍 Checking enrollment status for user:", userId);
 
-            const response = await fetch(`/api/enrollments/user/${userId}`);
+            const response = await fetch(`/api/enrollments/user/${userId}`, {
+                headers: getAuthHeaders()
+            });
 
             if (response.ok) {
                 const result = await response.json();
@@ -304,7 +344,9 @@
         try {
             console.log("📚 Loading all courses from backend...");
 
-            const response = await fetch('/api/courses/all');
+            const response = await fetch('/api/courses/all', {
+                headers: getAuthHeaders()
+            });
 
             if (response.ok) {
                 const result = await response.json();
@@ -323,7 +365,7 @@
                     showDefaultCourses();
                 }
             } else {
-                console.error('❌ HTTP error loading courses');
+                console.error('❌ HTTP error loading courses. Status:', response.status);
                 showDefaultCourses();
             }
         } catch (error) {
@@ -490,7 +532,9 @@
             button.disabled = true;
 
             // First, get course ID from backend
-            const coursesResponse = await fetch('/api/courses/all');
+            const coursesResponse = await fetch('/api/courses/all', {
+                headers: getAuthHeaders()
+            });
             if (!coursesResponse.ok) {
                 throw new Error('Failed to fetch courses');
             }
@@ -515,9 +559,7 @@
             // Call enrollment API
             const response = await fetch('/api/enrollments', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: getAuthHeaders(),
                 body: JSON.stringify(enrollmentData)
             });
 
@@ -605,5 +647,7 @@
         });
     });
 </script>
+
+
 </body>
 </html>
