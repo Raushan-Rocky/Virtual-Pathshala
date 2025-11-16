@@ -207,4 +207,58 @@ public class AdminController {
             ));
         }
     }
+
+    // ✅ AdminController.java me ye endpoints add karo
+    @PostMapping("/users/teachers/{teacherId}/approve")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> approveTeacher(@PathVariable int teacherId) {
+        try {
+            userService.approveTeacher(teacherId);
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "Teacher approved successfully"
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "success", false,
+                    "error", e.getMessage()
+            ));
+        }
+    }
+
+    @PostMapping("/users/teachers/{teacherId}/reject")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> rejectTeacher(@PathVariable int teacherId) {
+        try {
+            userService.rejectTeacher(teacherId);
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "Teacher rejected successfully"
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "success", false,
+                    "error", e.getMessage()
+            ));
+        }
+    }
+
+    @GetMapping("/users/teachers/pending")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> getPendingTeachers() {
+        try {
+            List<User> pendingTeachers = userService.getPendingTeachers();
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "data", pendingTeachers,
+                    "count", pendingTeachers.size()
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "success", false,
+                    "error", e.getMessage()
+            ));
+        }
+    }
+
 }

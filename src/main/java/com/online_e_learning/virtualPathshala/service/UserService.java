@@ -2,6 +2,7 @@ package com.online_e_learning.virtualPathshala.service;
 
 import com.online_e_learning.virtualPathshala.converter.UserConverter;
 import com.online_e_learning.virtualPathshala.enums.Role;
+import com.online_e_learning.virtualPathshala.enums.Status;
 import com.online_e_learning.virtualPathshala.exception.EmailAlreadyExistsException;
 import com.online_e_learning.virtualPathshala.exception.UserNotFoundException;
 import com.online_e_learning.virtualPathshala.model.User;
@@ -12,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -134,6 +136,41 @@ public class UserService {
 
     public long getUsersCountByRole(Role role) {
         return userRepository.findByRole(role).size();
+    }
+
+    // ✅ UserService.java me ye methods add karo
+    public void approveTeacher(int teacherId) {
+        User teacher = userRepository.findById(teacherId)
+                .orElseThrow(() -> new RuntimeException("Teacher not found with ID: " + teacherId));
+
+        if (!teacher.getRole().equals(Role.TEACHER)) {
+            throw new RuntimeException("User is not a teacher");
+        }
+
+        teacher.setStatus(Status.ACTIVE);
+        userRepository.save(teacher);
+
+        System.out.println("✅ Teacher approved: " + teacher.getEmail());
+    }
+
+    public void rejectTeacher(int teacherId) {
+        User teacher = userRepository.findById(teacherId)
+                .orElseThrow(() -> new RuntimeException("Teacher not found with ID: " + teacherId));
+
+        if (!teacher.getRole().equals(Role.TEACHER)) {
+            throw new RuntimeException("User is not a teacher");
+        }
+
+        teacher.setStatus(Status.INACTIVE);
+        userRepository.save(teacher);
+
+        System.out.println("❌ Teacher rejected: " + teacher.getEmail());
+    }
+
+    public List<User> getPendingTeachers() {
+        return userRepository.findByRole(Role.TEACHER).stream()
+                .filter(user -> user.getStatus() == Status.INACTIVE)
+                .collect(Collectors.toList());
     }
 
 
