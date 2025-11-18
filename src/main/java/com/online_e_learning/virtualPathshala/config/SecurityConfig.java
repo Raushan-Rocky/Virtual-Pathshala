@@ -56,6 +56,7 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/video/**").permitAll()
                         // ✅ PUBLIC ENDPOINTS - Anyone can access (NO AUTH REQUIRED)
                         .requestMatchers(
                                 "/", "/homepage", "/login", "/signup", "/forgotpass",
