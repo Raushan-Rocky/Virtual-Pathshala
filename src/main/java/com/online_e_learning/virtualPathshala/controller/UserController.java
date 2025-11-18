@@ -108,7 +108,6 @@ public class UserController {
     }
 
     // ✅ Get User by ID - Users can access their own data, ADMIN/TEACHER can access any
-    // ✅ Get User by ID - Users can access their own data, ADMIN/TEACHER can access any
     @GetMapping("/{userId}")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER', 'STUDENT')")
     public ResponseEntity<?> getUserById(@PathVariable int userId) {
@@ -197,6 +196,50 @@ public class UserController {
         } catch (Exception e) {
             System.out.println("❌ Error getting users by role: " + e.getMessage());
             return ResponseEntity.badRequest().body(createErrorResponse(e.getMessage()));
+        }
+    }
+
+    // ✅ Get All Teachers - ADMIN and TEACHER can access
+    @GetMapping("/teachers")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
+    public ResponseEntity<?> getAllTeachers() {
+        try {
+            List<User> teachers = userService.getAllTeachers();
+            List<Map<String, Object>> teacherData = teachers.stream()
+                    .map(this::createSecureUserData)
+                    .collect(Collectors.toList());
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("data", teacherData);
+            response.put("count", teacherData.size());
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            System.out.println("❌ Error getting all teachers: " + e.getMessage());
+            return ResponseEntity.internalServerError()
+                    .body(createErrorResponse("Error retrieving teachers: " + e.getMessage()));
+        }
+    }
+
+    // ✅ Get All Students - ADMIN and TEACHER can access
+    @GetMapping("/students")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
+    public ResponseEntity<?> getAllStudents() {
+        try {
+            List<User> students = userService.getAllStudents();
+            List<Map<String, Object>> studentData = students.stream()
+                    .map(this::createSecureUserData)
+                    .collect(Collectors.toList());
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("data", studentData);
+            response.put("count", studentData.size());
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            System.out.println("❌ Error getting all students: " + e.getMessage());
+            return ResponseEntity.internalServerError()
+                    .body(createErrorResponse("Error retrieving students: " + e.getMessage()));
         }
     }
 
@@ -349,6 +392,123 @@ public class UserController {
         }
     }
 
+    // ✅ Approve Teacher (Activate teacher account)
+    @PutMapping("/{teacherId}/approve")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> approveTeacher(@PathVariable int teacherId) {
+        try {
+            userService.approveTeacher(teacherId);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Teacher approved successfully");
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            System.out.println("❌ Error approving teacher: " + e.getMessage());
+            return ResponseEntity.badRequest().body(createErrorResponse(e.getMessage()));
+        }
+    }
+
+    // ✅ Reject Teacher (Deactivate teacher account)
+    @PutMapping("/{teacherId}/reject")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> rejectTeacher(@PathVariable int teacherId) {
+        try {
+            userService.rejectTeacher(teacherId);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Teacher rejected successfully");
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            System.out.println("❌ Error rejecting teacher: " + e.getMessage());
+            return ResponseEntity.badRequest().body(createErrorResponse(e.getMessage()));
+        }
+    }
+
+    // ✅ Get Pending Teachers (Teachers with INACTIVE status)
+    @GetMapping("/pending-teachers")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> getPendingTeachers() {
+        try {
+            List<User> pendingTeachers = userService.getPendingTeachers();
+            List<Map<String, Object>> teacherData = pendingTeachers.stream()
+                    .map(this::createSecureUserData)
+                    .collect(Collectors.toList());
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("data", teacherData);
+            response.put("count", teacherData.size());
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            System.out.println("❌ Error getting pending teachers: " + e.getMessage());
+            return ResponseEntity.internalServerError()
+                    .body(createErrorResponse("Error retrieving pending teachers: " + e.getMessage()));
+        }
+    }
+
+    // ✅ Update User Role (Only ADMIN)
+    @PutMapping("/{userId}/role")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> updateUserRole(@PathVariable int userId, @RequestBody Map<String, String> roleRequest) {
+        try {
+            String newRole = roleRequest.get("role");
+            if (newRole == null) {
+                return ResponseEntity.badRequest()
+                        .body(createErrorResponse("Role is required"));
+            }
+
+            Role role;
+            try {
+                role = Role.valueOf(newRole.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                return ResponseEntity.badRequest()
+                        .body(createErrorResponse("Invalid role: " + newRole));
+            }
+
+            userService.updateUserRole(userId, role);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "User role updated successfully");
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            System.out.println("❌ Error updating user role: " + e.getMessage());
+            return ResponseEntity.badRequest().body(createErrorResponse(e.getMessage()));
+        }
+    }
+
+    // ✅ Get User Statistics (Only ADMIN)
+    @GetMapping("/statistics")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> getUserStatistics() {
+        try {
+            long totalUsers = userService.getTotalUsers();
+            long totalTeachers = userService.getUsersCountByRole(Role.TEACHER);
+            long totalStudents = userService.getUsersCountByRole(Role.STUDENT);
+            long totalAdmins = userService.getUsersCountByRole(Role.ADMIN);
+
+            Map<String, Object> statistics = new HashMap<>();
+            statistics.put("totalUsers", totalUsers);
+            statistics.put("totalTeachers", totalTeachers);
+            statistics.put("totalStudents", totalStudents);
+            statistics.put("totalAdmins", totalAdmins);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("data", statistics);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            System.out.println("❌ Error getting user statistics: " + e.getMessage());
+            return ResponseEntity.internalServerError()
+                    .body(createErrorResponse("Error retrieving user statistics: " + e.getMessage()));
+        }
+    }
+
     // ✅ Helper method to create secure user data (exclude sensitive information)
     private Map<String, Object> createSecureUserData(User user) {
         Map<String, Object> userData = new HashMap<>();
@@ -358,6 +518,7 @@ public class UserController {
         userData.put("role", user.getRole().toString());
         userData.put("mobile", user.getMobile());
         userData.put("status", user.getStatus().toString());
+        userData.put("department", user.getDepartment()); // ✅ ADDED THIS LINE
         userData.put("createdAt", user.getCreatedAt());
         userData.put("updatedAt", user.getUpdatedAt());
         // Exclude password hash and other sensitive data
@@ -371,5 +532,15 @@ public class UserController {
         response.put("error", message);
         response.put("timestamp", System.currentTimeMillis());
         return response;
+    }
+
+    // ✅ Test endpoint
+    @GetMapping("/test")
+    public ResponseEntity<?> testEndpoint() {
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("message", "User Controller is working!");
+        response.put("timestamp", System.currentTimeMillis());
+        return ResponseEntity.ok(response);
     }
 }

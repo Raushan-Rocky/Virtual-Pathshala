@@ -1,5 +1,7 @@
 package com.online_e_learning.virtualPathshala.responseDto;
 
+import com.online_e_learning.virtualPathshala.model.User;
+
 import java.time.LocalDateTime;
 
 public class EnrollmentResponseDto {
@@ -7,6 +9,7 @@ public class EnrollmentResponseDto {
     private String progress;
     private String status;
     private LocalDateTime enrolledAt;
+    private User user;
 
     // User details
     private int userId;
@@ -142,4 +145,6 @@ public class EnrollmentResponseDto {
 
     public int getTeacherId() { return teacherId; }
     public void setTeacherId(int teacherId) { this.teacherId = teacherId; }
+    public User getUser() { return user; }
+    public void setUser(User user) { this.user = user; }
 }

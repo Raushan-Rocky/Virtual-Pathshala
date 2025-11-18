@@ -18,7 +18,6 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-
     @Column(nullable = false)
     private String name;
 
@@ -29,6 +28,9 @@ public class User {
     private String passwordHash;
 
     private String mobile;
+
+    // ✅ ADD DEPARTMENT FIELD
+    private String department;
 
     @Column(nullable = false)
     @Enumerated(value = EnumType.STRING)
@@ -48,6 +50,14 @@ public class User {
     @OneToMany(mappedBy = "user")
     private List<Enrollment> enrollmentList;
 
+    // ✅ ADD COURSE RELATIONSHIP (For teachers)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Course> courses;
+
+    // ✅ ADD ASSIGNMENT RELATIONSHIP (For teachers)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Assignment> assignments;
+
     // Constructors
     public User() {}
 
@@ -57,6 +67,7 @@ public class User {
         this.passwordHash = passwordHash;
         this.mobile = mobile;
         this.role = role;
+        this.department = "Computer Science"; // Default department
     }
 
     public User(String name, String email, String passwordHash, String mobile, Role role, Status status) {
@@ -64,6 +75,18 @@ public class User {
         this.email = email;
         this.passwordHash = passwordHash;
         this.mobile = mobile;
+        this.role = role;
+        this.status = status;
+        this.department = "Computer Science"; // Default department
+    }
+
+    // ✅ NEW CONSTRUCTOR WITH DEPARTMENT
+    public User(String name, String email, String passwordHash, String mobile, String department, Role role, Status status) {
+        this.name = name;
+        this.email = email;
+        this.passwordHash = passwordHash;
+        this.mobile = mobile;
+        this.department = department;
         this.role = role;
         this.status = status;
     }
@@ -109,6 +132,15 @@ public class User {
         this.mobile = mobile;
     }
 
+    // ✅ ADD DEPARTMENT GETTER AND SETTER
+    public String getDepartment() {
+        return department;
+    }
+
+    public void setDepartment(String department) {
+        this.department = department;
+    }
+
     public Role getRole() {
         return role;
     }
@@ -149,6 +181,22 @@ public class User {
         this.enrollmentList = enrollmentList;
     }
 
+    public List<Course> getCourses() {
+        return courses;
+    }
+
+    public void setCourses(List<Course> courses) {
+        this.courses = courses;
+    }
+
+    public List<Assignment> getAssignments() {
+        return assignments;
+    }
+
+    public void setAssignments(List<Assignment> assignments) {
+        this.assignments = assignments;
+    }
+
     @Override
     public String toString() {
         return "User{" +
@@ -156,6 +204,7 @@ public class User {
                 ", name='" + name + '\'' +
                 ", email='" + email + '\'' +
                 ", mobile='" + mobile + '\'' +
+                ", department='" + department + '\'' +
                 ", role=" + role +
                 ", status=" + status +
                 '}';
