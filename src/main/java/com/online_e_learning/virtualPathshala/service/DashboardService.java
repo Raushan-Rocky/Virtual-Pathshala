@@ -8,6 +8,7 @@ import com.online_e_learning.virtualPathshala.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -96,10 +97,7 @@ public class DashboardService {
 
         } catch (Exception e) {
             // Return default values in case of error
-            stats.put("myCourses", 0);
-            stats.put("myAssignments", 0);
-            stats.put("studentsEnrolled", 0);
-            stats.put("submissionsToGrade", 0);
+            setDefaultStatsForTeacher(stats);
             System.err.println("❌ Error in getTeacherDashboardStats: " + e.getMessage());
         }
 
@@ -123,15 +121,12 @@ public class DashboardService {
             stats.put("averageGrade", Math.round(averageGrade * 100.0) / 100.0); // Round to 2 decimal places
 
             // Upcoming Assignments
-            int upcomingAssignments = assignmentRepository.findByDueDateAfter(new java.util.Date()).size();
+            int upcomingAssignments = assignmentRepository.findByDueDateAfter(new Date()).size();
             stats.put("upcomingAssignments", upcomingAssignments);
 
         } catch (Exception e) {
             // Return default values in case of error
-            stats.put("enrolledCourses", 0);
-            stats.put("submittedAssignments", 0);
-            stats.put("averageGrade", 0.0);
-            stats.put("upcomingAssignments", 0);
+            setDefaultStatsForStudent(stats);
             System.err.println("❌ Error in getStudentDashboardStats: " + e.getMessage());
         }
 
@@ -170,5 +165,19 @@ public class DashboardService {
         stats.put("contentModeration", 0);
         stats.put("storageUsage", "0%");
         stats.put("supportTickets", 0);
+    }
+
+    private void setDefaultStatsForTeacher(Map<String, Object> stats) {
+        stats.put("myCourses", 0);
+        stats.put("myAssignments", 0);
+        stats.put("studentsEnrolled", 0);
+        stats.put("submissionsToGrade", 0);
+    }
+
+    private void setDefaultStatsForStudent(Map<String, Object> stats) {
+        stats.put("enrolledCourses", 0);
+        stats.put("submittedAssignments", 0);
+        stats.put("averageGrade", 0.0);
+        stats.put("upcomingAssignments", 0);
     }
 }

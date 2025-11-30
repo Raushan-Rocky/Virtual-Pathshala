@@ -50,8 +50,8 @@ public class User {
     @OneToMany(mappedBy = "user")
     private List<Enrollment> enrollmentList;
 
-    // ✅ ADD COURSE RELATIONSHIP (For teachers)
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    // ✅ FIXED: Changed mappedBy from "user" to "teacher" to match Course entity
+    @OneToMany(mappedBy = "teacher", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Course> courses;
 
     // ✅ ADD ASSIGNMENT RELATIONSHIP (For teachers)

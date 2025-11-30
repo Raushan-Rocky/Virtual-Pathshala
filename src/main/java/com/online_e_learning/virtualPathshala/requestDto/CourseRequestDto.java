@@ -1,74 +1,43 @@
 package com.online_e_learning.virtualPathshala.requestDto;
 
 public class CourseRequestDto {
-    private String title;
-    private String code;
-    private String category; // Existing field
+    private String name;
+    private String title; // ✅ YEH ADD KAREIN
     private String description;
-    private String department;
-    private Integer credits;
-    private String semester;
-    private Integer capacity;
-    private String schedule;
-    private String location;
-    private String prerequisites;
-    private int teacherId; // Changed from Long to int to match your User entity
+    private String category;
+    private String level;
+    private String code;
+    private int teacherId;
 
-    // Default constructor
+    // Constructors
     public CourseRequestDto() {}
 
-    // Parameterized constructor
-    public CourseRequestDto(String title, String code, String category, String description,
-                            String department, Integer credits, String semester,
-                            Integer capacity, String schedule, String location,
-                            String prerequisites, int teacherId) {
-        this.title = title;
-        this.code = code;
-        this.category = category;
+    public CourseRequestDto(String name, String title, String description, String category, String level) {
+        this.name = name;
+        this.title = title; // ✅ YEH ADD KAREIN
         this.description = description;
-        this.department = department;
-        this.credits = credits;
-        this.semester = semester;
-        this.capacity = capacity;
-        this.schedule = schedule;
-        this.location = location;
-        this.prerequisites = prerequisites;
-        this.teacherId = teacherId;
+        this.category = category;
+        this.level = level;
     }
 
     // Getters and Setters
-    public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
-    public String getCode() { return code; }
-    public void setCode(String code) { this.code = code; }
-
-    public String getCategory() { return category; }
-    public void setCategory(String category) { this.category = category; }
+    public String getTitle() { return title; } // ✅ YEH ADD KAREIN
+    public void setTitle(String title) { this.title = title; } // ✅ YEH ADD KAREIN
 
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
 
-    public String getDepartment() { return department; }
-    public void setDepartment(String department) { this.department = department; }
+    public String getCategory() { return category; }
+    public void setCategory(String category) { this.category = category; }
 
-    public Integer getCredits() { return credits; }
-    public void setCredits(Integer credits) { this.credits = credits; }
+    public String getLevel() { return level; }
+    public void setLevel(String level) { this.level = level; }
 
-    public String getSemester() { return semester; }
-    public void setSemester(String semester) { this.semester = semester; }
-
-    public Integer getCapacity() { return capacity; }
-    public void setCapacity(Integer capacity) { this.capacity = capacity; }
-
-    public String getSchedule() { return schedule; }
-    public void setSchedule(String schedule) { this.schedule = schedule; }
-
-    public String getLocation() { return location; }
-    public void setLocation(String location) { this.location = location; }
-
-    public String getPrerequisites() { return prerequisites; }
-    public void setPrerequisites(String prerequisites) { this.prerequisites = prerequisites; }
+    public String getCode() { return code; }
+    public void setCode(String code) { this.code = code; }
 
     public int getTeacherId() { return teacherId; }
     public void setTeacherId(int teacherId) { this.teacherId = teacherId; }

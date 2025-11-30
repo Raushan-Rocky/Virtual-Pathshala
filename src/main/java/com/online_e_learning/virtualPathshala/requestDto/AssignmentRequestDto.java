@@ -6,16 +6,18 @@ public class AssignmentRequestDto {
     private String title;
     private String description;
     private Date dueDate;
+    private String type = "HOMEWORK"; // ✅ ADD THIS FIELD
     private Integer userId;
     private Integer courseId;
 
     // Constructors
     public AssignmentRequestDto() {}
 
-    public AssignmentRequestDto(String title, String description, Date dueDate, Integer userId, Integer courseId) {
+    public AssignmentRequestDto(String title, String description, Date dueDate, String type, Integer userId, Integer courseId) {
         this.title = title;
         this.description = description;
         this.dueDate = dueDate;
+        this.type = type; // ✅ ADD IN CONSTRUCTOR
         this.userId = userId;
         this.courseId = courseId;
     }
@@ -29,6 +31,10 @@ public class AssignmentRequestDto {
 
     public Date getDueDate() { return dueDate; }
     public void setDueDate(Date dueDate) { this.dueDate = dueDate; }
+
+    // ✅ ADD TYPE GETTER AND SETTER
+    public String getType() { return type; }
+    public void setType(String type) { this.type = type; }
 
     public Integer getUserId() { return userId; }
     public void setUserId(Integer userId) { this.userId = userId; }

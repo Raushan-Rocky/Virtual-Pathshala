@@ -58,22 +58,16 @@ public class EnrollmentConverter {
         if (enrollment.getCourse() != null) {
             Course course = enrollment.getCourse();
             responseDto.setCourseId(course.getId());
-            responseDto.setCourseTitle(course.getTitle() != null ? course.getTitle() : "Unknown Course");
+            responseDto.setCourseTitle(course.getName() != null ? course.getName() : "Unknown Course");
             responseDto.setCourseCode(course.getCode() != null ? course.getCode() : "N/A");
             responseDto.setCourseCategory(course.getCategory() != null ? course.getCategory() : "General");
             responseDto.setCourseDescription(course.getDescription() != null ? course.getDescription() : "No description available");
-            responseDto.setCourseDepartment(course.getDepartment() != null ? course.getDepartment() : "General");
-            responseDto.setCourseCredits(course.getCredits() != null ? course.getCredits() : 0);
-            responseDto.setCourseSemester(course.getSemester() != null ? course.getSemester() : "Current");
-            responseDto.setCourseCapacity(course.getCapacity() != null ? course.getCapacity() : 0);
-            responseDto.setCourseSchedule(course.getSchedule() != null ? course.getSchedule() : "Not scheduled");
-            responseDto.setCourseLocation(course.getLocation() != null ? course.getLocation() : "Online");
-            responseDto.setCoursePrerequisites(course.getPrerequisites() != null ? course.getPrerequisites() : "None");
+            responseDto.setCourseLevel(course.getLevel() != null ? course.getLevel() : "General");
             responseDto.setCourseStatus(course.getStatus() != null ? course.getStatus() : "ACTIVE");
 
             // Teacher details from course
-            if (course.getUser() != null) {
-                User teacher = course.getUser();
+            if (course.getTeacher() != null) {
+                User teacher = course.getTeacher();
                 responseDto.setTeacherName(teacher.getName() != null ? teacher.getName() : "Unknown Teacher");
                 responseDto.setTeacherId(teacher.getId());
             } else {
@@ -87,13 +81,7 @@ public class EnrollmentConverter {
             responseDto.setCourseCode("N/A");
             responseDto.setCourseCategory("General");
             responseDto.setCourseDescription("No description available");
-            responseDto.setCourseDepartment("General");
-            responseDto.setCourseCredits(0);
-            responseDto.setCourseSemester("Current");
-            responseDto.setCourseCapacity(0);
-            responseDto.setCourseSchedule("Not scheduled");
-            responseDto.setCourseLocation("Online");
-            responseDto.setCoursePrerequisites("None");
+            responseDto.setCourseLevel("General");
             responseDto.setCourseStatus("ACTIVE");
             responseDto.setTeacherName("Unknown Teacher");
             responseDto.setTeacherId(0);

@@ -1,7 +1,5 @@
 package com.online_e_learning.virtualPathshala.responseDto;
 
-import com.online_e_learning.virtualPathshala.model.User;
-
 import java.time.LocalDateTime;
 
 public class EnrollmentResponseDto {
@@ -9,7 +7,6 @@ public class EnrollmentResponseDto {
     private String progress;
     private String status;
     private LocalDateTime enrolledAt;
-    private User user;
 
     // User details
     private int userId;
@@ -24,13 +21,7 @@ public class EnrollmentResponseDto {
     private String courseCode;
     private String courseCategory;
     private String courseDescription;
-    private String courseDepartment;
-    private Integer courseCredits;
-    private String courseSemester;
-    private Integer courseCapacity;
-    private String courseSchedule;
-    private String courseLocation;
-    private String coursePrerequisites;
+    private String courseLevel;
     private String courseStatus;
     private String teacherName;
     private int teacherId;
@@ -41,9 +32,7 @@ public class EnrollmentResponseDto {
     public EnrollmentResponseDto(int id, String progress, String status, LocalDateTime enrolledAt,
                                  int userId, String userName, String userEmail, String userRole, String userMobile,
                                  int courseId, String courseTitle, String courseCode, String courseCategory,
-                                 String courseDescription, String courseDepartment, Integer courseCredits,
-                                 String courseSemester, Integer courseCapacity, String courseSchedule,
-                                 String courseLocation, String coursePrerequisites, String courseStatus,
+                                 String courseDescription, String courseLevel, String courseStatus,
                                  String teacherName, int teacherId) {
         this.id = id;
         this.progress = progress;
@@ -59,13 +48,7 @@ public class EnrollmentResponseDto {
         this.courseCode = courseCode;
         this.courseCategory = courseCategory;
         this.courseDescription = courseDescription;
-        this.courseDepartment = courseDepartment;
-        this.courseCredits = courseCredits;
-        this.courseSemester = courseSemester;
-        this.courseCapacity = courseCapacity;
-        this.courseSchedule = courseSchedule;
-        this.courseLocation = courseLocation;
-        this.coursePrerequisites = coursePrerequisites;
+        this.courseLevel = courseLevel;
         this.courseStatus = courseStatus;
         this.teacherName = teacherName;
         this.teacherId = teacherId;
@@ -116,26 +99,8 @@ public class EnrollmentResponseDto {
     public String getCourseDescription() { return courseDescription; }
     public void setCourseDescription(String courseDescription) { this.courseDescription = courseDescription; }
 
-    public String getCourseDepartment() { return courseDepartment; }
-    public void setCourseDepartment(String courseDepartment) { this.courseDepartment = courseDepartment; }
-
-    public Integer getCourseCredits() { return courseCredits; }
-    public void setCourseCredits(Integer courseCredits) { this.courseCredits = courseCredits; }
-
-    public String getCourseSemester() { return courseSemester; }
-    public void setCourseSemester(String courseSemester) { this.courseSemester = courseSemester; }
-
-    public Integer getCourseCapacity() { return courseCapacity; }
-    public void setCourseCapacity(Integer courseCapacity) { this.courseCapacity = courseCapacity; }
-
-    public String getCourseSchedule() { return courseSchedule; }
-    public void setCourseSchedule(String courseSchedule) { this.courseSchedule = courseSchedule; }
-
-    public String getCourseLocation() { return courseLocation; }
-    public void setCourseLocation(String courseLocation) { this.courseLocation = courseLocation; }
-
-    public String getCoursePrerequisites() { return coursePrerequisites; }
-    public void setCoursePrerequisites(String coursePrerequisites) { this.coursePrerequisites = coursePrerequisites; }
+    public String getCourseLevel() { return courseLevel; }
+    public void setCourseLevel(String courseLevel) { this.courseLevel = courseLevel; }
 
     public String getCourseStatus() { return courseStatus; }
     public void setCourseStatus(String courseStatus) { this.courseStatus = courseStatus; }
@@ -145,6 +110,4 @@ public class EnrollmentResponseDto {
 
     public int getTeacherId() { return teacherId; }
     public void setTeacherId(int teacherId) { this.teacherId = teacherId; }
-    public User getUser() { return user; }
-    public void setUser(User user) { this.user = user; }
 }

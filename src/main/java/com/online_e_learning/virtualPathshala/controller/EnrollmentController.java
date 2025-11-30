@@ -61,11 +61,11 @@ public class EnrollmentController {
             }
 
             Course course = courseOptional.get();
-            System.out.println("📚 Course found: " + course.getId() + " - " + course.getTitle());
-            System.out.println("👨‍🏫 Course teacher ID: " + (course.getUser() != null ? course.getUser().getId() : "NULL"));
+            System.out.println("📚 Course found: " + course.getId() + " - " + course.getName());
+            System.out.println("👨‍🏫 Course teacher ID: " + (course.getTeacher() != null ? course.getTeacher().getId() : "NULL"));
 
             // ✅ SECURITY: Only course teacher or admin can access enrollments
-            boolean isCourseTeacher = course.getUser() != null && course.getUser().getId() == currentUser.getId();
+            boolean isCourseTeacher = course.getTeacher() != null && course.getTeacher().getId() == currentUser.getId();
             boolean isAdmin = currentUser.getRole().name().equals("ADMIN");
 
             System.out.println("🔍 Security check - Is Admin: " + isAdmin + ", Is Course Teacher: " + isCourseTeacher);
@@ -74,7 +74,7 @@ public class EnrollmentController {
                 System.out.println("❌ ACCESS DENIED: User " + currentUser.getId() + " is not teacher of course " + courseId);
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
                         .body(createErrorResponse("Access denied: You can only view enrollments for your own courses. Course belongs to teacher ID: " +
-                                (course.getUser() != null ? course.getUser().getId() : "none")));
+                                (course.getTeacher() != null ? course.getTeacher().getId() : "none")));
             }
 
             // ✅ Get enrollments
@@ -84,7 +84,7 @@ public class EnrollmentController {
             response.put("success", true);
             response.put("data", enrollments);
             response.put("count", enrollments.size());
-            response.put("courseTitle", course.getTitle());
+            response.put("courseName", course.getName());
 
             System.out.println("✅ Found " + enrollments.size() + " enrollments for course: " + courseId);
             return new ResponseEntity<>(response, HttpStatus.OK);
@@ -124,7 +124,7 @@ public class EnrollmentController {
             }
 
             // ✅ Get teacher's courses
-            List<Course> teacherCourses = courseRepository.findByUserId(teacherId);
+            List<Course> teacherCourses = courseRepository.findByTeacherId(teacherId);
             System.out.println("📚 Found " + teacherCourses.size() + " courses for teacher " + teacherId);
 
             // ✅ Get enrollments for all courses
@@ -134,7 +134,7 @@ public class EnrollmentController {
 
             // ✅ Count unique students
             long uniqueStudents = allEnrollments.stream()
-                    .map(this::getStudentIdFromEnrollment)
+                    .map(EnrollmentResponseDto::getUserId)
                     .distinct()
                     .count();
 
@@ -157,17 +157,7 @@ public class EnrollmentController {
         }
     }
 
-    // ✅ Helper method to get student ID from enrollment
-    private int getStudentIdFromEnrollment(EnrollmentResponseDto enrollment) {
-        // Check different possible field names in your EnrollmentResponseDto
-        if (enrollment.getUserId() > 0) {
-            return enrollment.getUserId();
-        }
-        // Add other possible field names based on your DTO structure
-        return 0;
-    }
-
-    // ✅ Other existing methods (keep them as they are)
+    // ✅ GET enrollments by user ID
     @GetMapping("/user/{userId}")
     @PreAuthorize("hasAnyRole('TEACHER', 'ADMIN', 'STUDENT')")
     public ResponseEntity<?> getEnrollmentsByUserId(@PathVariable int userId) {
@@ -212,7 +202,9 @@ public class EnrollmentController {
         }
     }
 
+    // ✅ CREATE enrollment
     @PostMapping
+    @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN')")
     public ResponseEntity<?> createEnrollment(@RequestBody EnrollmentRequestDto requestDto) {
         try {
             System.out.println("✅ Enrollment Controller: Creating enrollment for user: " + requestDto.getUserId());
@@ -237,6 +229,7 @@ public class EnrollmentController {
         }
     }
 
+    // ✅ GET all enrollments (Admin only)
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> getAllEnrollments() {
@@ -255,9 +248,9 @@ public class EnrollmentController {
     }
 
     // ✅ Helper method for error responses
-    private Map<String, String> createErrorResponse(String message) {
-        Map<String, String> errorResponse = new HashMap<>();
-        errorResponse.put("success", "false");
+    private Map<String, Object> createErrorResponse(String message) {
+        Map<String, Object> errorResponse = new HashMap<>();
+        errorResponse.put("success", false);
         errorResponse.put("error", message);
         return errorResponse;
     }

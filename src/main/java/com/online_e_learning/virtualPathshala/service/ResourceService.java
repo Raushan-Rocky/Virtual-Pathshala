@@ -58,6 +58,26 @@ public class ResourceService {
         return resourceRepository.findByFileType(fileType);
     }
 
+    // SEARCH RESOURCES
+    public List<Resource> searchResources(String query) {
+        return resourceRepository.searchResources(query);
+    }
+
+    // ✅ FIXED: GET LATEST RESOURCES by ID (since createdAt field doesn't exist)
+    public List<Resource> getLatestResources() {
+        return resourceRepository.findTop10ByOrderByIdDesc();
+    }
+
+    // SEARCH BY FILE NAME
+    public List<Resource> searchByFileName(String fileName) {
+        return resourceRepository.findByFileNameContainingIgnoreCase(fileName);
+    }
+
+    // SEARCH BY FILE TYPE
+    public List<Resource> searchByFileType(String fileType) {
+        return resourceRepository.findByFileTypeContainingIgnoreCase(fileType);
+    }
+
     // UPDATE
     public Resource updateResource(int id, ResourceRequestDto requestDto) {
         Resource resource = resourceRepository.findById(id)

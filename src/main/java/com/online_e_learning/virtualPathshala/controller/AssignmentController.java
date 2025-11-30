@@ -1,6 +1,7 @@
 package com.online_e_learning.virtualPathshala.controller;
 
 import com.online_e_learning.virtualPathshala.model.Assignment;
+import com.online_e_learning.virtualPathshala.requestDto.AssignmentRequestDto;
 import com.online_e_learning.virtualPathshala.service.AssignmentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,6 +20,37 @@ public class AssignmentController {
     @Autowired
     private AssignmentService assignmentService;
 
+    // ✅ CREATE NEW ASSIGNMENT - POST http://localhost:8040/api/assignments
+    @PostMapping
+    @PreAuthorize("hasAnyRole('TEACHER', 'ADMIN')")
+    public ResponseEntity<?> createAssignment(@RequestBody AssignmentRequestDto assignmentRequestDto) {
+        try {
+            System.out.println("📝 Creating new assignment: " + assignmentRequestDto.getTitle());
+            System.out.println("👨‍🏫 Teacher ID: " + assignmentRequestDto.getUserId());
+            System.out.println("📚 Course ID: " + assignmentRequestDto.getCourseId());
+
+            Assignment assignment = assignmentService.createAssignment(assignmentRequestDto);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Assignment created successfully");
+            response.put("data", assignment);
+            response.put("assignmentId", assignment.getId());
+
+            System.out.println("✅ Assignment created successfully with ID: " + assignment.getId());
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+
+        } catch (Exception e) {
+            System.out.println("❌ Error creating assignment: " + e.getMessage());
+            e.printStackTrace();
+
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("success", "false");
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        }
+    }
+
     // ✅ GET assignments by teacher ID
     @GetMapping("/teacher/{teacherId}")
     @PreAuthorize("hasAnyRole('TEACHER', 'ADMIN')")
@@ -35,13 +67,14 @@ public class AssignmentController {
                 data.put("title", assignment.getTitle());
                 data.put("description", assignment.getDescription());
                 data.put("dueDate", assignment.getDueDate());
+                data.put("type", assignment.getType());
                 data.put("submittedCount", 0); // You can calculate this later
                 data.put("totalStudents", 0); // You can calculate this later
 
                 if (assignment.getCourse() != null) {
                     Map<String, Object> courseData = new HashMap<>();
                     courseData.put("id", assignment.getCourse().getId());
-                    courseData.put("title", assignment.getCourse().getTitle());
+                    courseData.put("name", assignment.getCourse().getName()); // Changed from getTitle() to getName()
                     courseData.put("code", assignment.getCourse().getCode());
                     data.put("course", courseData);
                 }
@@ -80,13 +113,14 @@ public class AssignmentController {
                 data.put("title", assignment.getTitle());
                 data.put("description", assignment.getDescription());
                 data.put("dueDate", assignment.getDueDate());
+                data.put("type", assignment.getType());
                 data.put("submittedCount", 0);
                 data.put("totalStudents", 0);
 
                 if (assignment.getCourse() != null) {
                     Map<String, Object> courseData = new HashMap<>();
                     courseData.put("id", assignment.getCourse().getId());
-                    courseData.put("title", assignment.getCourse().getTitle());
+                    courseData.put("name", assignment.getCourse().getName()); // Changed from getTitle() to getName()
                     data.put("course", courseData);
                 }
 
@@ -122,12 +156,13 @@ public class AssignmentController {
                 data.put("title", assignment.getTitle());
                 data.put("description", assignment.getDescription());
                 data.put("dueDate", assignment.getDueDate());
+                data.put("type", assignment.getType());
 
                 if (assignment.getUser() != null) {
                     data.put("teacherName", assignment.getUser().getName());
                 }
                 if (assignment.getCourse() != null) {
-                    data.put("courseName", assignment.getCourse().getTitle());
+                    data.put("courseName", assignment.getCourse().getName()); // Changed from getTitle() to getName()
                 }
 
                 return data;
@@ -159,12 +194,13 @@ public class AssignmentController {
             assignmentData.put("title", assignment.getTitle());
             assignmentData.put("description", assignment.getDescription());
             assignmentData.put("dueDate", assignment.getDueDate());
+            assignmentData.put("type", assignment.getType());
 
             if (assignment.getUser() != null) {
                 assignmentData.put("teacherName", assignment.getUser().getName());
             }
             if (assignment.getCourse() != null) {
-                assignmentData.put("courseName", assignment.getCourse().getTitle());
+                assignmentData.put("courseName", assignment.getCourse().getName()); // Changed from getTitle() to getName()
             }
 
             Map<String, Object> response = new HashMap<>();
@@ -177,6 +213,61 @@ public class AssignmentController {
             errorResponse.put("success", "false");
             errorResponse.put("error", e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+        }
+    }
+
+    // ✅ UPDATE assignment
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('TEACHER', 'ADMIN')")
+    public ResponseEntity<?> updateAssignment(@PathVariable int id, @RequestBody AssignmentRequestDto assignmentRequestDto) {
+        try {
+            System.out.println("📝 Updating assignment ID: " + id);
+
+            Assignment assignment = assignmentService.updateAssignment(id, assignmentRequestDto);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Assignment updated successfully");
+            response.put("data", assignment);
+
+            System.out.println("✅ Assignment updated successfully with ID: " + assignment.getId());
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            System.out.println("❌ Error updating assignment: " + e.getMessage());
+            e.printStackTrace();
+
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("success", "false");
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        }
+    }
+
+    // ✅ DELETE assignment
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('TEACHER', 'ADMIN')")
+    public ResponseEntity<?> deleteAssignment(@PathVariable int id) {
+        try {
+            System.out.println("🗑️ Deleting assignment ID: " + id);
+
+            assignmentService.deleteAssignment(id);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Assignment deleted successfully");
+
+            System.out.println("✅ Assignment deleted successfully with ID: " + id);
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            System.out.println("❌ Error deleting assignment: " + e.getMessage());
+            e.printStackTrace();
+
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("success", "false");
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         }
     }
 

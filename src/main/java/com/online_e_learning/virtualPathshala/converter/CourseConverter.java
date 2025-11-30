@@ -11,19 +11,18 @@ public class CourseConverter {
 
     public Course courseRequestDtoToCourse(CourseRequestDto courseRequestDto, User teacher) {
         Course course = new Course();
-        course.setTitle(courseRequestDto.getTitle());
-        course.setCode(courseRequestDto.getCode());
-        course.setCategory(courseRequestDto.getCategory());
+        course.setName(courseRequestDto.getName());
+        course.setTitle(courseRequestDto.getTitle()); // ✅ YEH ADD KAREIN
         course.setDescription(courseRequestDto.getDescription());
-        course.setDepartment(courseRequestDto.getDepartment());
-        course.setCredits(courseRequestDto.getCredits());
-        course.setSemester(courseRequestDto.getSemester());
-        course.setCapacity(courseRequestDto.getCapacity());
-        course.setSchedule(courseRequestDto.getSchedule());
-        course.setLocation(courseRequestDto.getLocation());
-        course.setPrerequisites(courseRequestDto.getPrerequisites());
-        course.setUser(teacher);
+        course.setCategory(courseRequestDto.getCategory());
+        course.setLevel(courseRequestDto.getLevel());
+        course.setTeacher(teacher);
         course.setStatus("ACTIVE");
+
+        // Optional: Set other fields if they exist in CourseRequestDto
+        if (courseRequestDto.getCode() != null) {
+            course.setCode(courseRequestDto.getCode());
+        }
 
         return course;
     }
@@ -31,20 +30,25 @@ public class CourseConverter {
     public CourseResponseDto courseToCourseResponseDto(Course course) {
         CourseResponseDto responseDto = new CourseResponseDto();
         responseDto.setId(course.getId());
-        responseDto.setTitle(course.getTitle());
-        responseDto.setCode(course.getCode());
-        responseDto.setCategory(course.getCategory());
+        responseDto.setName(course.getName());
+        responseDto.setTitle(course.getTitle()); // ✅ YEH ADD KAREIN
         responseDto.setDescription(course.getDescription());
-        responseDto.setDepartment(course.getDepartment());
-        responseDto.setCredits(course.getCredits());
-        responseDto.setSemester(course.getSemester());
-        responseDto.setCapacity(course.getCapacity());
-        responseDto.setSchedule(course.getSchedule());
-        responseDto.setLocation(course.getLocation());
-        responseDto.setPrerequisites(course.getPrerequisites());
+        responseDto.setCategory(course.getCategory());
+        responseDto.setLevel(course.getLevel());
         responseDto.setStatus(course.getStatus());
-        responseDto.setTeacherName(course.getUser().getName());
-        responseDto.setTeacherId(course.getUser().getId());
+        responseDto.setCreatedAt(course.getCreatedAt());
+        responseDto.setUpdatedAt(course.getUpdatedAt());
+
+        // Set teacher information
+        if (course.getTeacher() != null) {
+            responseDto.setTeacherName(course.getTeacher().getName());
+            responseDto.setTeacherId(course.getTeacher().getId());
+        }
+
+        // Optional: Set other fields if they exist
+        if (course.getCode() != null) {
+            responseDto.setCode(course.getCode());
+        }
 
         return responseDto;
     }

@@ -26,6 +26,10 @@ public class Assignment {
  @Column(nullable = false)
  private Date dueDate;
 
+ // ✅ ADD THIS FIELD - Fix the database error
+ @Column(nullable = false)
+ private String type = "HOMEWORK"; // Default value
+
  @CreationTimestamp
  private LocalDateTime createdAt;
 
@@ -37,7 +41,6 @@ public class Assignment {
  @ManyToOne
  private Course course;
 
- // ✅ Changed from @OneToOne to @OneToMany
  @JsonManagedReference("submission-assignment")
  @OneToMany(mappedBy = "assignment", cascade = CascadeType.ALL)
  private List<Submission> submissions;
@@ -45,18 +48,29 @@ public class Assignment {
  // Getters and Setters
  public int getId() { return id; }
  public void setId(int id) { this.id = id; }
+
  public String getTitle() { return title; }
  public void setTitle(String title) { this.title = title; }
+
  public String getDescription() { return description; }
  public void setDescription(String description) { this.description = description; }
+
  public Date getDueDate() { return dueDate; }
  public void setDueDate(Date dueDate) { this.dueDate = dueDate; }
+
+ // ✅ ADD TYPE GETTER AND SETTER
+ public String getType() { return type; }
+ public void setType(String type) { this.type = type; }
+
  public LocalDateTime getCreatedAt() { return createdAt; }
  public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
  public User getUser() { return user; }
  public void setUser(User user) { this.user = user; }
+
  public Course getCourse() { return course; }
  public void setCourse(Course course) { this.course = course; }
+
  public List<Submission> getSubmissions() { return submissions; }
  public void setSubmissions(List<Submission> submissions) { this.submissions = submissions; }
 }

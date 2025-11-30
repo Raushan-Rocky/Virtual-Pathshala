@@ -162,24 +162,13 @@ public class EnrollmentService {
         enrollmentRepository.deleteById(id);
     }
 
-    // Existing progress calculation methods...
-    public void updateCourseProgress(int enrollmentId) {
-        Enrollment enrollment = enrollmentRepository.findByIdWithDetails(enrollmentId)
-                .orElseThrow(() -> new EnrollmentNotFoundException("Enrollment not found with id: " + enrollmentId));
-
-        Course course = enrollment.getCourse();
-        int totalLessons = course.getLessonList() != null ? course.getLessonList().size() : 0;
-        int completedLessons = calculateCompletedLessons(enrollment);
-
-        if (totalLessons > 0) {
-            int progress = (completedLessons * 100) / totalLessons;
-            enrollment.setProgress(progress + "%");
-            enrollmentRepository.save(enrollment);
-        }
+    // Count enrollments by course
+    public long countEnrollmentsByCourse(int courseId) {
+        return enrollmentRepository.countByCourseId(courseId);
     }
 
-    private int calculateCompletedLessons(Enrollment enrollment) {
-        // Implement based on your business logic
-        return 0;
+    // Count enrollments by teacher
+    public long countEnrollmentsByTeacher(int teacherId) {
+        return enrollmentRepository.countByCourse_UserId(teacherId);
     }
 }

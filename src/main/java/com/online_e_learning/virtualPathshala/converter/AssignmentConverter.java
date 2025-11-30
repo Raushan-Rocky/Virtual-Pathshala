@@ -14,6 +14,7 @@ public class AssignmentConverter {
         assignment.setTitle(requestDto.getTitle());
         assignment.setDescription(requestDto.getDescription());
         assignment.setDueDate(requestDto.getDueDate());
+        assignment.setType(requestDto.getType() != null ? requestDto.getType() : "HOMEWORK"); // ✅ SET TYPE
         assignment.setUser(user);
         assignment.setCourse(course);
         return assignment;
@@ -29,6 +30,9 @@ public class AssignmentConverter {
         if (requestDto.getDueDate() != null) {
             assignment.setDueDate(requestDto.getDueDate());
         }
+        if (requestDto.getType() != null) { // ✅ UPDATE TYPE
+            assignment.setType(requestDto.getType());
+        }
     }
 
     public AssignmentRequestDto convertToResponseDto(Assignment assignment) {
@@ -36,6 +40,7 @@ public class AssignmentConverter {
         responseDto.setTitle(assignment.getTitle());
         responseDto.setDescription(assignment.getDescription());
         responseDto.setDueDate(assignment.getDueDate());
+        responseDto.setType(assignment.getType()); // ✅ ADD TYPE
 
         if (assignment.getUser() != null) {
             responseDto.setUserId(assignment.getUser().getId());

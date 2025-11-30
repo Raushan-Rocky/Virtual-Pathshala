@@ -43,7 +43,7 @@ public class CourseController {
     public ResponseEntity<?> createCourse(@RequestBody CourseRequestDto courseRequestDto,
                                           HttpServletRequest request) {
         try {
-            System.out.println("✅ Course Controller reached! Creating course: " + courseRequestDto.getTitle());
+            System.out.println("✅ Course Controller reached! Creating course: " + courseRequestDto.getName());
 
             // ✅ SECURITY: Get logged-in teacher ID from security context
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -137,12 +137,13 @@ public class CourseController {
         try {
             System.out.println("✅ Fetching all courses for student view");
 
-            List<Course> courses = courseRepository.findAll();
-            List<CourseResponseDto> responseDtos = courses.stream()
-                    .map(courseConverter::courseToCourseResponseDto)
-                    .toList();
+            ApiResponse<List<CourseResponseDto>> serviceResponse = courseService.getAllCourses();
 
-            return ResponseEntity.ok(new ApiResponse<>(true, "All courses retrieved successfully", responseDtos));
+            if (serviceResponse.isSuccess()) {
+                return ResponseEntity.ok(serviceResponse);
+            } else {
+                return ResponseEntity.badRequest().body(serviceResponse);
+            }
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

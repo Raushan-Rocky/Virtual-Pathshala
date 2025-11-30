@@ -19,7 +19,6 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Integer>
     Optional<Enrollment> findByUserIdAndCourseId(int userId, int courseId);
     List<Enrollment> findByStatus(String status);
     long countByCourseId(int courseId);
-    //Object countByCourse_UserId(int teacherId);
 
     @Query("SELECT e.user FROM Enrollment e WHERE e.course.id = :courseId")
     List<User> findUsersByCourseId(@Param("courseId") int courseId);
@@ -42,6 +41,7 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Integer>
 
     @Query("SELECT e FROM Enrollment e JOIN FETCH e.course JOIN FETCH e.user")
     List<Enrollment> findAllWithDetails();
-    @Query("SELECT COUNT(e) FROM Enrollment e WHERE e.course.user.id = :teacherId")
+
+    @Query("SELECT COUNT(e) FROM Enrollment e WHERE e.course.teacher.id = :teacherId")
     Long countByCourse_UserId(@Param("teacherId") int teacherId);
 }

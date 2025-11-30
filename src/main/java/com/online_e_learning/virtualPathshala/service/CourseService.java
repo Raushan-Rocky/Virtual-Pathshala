@@ -35,9 +35,11 @@ public class CourseService {
                 return ApiResponse.error("Teacher not found with ID: " + courseRequestDto.getTeacherId());
             }
 
-            // Check if course code already exists
-            if (courseRepository.existsByCode(courseRequestDto.getCode())) {
-                return ApiResponse.error("Course with code " + courseRequestDto.getCode() + " already exists");
+            // Check if course code already exists (if code is provided)
+            if (courseRequestDto.getCode() != null && !courseRequestDto.getCode().isEmpty()) {
+                if (courseRepository.existsByCode(courseRequestDto.getCode())) {
+                    return ApiResponse.error("Course with code " + courseRequestDto.getCode() + " already exists");
+                }
             }
 
             User teacher = teacherOptional.get();
@@ -54,7 +56,7 @@ public class CourseService {
 
     public ApiResponse<List<CourseResponseDto>> getCoursesByTeacher(int teacherId) {
         try {
-            List<Course> courses = courseRepository.findByUserId(teacherId);
+            List<Course> courses = courseRepository.findByTeacherId(teacherId);
             List<CourseResponseDto> responseDtos = courses.stream()
                     .map(courseConverter::courseToCourseResponseDto)
                     .collect(Collectors.toList());
@@ -65,8 +67,6 @@ public class CourseService {
         }
     }
 
-    // Add other methods as needed...
-    // CourseService.java - ye method add karein
     public ApiResponse<List<CourseResponseDto>> getAllCourses() {
         try {
             List<Course> courses = courseRepository.findAll();
